@@ -1,0 +1,26 @@
+{
+    "name": "convert-dhis2-tracked-fhir",
+    "description": "App for browsing, searching and transform ISDR tracked entities resources to FHIR based",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+       
+    },
+    "author": "Gerard",
+	"license": "BSD-3-Clause",
+    "keywords": [
+    "DHIS2",
+    "App"
+  ],
+    "devDependencies": {
+		"express": "^4.14.1",
+		"btoa":"^1.1.2",
+		"xmlhttprequest":"^1.8.0"
+    },
+    "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gerard-bisama/DHIS2-fhir-lab-app.git"
+	},
+	"homepage": "https://github.com/gerard-bisama/DHIS2-fhir-lab-app.git#readme"
+  
+}

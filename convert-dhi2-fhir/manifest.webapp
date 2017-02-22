@@ -1,0 +1,30 @@
+{
+  "launch_path": "/src/app.js",
+  "default_locale": "en",
+  "activities": {
+    "dhis": {
+      "href": "http://localhost:8080"
+    }
+  },
+  "appType": "APP",
+  "name": "DHIS2-FHIR-Lab-app",
+  "version": "1.0.0",
+  "description": "App for browsing, searching and transform ISDR resources to FHIR based",
+  "developer": {
+    "name": "Gerard Bisama"
+  },
+  "icons": {
+    "48": "icon.png"
+  },
+  "entities_mapping":{
+	"patient":"fZZDtGHhXT3",
+	"provider":"WO3xOdPaJfL",
+	"specimen":"IJooTQOZbfy",
+	"order":"mob9DySuMOS",
+	"observation":"KEc7eJXhZw3",
+	"diagnosticReport":"Onw0t8l5Dyp"
+  },
+  "authentication":"admin:district",
+  "temp_directory":"/home/server-hit/dhis2-fhir-data",
+  "manifest_generated_at": "Thu Dec 01 2016 10:27:06 GMT+0100 (CET)"
+}

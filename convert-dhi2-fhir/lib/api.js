@@ -173,6 +173,30 @@ exports.GetTrackedEntitiesMapping = function GetTrackedEntitiesMapping()
 {
 	return manifest.entities_mapping;
 }
+exports.GetPatientAttributesMapping = function GetPatientAttributesMapping()
+{
+	return manifest.patient_attribute_mapping;
+}
+exports.GetPractitionerAttributesMapping = function GetPractitionerAttributesMapping()
+{
+	return manifest.practitioner_attribute_mapping;
+}
+exports.GetSpecimenAttributesMapping = function GetSpecimenAttributesMapping()
+{
+	return manifest.specimen_attribute_mapping;
+}
+exports.getOrderAttributesMapping = function getOrderAttributesMapping()
+{
+	return manifest.order_attribute_mapping;
+}
+exports.getObservationAttributesMapping = function getObservationAttributesMapping()
+{
+	return manifest.observation_attribute_mapping;
+}
+exports.getDiagnosticReportAttributesMapping = function getDiagnosticReportAttributesMapping()
+{
+	return manifest.diagnosticreport_attribute_mapping;
+}
 
 function ReadJSONFile(fileName)
 {

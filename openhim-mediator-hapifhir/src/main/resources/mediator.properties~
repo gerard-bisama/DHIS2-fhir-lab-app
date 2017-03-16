@@ -1,0 +1,12 @@
+# Mediator Properties
+mediator.name=openhim-mediator-hapifhir
+mediator.host=localhost
+mediator.port=4000
+mediator.timeout=1200000
+mediator.heartbeats=true
+
+core.host=localhost
+core.api.port=8080
+core.api.user=root@openhim.org
+core.api.password=him!14
+

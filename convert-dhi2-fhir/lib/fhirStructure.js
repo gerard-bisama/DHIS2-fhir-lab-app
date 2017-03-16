@@ -173,8 +173,8 @@ var Specimen={
   "status" : "", // available | unavailable | unsatisfactory | entered-in-error
   "type" : { CodeableConcept }, // Kind of material that forms the specimen
   "parent" : [], //{ Reference(Specimen) } Specimen from which this specimen originated
-  "subject" : "", //Reference(Patient|Group|Device|Substance) R!  Where the specimen came from. This may be from the patient(s) or from the environment or a device
-  "accessionIdentifier" : {}, // Identifier, Identifier assigned by the lab
+  "subject" : "", //**Reference(Patient|Group|Device|Substance) R!  Where the specimen came from. This may be from the patient(s) or from the environment or a device
+  "accession" : {}, // Identifier, Identifier assigned by the lab
   "receivedTime" : "", // The time when specimen was received for processing
   "collection" : {}, // Collection details,
   //{"collector" : { Reference(Practitioner) },"comment" : ["<string>"],"collectedDateTime" : "<dateTime>","collectedPeriod" : { Period },"quantity" : { Quantity(SimpleQuantity) },"method" : { CodeableConcept },"bodySite" : { CodeableConcept }}
@@ -186,6 +186,12 @@ var Specimen={
   //[{"identifier" : [{ Identifier }], "description" : "<string>","type" : { CodeableConcept },"capacity" : { Quantity(SimpleQuantity) }, "specimenQuantity" : { Quantity(SimpleQuantity) },"additiveCodeableConcept" : { CodeableConcept },"additiveReference" : { Reference(Substance) }
   //// Id for the container,Textual description of the container,Kind of container directly associated with specimen,Container volume or size,Quantity of specimen within container
 };
+var OrderEvent={//A list of events of interest in the lifecycle
+	"status" : "", // R!  proposed | draft | planned | requested | received |...
+	"description" : { CodeableConcept }, // More information about the event and its context
+	"dateTime" : "", // R!  The date at which the event happened
+	"actor" : {} // "actor" : { Reference(Practitioner|Device) } // Who recorded or did this Who recorded or did this
+	};
 var DiagnosticOrder={
   "resourceType" : "DiagnosticOrder",
   "id":"",
@@ -203,7 +209,7 @@ var DiagnosticOrder={
   "priority" : "", //<code> routine | urgent | stat | asap
   "event" : [], // A list of events of interest in the lifecycle
   //[{"status" : "<code>","description" : { CodeableConcept },"dateTime" : "<dateTime>","actor" : { Reference(Practitioner|Device) } }] 
-  //// R!  proposed | draft | planned | requested |...,More information about the event and its context, The date at which the event happened, Who recorded or did this
+  //// **R!  proposed | draft | planned | requested |...,More information about the event and its context, **The date at which the event happened, Who recorded or did this
   "item" : [],// The items the orderer requested
   //[{"code" : { CodeableConcept },"specimen" : [{ Reference(Specimen) }],"bodySite" : { CodeableConcept },"status" : "<code>","event" : [{ Content as for DiagnosticOrder.event }]}]
   //R!  Code to indicate the item (test or panel) being ordered,If this item relates to specific specimens,Location of requested test (if applicable),proposed | draft | planned | requested ...,Events specific to this item
@@ -349,6 +355,7 @@ exports.Patient=Patient;
 exports.HumanName=HumanName;
 exports.Practitioner=Practitioner;
 exports.Specimen=Specimen;
+exports.OrderEvent=OrderEvent;
 exports.Collection=Collection;
 exports.Container=Container;
 exports.DiagnosticOrder=DiagnosticOrder;

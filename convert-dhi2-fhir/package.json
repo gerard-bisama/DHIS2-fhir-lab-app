@@ -3,6 +3,9 @@
     "description": "App for browsing, searching and transform ISDR tracked entities resources to FHIR based",
     "version": "1.0.0",
     "private": true,
+    "scripts": {
+		"start": "node trackedentities.js"
+    },
     "dependencies": {
        
     },

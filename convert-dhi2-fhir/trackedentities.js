@@ -6,14 +6,22 @@
   var entityAPI =require ("./lib/api");
   var fhirStructureAPI =require ("./lib/fhirStructure");
   var entitieTrackedMapping= entityAPI.GetTrackedEntitiesMapping();
+  var patientAttributesMapping= entityAPI.GetPatientAttributesMapping();
+  var practitionerAttributesMapping= entityAPI.GetPractitionerAttributesMapping();
+  var specimenAttributesMapping= entityAPI.GetSpecimenAttributesMapping();
+  var orderAttributesMapping= entityAPI.getOrderAttributesMapping();
+  var observationAttributesMapping= entityAPI.getObservationAttributesMapping();
+  var diagnosticReportAttributesMapping= entityAPI.getDiagnosticReportAttributesMapping();
   var Identifier=fhirStructureAPI.Identifier;
   var Organization=fhirStructureAPI.Organization;
   var CodeableConcept=fhirStructureAPI.CodeableConcept;
+  var Address=fhirStructureAPI.Address;
   var Patient=fhirStructureAPI.Patient;
   var HumanName=fhirStructureAPI.HumanName;
   var ContactPoint=fhirStructureAPI.ContactPoint;
   var Practitioner=fhirStructureAPI.Practitioner;
   var Specimen=fhirStructureAPI.Specimen;
+  var OrderEvent=fhirStructureAPI.OrderEvent;
   var Collection=fhirStructureAPI.Collection;
   var Container=fhirStructureAPI.Container;
   var DiagnosticOrder=fhirStructureAPI.DiagnosticOrder;
@@ -77,7 +85,7 @@
 				org.type=orgUnitCoding;
 				//assigment of OrgUnit
 				org.id=oOrgUnit.id;
-				org.meta={"lastUpdated":oOrgUnit.lastUpdated};
+				org.meta={"lastUpdated":formatDateInZform (oOrgUnit.lastUpdated)};
 				org.identifier=[orgIdentifier];
 				org.name=oOrgUnit.name;
 				organizationList.push(org);
@@ -109,7 +117,7 @@
 						org2.type=orgUnitCoding;
 						//assigment of OrgUnit
 						org2.id=oOrgUnit2.id;
-						org2.meta={"lastUpdated":oOrgUnit2.lastUpdated};
+						org2.meta={"lastUpdated": formatDateInZform(oOrgUnit2.lastUpdated)};
 						org2.identifier=[orgIdentifier];
 						org2.name=oOrgUnit2.name;
 						org2.partOf={"reference":"Organization/"+oOrgUnit.id}
@@ -141,7 +149,7 @@
 								org3.type=orgUnitCoding;
 								//assigment of OrgUnit
 								org3.id=oOrgUnit3.id;
-								org3.meta={"lastUpdated":oOrgUnit3.lastUpdated};
+								org3.meta={"lastUpdated":formatDateInZform(oOrgUnit3.lastUpdated)};
 								org3.identifier=[orgIdentifier];
 								org3.name=oOrgUnit3.name;
 								//org3.partOf=oOrgUnit2.id;
@@ -174,7 +182,7 @@
 										org4.type=orgUnitCoding;
 										//assigment of OrgUnit
 										org4.id=oOrgUnit4.id;
-										org4.meta={"lastUpdated":oOrgUnit4.lastUpdated};
+										org4.meta={"lastUpdated":formatDateInZform(oOrgUnit4.lastUpdated)};
 										org4.identifier=[orgIdentifier];
 										org4.name=oOrgUnit4.name;
 										//org4.partOf=oOrgUnit3.id;
@@ -208,6 +216,40 @@
 		
 		return organizationList;
 	}
+	
+	function formatDateInZform(originalDate)
+	{
+		var formatedDate="";
+		var dateComponants=[];
+		var dateComponants=originalDate.split("+");
+		if(dateComponants.length>0)
+		{
+			formatedDate=dateComponants[0];//+"+00:00"
+			//formatedDate+="+00:00";
+			if(formatedDate.includes("Z")||formatedDate.includes("z"))
+			{
+				formatedDate=formatedDate
+			}
+			else
+			{
+				formatedDate+="+00:00";
+			}
+		}
+		return formatedDate;
+	}
+	function getAssociatedGenderValueSet(_genderValue)
+	{
+		var valueSet="";
+		if(_genderValue.toLowerCase()=="m"|| _genderValue.toLowerCase()=="male")
+		{
+			valueSet="male";
+		}
+		else if(_genderValue.toLowerCase()=="f"|| _genderValue.toLowerCase()=="female")
+		{
+			valueSet="female";
+		}
+		return valueSet;
+	}
 	function GetAssociatedFhirResource(oTrackedEntity)
 	{
 		const entityCode=oTrackedEntity.trackedEntity;
@@ -216,11 +258,12 @@
 		{
 			case entitieTrackedMapping.patient:
 				//extract patient attribute
+				//console.log(oTrackedEntity);
 				var oPatient={};
 				oPatient= Object.create(Patient);
 				oPatient.resourceType="Patient";
 				oPatient.id=oTrackedEntity.trackedEntityInstance;
-				oPatient.meta={"lastUpdated":oTrackedEntity.lastUpdated};
+				oPatient.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
 				oPatient.active=true;
 				//oPatient.managingOrganization=oTrackedEntity.orgUnit;
 				oPatient.managingOrganization={"reference":"Organization/"+oTrackedEntity.orgUnit}
@@ -232,11 +275,65 @@
 				var oContact={};
 				oContact= Object.create(ContactPoint);
 				oContact.resourceType="ContactPoint";
+				var oAddress={};
+				oAddress= Object.create(Address);
+				oAddress.resourceType="Address";
 				
 				var listOfIdentifier=[];
 				var firstEntry=false;
 				for(var i=0;i<oTrackedEntity.attributes.length;i++)
 				{
+					var oAttribute=oTrackedEntity.attributes[i].displayName;
+					switch(oAttribute)
+					{
+						case patientAttributesMapping.identifier:
+							var orgIdentifier={};
+							orgIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							orgIdentifier.use="official";
+							orgIdentifier.type={"text":"Medical Record Number"};
+							orgIdentifier.system="http://hl7.org/fhir/";
+							orgIdentifier.value=oTrackedEntity.attributes[i].value;
+							listOfIdentifier.push(orgIdentifier);
+							break;
+						case patientAttributesMapping.name_family:
+							oName.family=oTrackedEntity.attributes[i].value;
+							oName.text+=oTrackedEntity.attributes[i].value+" ";
+						break;
+						case patientAttributesMapping.name_given:
+							oName.given=oTrackedEntity.attributes[i].value;
+							oName.text+=oTrackedEntity.attributes[i].value+" ";
+						break;
+						case patientAttributesMapping.telecom_phone:
+							oContact.system="phone";
+							oContact.value=oTrackedEntity.attributes[i].value;
+							oContact.use="home";
+							oContact.rank="1";
+							oPatient.telecom=[oContact];
+						break;
+						case patientAttributesMapping.telecom_email:
+							oContact.system="email";
+							oContact.value=oTrackedEntity.attributes[i].value;
+							oContact.use="home";
+							oContact.rank="2";
+							oPatient.telecom=[oContact];
+						break;
+						case patientAttributesMapping.gender:
+							if(getAssociatedGenderValueSet(oTrackedEntity.attributes[i].value)!="")
+							{
+								oPatient.gender=getAssociatedGenderValueSet(oTrackedEntity.attributes[i].value);
+							}
+						break;
+						case patientAttributesMapping.birthDate:
+							oPatient.birthDate=oTrackedEntity.attributes[i].value;
+						break;
+						case patientAttributesMapping.address:
+							oAddress.text=oTrackedEntity.attributes[i].value
+							oPatient.address=[oAddress];
+						break;
+						
+					}
+					/*
 					if(oTrackedEntity.attributes[i].displayName=="Identifier")
 					{
 						var orgIdentifier={};
@@ -278,7 +375,7 @@
 					{
 						oPatient.birthDate=oTrackedEntity.attributes[i].value;
 					}
-					
+					*/
 				}//fin for
 				oPatient.identifier=listOfIdentifier;
 				//oPatient.active=true;
@@ -293,9 +390,9 @@
 				oPractitioner= Object.create(Practitioner);
 				oPractitioner.resourceType="Practitioner";
 				oPractitioner.id=oTrackedEntity.trackedEntityInstance;
-				oPractitioner.meta={"lastUpdated":oTrackedEntity.lastUpdated};
+				oPractitioner.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
 				oPractitioner.active=true;
-				oPractitioner.qualification=[{"managingOrganization": {"reference":"Organization/"+oTrackedEntity.orgUnit}}];
+				oPractitioner.practitionerRole=[{"managingOrganization": {"reference":"Organization/"+oTrackedEntity.orgUnit}}];
 				var oName={};
 				oName= Object.create(HumanName);
 				oName.resourceType="HumanName";
@@ -308,6 +405,50 @@
 				var listOfIdentifier=[];
 				for(var i=0;i<oTrackedEntity.attributes.length;i++)
 				{
+					var oAttribute=oTrackedEntity.attributes[i].displayName;
+					switch(oAttribute)
+					{
+						case practitionerAttributesMapping.identifier:
+							var orgIdentifier={};
+							orgIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							orgIdentifier.use="official";
+							orgIdentifier.type={"text":"License Number"};
+							orgIdentifier.system="http://hl7.org/fhir/";
+							orgIdentifier.value=oTrackedEntity.attributes[i].value;
+							listOfIdentifier.push(orgIdentifier);
+							break;
+						case practitionerAttributesMapping.name_family:
+							oName.family=oTrackedEntity.attributes[i].value;
+							oName.text+=oTrackedEntity.attributes[i].value+" ";
+						break;
+						case practitionerAttributesMapping.name_given:
+							oName.given=oTrackedEntity.attributes[i].value;
+							oName.text+=oTrackedEntity.attributes[i].value+" ";
+						break;
+						case practitionerAttributesMapping.telecom_phone:
+							oContact.system="phone";
+							oContact.value=oTrackedEntity.attributes[i].value;
+							oContact.use="home";
+							oContact.rank="1";
+							oPractitioner.telecom=[oContact];
+						break;
+						case practitionerAttributesMapping.telecom_email:
+							oContact.system="email";
+							oContact.value=oTrackedEntity.attributes[i].value;
+							oContact.use="home";
+							oContact.rank="2";
+							oPractitioner.telecom=[oContact];
+						break;
+						case practitionerAttributesMapping.gender:
+							if(getAssociatedGenderValueSet(oTrackedEntity.attributes[i].value)!="")
+							{
+								oPractitioner.gender=getAssociatedGenderValueSet(oTrackedEntity.attributes[i].value);
+							}
+						break;
+					}
+					
+					/*
 					if(oTrackedEntity.attributes[i].displayName=="LastName" || oTrackedEntity.attributes[i].displayName=="FirstName")
 					{
 						if(oTrackedEntity.attributes[i].displayName=="LastName")
@@ -336,7 +477,7 @@
 					if(oTrackedEntity.attributes[i].displayName=="Sex")
 					{
 						oPractitioner.gender=oTrackedEntity.attributes[i].value;
-					}
+					}*/
 				}
 				oPractitioner.identifier=listOfIdentifier;
 				oPractitioner.name=oName;
@@ -347,7 +488,7 @@
 				oSpecimen= Object.create(Specimen);
 				oSpecimen.resourceType="Specimen";
 				oSpecimen.id=oTrackedEntity.trackedEntityInstance;
-				oSpecimen.meta={"lastUpdated":oTrackedEntity.lastUpdated};
+				oSpecimen.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
 				oSpecimen.active=true;
 				var listOfIdentifier=[];
 				var listOfTraitment=[];
@@ -369,6 +510,83 @@
 				
 				for(var i=0;i<oTrackedEntity.attributes.length;i++)
 				{
+					var oAttribute=oTrackedEntity.attributes[i].displayName;
+					switch(oAttribute)
+					{
+						case specimenAttributesMapping.identifier:
+							var orgIdentifier={};
+							orgIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							orgIdentifier.use="official";
+							orgIdentifier.type={"text":"Specimen Identification"};
+							orgIdentifier.system="http://hl7.org/fhir/";
+							orgIdentifier.value=oTrackedEntity.attributes[i].value;
+							listOfIdentifier.push(orgIdentifier);
+							break;
+						case specimenAttributesMapping.status:
+							oSpecimen.status=oTrackedEntity.attributes[i].value;
+							oSpecimen.status="available";
+							break;
+						case specimenAttributesMapping.subject:
+							oSpecimen.subject={"reference":"Patient/"+oTrackedEntity.attributes[i].value};
+							break;
+						case specimenAttributesMapping.accession:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Lab Identification"};
+							oIdentifier.system="http://hl7.org/fhir";
+							oIdentifier.value=oTrackedEntity.attributes[i].value;
+							oSpecimen.accession=oIdentifier;
+							break;
+						case specimenAttributesMapping.receivedTime:
+							oSpecimen.receivedTime=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.collectedDateTime:
+							oCollection.collectedDateTime=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.collection_quantity_unit:
+							oCollection.quantity.unit=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.collection_quantity_value:
+							oCollection.quantity.value=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.collection_method:
+							oConceptCollectionMethod.text=oTrackedEntity.attributes[i].value;
+							oCollection.method=oConceptCollectionMethod;
+							break;
+						case specimenAttributesMapping.collection_bodySite:
+							oConceptBodySite.text=oTrackedEntity.attributes[i].value;
+							oCollection.bodySite=oConceptBodySite;
+							break;
+						case specimenAttributesMapping.container_capacity_unit:
+							oContainer.capacity.unit=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.container_capacity_value:
+							oContainer.capacity.value=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.container_description:
+							oContainer.description=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.traitment_description:
+							oTraitment.description=oTrackedEntity.attributes[i].value;
+							break;
+						case specimenAttributesMapping.traitment_procedure:
+							oConceptProcedure.text=oTrackedEntity.attributes[i].value;
+							oTraitment.procedure=oConceptProcedure;
+							break;
+						case specimenAttributesMapping.container_identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Container Identification"};
+							oIdentifier.system="http://hl7.org/fhir";
+							oIdentifier.value=oTrackedEntity.attributes[i].value;
+							oContainer.Identifier=[oIdentifier];
+							break;
+					}
+					/*
 					if(oTrackedEntity.attributes[i].displayName=="SpecimenTreatmentDescription")
 					{
 						oTraitment.description=oTrackedEntity.attributes[i].value;
@@ -381,6 +599,10 @@
 					if(oTrackedEntity.attributes[i].displayName=="DateOfReception")
 					{
 						oSpecimen.receivedTime=oTrackedEntity.attributes[i].value;
+					}
+					if(oTrackedEntity.attributes[i].displayName=="Subject")
+					{
+						oSpecimen.subject={"reference":"Patient/"+oTrackedEntity.attributes[i].value};
 					}
 					if(oTrackedEntity.attributes[i].displayName=="DateOfCollection")
 					{
@@ -425,7 +647,7 @@
 						oIdentifier.system="http://hl7.org/fhir";
 						oIdentifier.value=oTrackedEntity.attributes[i].value;
 						//listOfIdentifier.push(oIdentifier);
-						oSpecimen.accessionIdentifier=oIdentifier;
+						oSpecimen.accession=oIdentifier;
 					}
 					if(oTrackedEntity.attributes[i].displayName=="ContainerCapacityUnit")
 					{
@@ -450,9 +672,10 @@
 					{
 						oContainer.description=oTrackedEntity.attributes[i].value;
 					}
+					* */
 				}
 				oSpecimen.Identifier=listOfIdentifier;
-				oSpecimen.status="available";
+				//oSpecimen.status="available";
 				oSpecimen.collection=oCollection;
 				oSpecimen.treatment=[oTraitment];
 				oSpecimen.Container=[oContainer];
@@ -463,11 +686,78 @@
 				oOrder= Object.create(DiagnosticOrder);
 				oOrder.resourceType="DiagnosticOrder";
 				oOrder.id=oTrackedEntity.trackedEntityInstance;
-				oOrder.meta={"lastUpdated":oTrackedEntity.lastUpdated};
+				oOrder.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
 				//oOrder.
 				var listOfIdentifier=[];
+				var oOrderEvent={};
+				oOrderEvent= Object.create(OrderEvent);
 				for(var i=0;i<oTrackedEntity.attributes.length;i++)
 				{
+					var oAttribute=oTrackedEntity.attributes[i].displayName;
+					switch(oAttribute)
+					{
+						case orderAttributesMapping.identifier:
+							var orgIdentifier={};
+							orgIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							orgIdentifier.use="official";
+							orgIdentifier.type={"text":"Order Identification"};
+							orgIdentifier.system="http://hl7.org/fhir/";
+							orgIdentifier.value=oTrackedEntity.attributes[i].value;
+							listOfIdentifier.push(orgIdentifier);
+							break;
+						case orderAttributesMapping.subject:
+							oOrder.subject={"reference":"Patient/"+oTrackedEntity.attributes[i].value};
+							break;
+						case orderAttributesMapping.orderer:
+							oOrder.orderer={"reference":"Practitioner/"+oTrackedEntity.attributes[i].value};
+							break;
+						case orderAttributesMapping.encounter:
+							oOrder.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[i].value};
+							break;
+						case orderAttributesMapping.reason:
+							var oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oOrder.reason=[oConcept];
+							break;
+						case orderAttributesMapping.supportingInformation:
+							oOrder.supportingInformation=[oTrackedEntity.attributes[i].value];
+							break;
+						case orderAttributesMapping.specimen:
+							oOrder.specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
+							break;
+						case orderAttributesMapping.status:
+							oOrder.status=oTrackedEntity.attributes[i].value;
+							break;
+						case orderAttributesMapping.priority:
+							oOrder.priority=oTrackedEntity.attributes[i].value;
+							break;
+						case orderAttributesMapping.orderEvent_dateTime:
+							oOrderEvent.dateTime=oTrackedEntity.attributes[i].value;
+							break;
+						case orderAttributesMapping.orderEvent_status:
+							oOrderEvent.status=oTrackedEntity.attributes[i].value;
+							break;
+						case orderAttributesMapping.OrderEventDescription:
+							var oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oOrderEvent.description=oConcept;
+							break;
+						case orderAttributesMapping.item:
+							var oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oOrder.item=[oConcept];
+							break;
+						case orderAttributesMapping.note:
+							oOrder.note={"text":oTrackedEntity.attributes[i].value};
+							break;
+						
+					}
+					
+					/*
 					if(oTrackedEntity.attributes[i].displayName=="Orderer")
 					{
 						oOrder.orderer={"reference":"Practitioner/"+oTrackedEntity.attributes[i].value};
@@ -494,6 +784,28 @@
 					{
 						oOrder.specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
 					}
+					else if(oTrackedEntity.attributes[i].displayName=="OrderEventDateTime")
+					{
+						oOrderEvent.dateTime=oTrackedEntity.attributes[i].value;
+					}
+					else if(oTrackedEntity.attributes[i].displayName=="OrderEventStatus")
+					{
+						oOrderEvent.status=oTrackedEntity.attributes[i].value;
+					}
+					else if(oTrackedEntity.attributes[i].displayName=="OrderEventDescription")
+					{
+						var oConcept={};
+						oConcept= Object.create(CodeableConcept);
+						oConcept.text=oTrackedEntity.attributes[i].value;
+						oOrderEvent.description=oConcept;
+					}
+					else if(oTrackedEntity.attributes[i].displayName=="OrderItemCode")
+					{
+						var oConcept={};
+						oConcept= Object.create(CodeableConcept);
+						oConcept.text=oTrackedEntity.attributes[i].value;
+						oOrder.item=[oConcept];
+					}
 					else if(oTrackedEntity.attributes[i].displayName=="Subject")
 					{
 						oOrder.subject={"reference":"Patient/"+oTrackedEntity.attributes[i].value};
@@ -510,10 +822,11 @@
 					{
 						oOrder.note={"text":oTrackedEntity.attributes[i].value};
 					}
-					
+					*/
 					
 				}
 				oOrder.Identifier=listOfIdentifier;
+				oOrder.event=[oOrderEvent];
 				entityObject=oOrder;
 				break;
 			case entitieTrackedMapping.observation:
@@ -521,13 +834,15 @@
 				oObservation= Object.create(Observation);
 				oObservation.resourceType="Observation";
 				oObservation.id=oTrackedEntity.trackedEntityInstance;
-				oObservation.meta={"lastUpdated":oTrackedEntity.lastUpdated};
+				oObservation.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
 				//oOrder.
 				var listOfIdentifier=[];
 				var oSampledData={};
 				oSampledData= Object.create(SampledData);
 				var oPeriodEffective={};
 				oPeriodEffective= Object.create(Period);
+				var oPeriodResult={};
+				oPeriodResult= Object.create(Period);
 				var oValueQuantity={};
 				oValueQuantity= Object.create(Quantity);
 				var oOriginQuantity={};
@@ -543,6 +858,161 @@
 				
 				for(var i=0;i<oTrackedEntity.attributes.length;i++)
 				{
+					var oAttribute=oTrackedEntity.attributes[i].displayName;
+					switch(oAttribute)
+					{
+						case observationAttributesMapping.identifier:
+							var orgIdentifier={};
+							orgIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							orgIdentifier.use="official";
+							orgIdentifier.type={"text":"Observation Identification"};
+							orgIdentifier.system="http://hl7.org/fhir/";
+							orgIdentifier.value=oTrackedEntity.attributes[i].value;
+							listOfIdentifier.push(orgIdentifier);
+							break;
+						case observationAttributesMapping.status:
+							oObservation.status=oTrackedEntity.attributes[i].value;
+							break;
+						case observationAttributesMapping.category:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oObservation.category=oConcept;
+							break;
+						case observationAttributesMapping.code:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oObservation.code=oConcept;
+							break;
+						case observationAttributesMapping.subject:
+							oObservation.subject={"reference":"Patient/"+oTrackedEntity.attributes[i].value};
+							break;
+						case observationAttributesMapping.encounter:
+							oObservation.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[i].value};
+							break;
+						case observationAttributesMapping.effectiveDateTime:
+							oObservation.effectiveDateTime=oTrackedEntity.attributes[i].value;
+							break;
+						case observationAttributesMapping.effectivePeriod_dateSup:
+							oPeriodEffective.end= formatDateInZform(oTrackedEntity.attributes[i].value);
+							break;
+						case observationAttributesMapping.effectivePeriod_dateInf:
+							oPeriodEffective.start=formatDateInZform(oTrackedEntity.attributes[i].value);
+							break;
+						case observationAttributesMapping.issued:
+							oObservation.issued=oTrackedEntity.attributes[i].value;
+							break;
+						case observationAttributesMapping.performer:
+								oObservation.performer=[{"reference":"Practitioner/"+oTrackedEntity.attributes[i].value}];
+							break;
+						case observationAttributesMapping.valueQuantity_unit:
+								oValueQuantity.unit=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueQuantity_value:
+								oValueQuantity.value=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueCodeableConcept:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[i].value;
+								oObservation.valueCodeableConcept=oConcept;
+								break;
+						case observationAttributesMapping.valueString:
+								oObservation.valueString=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueRange_sup:
+								var rangeQuantity=Object.create(Quantity);
+								rangeQuantity.value=oTrackedEntity.attributes[i].value;
+								oObservationRange.high=rangeQuantity;
+								break;
+						case observationAttributesMapping.valueRange_Inf:
+								var rangeQuantity=Object.create(Quantity);
+								rangeQuantity.value=oTrackedEntity.attributes[i].value;
+								oObservationRange.low=rangeQuantity;
+								break;
+						case observationAttributesMapping.valueRatio_num:
+								oObservationRatio.numerator=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueRatio_denom:
+								oObservationRatio.denominator=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_origin:
+								oOriginQuantity.value=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_period:
+								oSampledData.period=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_factor:
+								oSampledData.factor=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_lowerLimit:
+								oSampledData.lowerLimit=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_upperLimit:
+								oSampledData.upperLimit=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_dimensions:
+								oSampledData.dimensions=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueSampledData_data:
+								oSampledData.data=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueTime:
+								oObservation.valueTime=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valueDateTime:
+								oObservation.valueDateTime=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valuePeriod_start:
+								oPeriodResult.start=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.valuePeriod_end:
+								oPeriodResult.end=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.dataAbsentReason:
+								oAbsentRaisonConcept.text=oTrackedEntity.attributes[i].value;
+								oObservation.dataAbsentReason=oAbsentRaisonConcept;
+								break;
+						case observationAttributesMapping.interpretation:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[i].value;
+								oObservation.interpretation=oConcept;
+								break;
+						case observationAttributesMapping.comments:
+								oObservation.comments=oTrackedEntity.attributes[i].value;
+								break;
+						case observationAttributesMapping.bodySite:
+								oBodySiteConcept.text=oTrackedEntity.attributes[i].value;
+								oObservation.bodySite=oBodySiteConcept;
+								break;
+						case observationAttributesMapping.method:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[i].value;
+								oObservation.method=oConcept;
+								break;
+						case observationAttributesMapping.specimen:
+								oObservation.specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
+								break;
+						case observationAttributesMapping.device:
+								oObservation.device={"reference":"Device/"+oTrackedEntity.attributes[i].value};
+								break;
+						case observationAttributesMapping.referenceRange:
+								oObservation.referenceRange=[];
+								break;
+						case observationAttributesMapping.related:
+								oObservation.related=[];
+								break;
+						case observationAttributesMapping.component:
+								oObservation.component=[];
+								break;
+						}
+					
+					
+					/*
 					if (oTrackedEntity.attributes[i].displayName=="Identifier")
 					{
 						var oIdentifier={};
@@ -582,12 +1052,12 @@
 					}
 					else if (oTrackedEntity.attributes[i].displayName=="ObservationEffectivePeriodeDateSup")
 					{
-						oPeriodEffective.end=oTrackedEntity.attributes[i].value;
+						oPeriodEffective.end= formatDateInZform(oTrackedEntity.attributes[i].value);
 						//oObservation.effectivePeriod.end=oTrackedEntity.attributes[i].value;
 					}
 					else if (oTrackedEntity.attributes[i].displayName=="ObservationEffectivePeriodeDateInf")
 					{
-						oPeriodEffective.start=oTrackedEntity.attributes[i].value;
+						oPeriodEffective.start=formatDateInZform(oTrackedEntity.attributes[i].value);
 						//oObservation.effectivePeriod.start=oTrackedEntity.attributes[i].value;
 					}
 					else if (oTrackedEntity.attributes[i].displayName=="ObservationIssued")
@@ -710,6 +1180,7 @@
 					{
 						oObservation.specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
 					}
+					* */
 				}
 					oSampledData.origin=oOriginQuantity;
 					oObservation.valueSampledData=oSampledData;
@@ -717,7 +1188,9 @@
 					oObservation.effectivePeriod=oPeriodEffective;
 					oObservation.valueQuantity=oValueQuantity;
 					oObservation.valueRange=oObservationRange;
+					//checkIfAsProperties(oObservationRange);
 					oObservation.valueRatio=oObservationRatio;
+					oObservation.valuePeriod=oPeriodResult;
 					
 					entityObject=oObservation;
 				break;
@@ -725,13 +1198,92 @@
 				var oDiagnosticReport={};
 				oDiagnosticReport= Object.create(DiagnosticReport);
 				oDiagnosticReport.resourceType="DiagnosticReport";
-				DiagnosticReport.id=oTrackedEntity.trackedEntityInstance;
-				DiagnosticReport.meta={"lastUpdated":oTrackedEntity.lastUpdated};
+				oDiagnosticReport.id=oTrackedEntity.trackedEntityInstance;
+				oDiagnosticReport.meta={"lastUpdated":formatDateInZform(oTrackedEntity.lastUpdated)};
 				var listOfIdentifier=[];
 				var oEffectivePeriod={};
 				oEffectivePeriod= Object.create(Period);
 				for(var i=0;i<oTrackedEntity.attributes.length;i++)
 				{
+					var oAttribute=oTrackedEntity.attributes[i].displayName;
+					switch(oAttribute)
+					{
+						case diagnosticReportAttributesMapping.identifier:
+							var orgIdentifier={};
+							orgIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							orgIdentifier.use="official";
+							orgIdentifier.type={"text":"DiagnosticReport Identification"};
+							orgIdentifier.system="http://hl7.org/fhir/";
+							orgIdentifier.value=oTrackedEntity.attributes[i].value;
+							listOfIdentifier.push(orgIdentifier);
+							break;
+						case diagnosticReportAttributesMapping.status:
+							oDiagnosticReport.status=oTrackedEntity.attributes[i].value;
+							break;
+						case diagnosticReportAttributesMapping.category:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oDiagnosticReport.category=oConcept;
+							break;
+						case diagnosticReportAttributesMapping.code:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oDiagnosticReport.code=oConcept;
+							break;
+						case diagnosticReportAttributesMapping.subject:
+							oDiagnosticReport.subject={"reference":"Patient/"+oTrackedEntity.attributes[i].value};
+							break;
+						case diagnosticReportAttributesMapping.encounter:
+							oDiagnosticReport.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[i].value};
+							break;
+						case diagnosticReportAttributesMapping.effectiveDateTime:
+							oDiagnosticReport.effectiveDateTime=oTrackedEntity.attributes[i].value;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_start:
+							oEffectivePeriod.start=oTrackedEntity.attributes[i].value;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_end:
+							oEffectivePeriod.end=oTrackedEntity.attributes[i].value;
+							break;
+						case diagnosticReportAttributesMapping.issued:
+							oDiagnosticReport.issued=oTrackedEntity.attributes[i].value;
+							break;
+						case diagnosticReportAttributesMapping.performer:
+							oDiagnosticReport.performer={"reference":"Practitioner/"+oTrackedEntity.attributes[i].value};
+							break;
+						case diagnosticReportAttributesMapping.request:
+							oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oTrackedEntity.attributes[i].value}];
+							break;
+						case diagnosticReportAttributesMapping.specimen:
+							oDiagnosticReport.specimen=[{"reference":"Specimen/"+oTrackedEntity.attributes[i].value}];
+							break;
+						case diagnosticReportAttributesMapping.result:
+							oDiagnosticReport.result=[{"reference":"Observation/"+oTrackedEntity.attributes[i].value}];
+							break;
+						case diagnosticReportAttributesMapping.imagingStudy:
+							oDiagnosticReport.imagingStudy=[];
+							break;
+						case diagnosticReportAttributesMapping.image:
+							oDiagnosticReport.image=[];
+							break;
+						case diagnosticReportAttributesMapping.conclusion:
+							oDiagnosticReport.conclusion=oTrackedEntity.attributes[i].value;
+							break;
+						case diagnosticReportAttributesMapping.codedDiagnosis:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[i].value;
+							oDiagnosticReport.codedDiagnosis=[oConcept];
+							break;
+						case diagnosticReportAttributesMapping.presentedForm:
+							oDiagnosticReport.presentedForm=[];
+							break;
+					}
+					
+					/*
 					if (oTrackedEntity.attributes[i].displayName=="Identifier")
 					{
 						var oIdentifier={};
@@ -808,6 +1360,7 @@
 					{
 						oEffectivePeriod.end=oTrackedEntity.attributes[i].value;
 					}
+					* */
 				}
 				oDiagnosticReport.identifier=listOfIdentifier;
 				oDiagnosticReport.effectivePeriod=oEffectivePeriod;
@@ -828,7 +1381,8 @@
 		totalNumberOfResource+=listSpecimen.length+listDiagnosticOrder.length+listObservation.length+listDiagnosticReport.length;
 		var idBundle=listOrganisation[0].id+totalNumberOfResource;
 		oBundle.id=idBundle;
-		oBundle.meta={"lastUpdated":new Date().toJSON()};
+		var lastlastUpdated=new Date().toJSON();
+		oBundle.meta={"lastUpdated":formatDateInZform(lastlastUpdated)};
 		oBundle.type="collection";
 		oBundle.total=totalNumberOfResource;
 		var listOfEntries=[];
@@ -983,76 +1537,6 @@
 		});
 	  
 	}
-  records = {
-    1: {
-      patientId: 1,
-      providerId: 1,
-      encounterType: "Physical Examination",
-      encounterDate: "20131023",
-      observations: [
-        {
-          obsType: "Weight",
-          obsValue: "50",
-          obsUnit: "kg"
-        }, {
-          obsType: "Height",
-          obsValue: "160",
-          obsUnit: "cm"
-        }, {
-          obsType: "Systolic Blood Pressure",
-          obsValue: "120",
-          obsUnit: "mmHg"
-        }, {
-          obsType: "Diastolic Blood Pressure",
-          obsValue: "80",
-          obsUnit: "mmHg"
-        }, {
-          obsType: "Heartrate",
-          obsValue: "90",
-          obsUnit: "bpm"
-        }, {
-          obsType: "Temperature",
-          obsValue: "37",
-          obsUnit: "C"
-        }
-      ]
-    },
-    2: {
-      patientId: 2,
-      providerId: 1,
-      encounterType: "Physical Examination",
-      encounterDate: "20140517",
-      observations: [
-        {
-          obsType: "Weight",
-          obsValue: "88",
-          obsUnit: "kg"
-        }, {
-          obsType: "Height",
-          obsValue: "180",
-          obsUnit: "cm"
-        }, {
-          obsType: "Systolic Blood Pressure",
-          obsValue: "138",
-          obsUnit: "mmHg"
-        }, {
-          obsType: "Diastolic Blood Pressure",
-          obsValue: "93",
-          obsUnit: "mmHg"
-        }, {
-          obsType: "Heartrate",
-          obsValue: "97",
-          obsUnit: "bpm"
-        }, {
-          obsType: "Temperature",
-          obsValue: "37",
-          obsUnit: "C"
-        }
-      ]
-    }
-  };
-
-  
 
   app = express();
 
@@ -1060,7 +1544,7 @@
 
   app.get("/trackedentities", entityinstances);
 
-  server = app.listen(process.env.PORT || 8082, function() {
+  server = app.listen(process.env.PORT || 8083, function() {
     return console.log("Service DHIS2 tracked converstion to Fhir is running on port:" + (server.address().port));
   });
 

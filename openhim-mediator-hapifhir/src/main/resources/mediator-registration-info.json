@@ -1,0 +1,31 @@
+{
+  "urn": "urn:uuid:803fb850-977b-11e6-b71b-cf7766d456fe",
+  "version": "0.1.0",
+  "name": "openhim-mediator-dhis2-hapijpa",
+  "description": "Synchronize DHIS2-fhir resources between a DHIS2 tracker and the JPA server",
+  "endpoints": [
+    {
+      "name": "openhim-mediator-dhsi2-hapiserver Route",
+      "host": "localhost",
+      "port": "4000",
+      "type": "http"
+    }
+  ],
+  "defaultChannelConfig": [
+    {
+      "name": "dhis2-jpa-mediator-channel",
+      "urlPattern": "/entitytrackers/.*",
+      "type": "http",
+      "allow": ["tut"],
+      "routes": [
+        {
+          "name": "openhim-mediator-dhsi2-hapiserver Route",
+          "host": "localhost",
+          "port": "4000",
+          "type": "http",
+          "primary": "true"
+        }
+      ]
+    }
+  ]
+}

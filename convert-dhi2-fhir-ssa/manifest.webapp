@@ -1,0 +1,163 @@
+{
+  "launch_path": "/src/app.js",
+  "default_locale": "en",
+  "activities": {
+    "dhis": {
+      "href": "http://localhost",
+      "port":"8082"
+    },
+    "app":{
+	  "port":"8083"
+    }
+  },
+  "appType": "APP",
+  "name": "DHIS2-FHIR-Lab-app",
+  "version": "1.0.0",
+  "description": "App for browsing, searching and transform ISDR resources to FHIR based",
+  "developer": {
+    "name": "Gerard Bisama"
+  },
+  "icons": {
+    "48": "icon.png"
+  },
+  "entities_mapping":{
+	"patient":"fZZDtGHhXT3",
+	"provider":"WO3xOdPaJfL",
+	"specimen":"IJooTQOZbfy",
+	"order":"mob9DySuMOS",
+	"observation":"KEc7eJXhZw3",
+	"diagnosticReport":"Onw0t8l5Dyp"
+  },
+  "patient_attribute_mapping":
+  {
+	"id":"trackedEntityInstance",
+	"managingOrganization":"orgUnit",
+	"identifier":"Identifier",
+	"name_family":"LastName",
+	"name_given":"FirstName",
+	"telecom_phone":"Telephone",
+	"telecom_email":"Email",
+	"gender":"Sex",
+	"birthDate":"BirthDate",
+	"address":"Residence"
+  },
+  "practitioner_attribute_mapping":
+  {
+	"id":"trackedEntityInstance",
+	"identifier":"Identifier",
+	"name_family":"LastName",
+	"name_given":"FirstName",
+	"gender":"Sex",
+	"telecom_phone":"Telephone",
+	"telecom_email":"Email",
+	"address":"Residence"
+  },
+  "specimen_attribute_mapping":
+  {
+	"id":"trackedEntityInstance",
+	"identifier":"Identifier",
+	"status":"status",
+	"subject":"Subject",
+	"accession":"LabIdentifier",
+	"receivedTime":"DateOfReception",
+	"collectedDateTime":"DateOfCollection",
+	"collection_quantity_unit":"QuantityUnit",
+	"collection_quantity_value":"Quantity",
+	"collection_method":"SpecimenCollectionMethod",
+	"collection_bodySite":"SpecimenBodySite",
+	"container_identifier":"ContainerIdentifier",
+	"container_capacity_unit":"ContainerCapacityUnit",
+	"container_capacity_value":"ContainerCapacity",
+	"container_description":"ContainerDescription",
+	"traitment_description":"SpecimenTreatmentDescription",
+	"traitment_procedure":"SpecimenTreatementProcedure"
+  },
+  "order_attribute_mapping":
+  {
+	"id":"trackedEntityInstance",
+	"identifier":"Identifier",
+	"subject":"Subject",
+	"orderer":"Orderer",
+	"encounter":"Encounter",
+	"reason":"OrderRaison",
+	"supportingInformation":"SupportingInformation",
+	"specimen":"Specimen",
+	"status":"OrderStatus",
+	"priority":"OrderPriority",
+	"orderEvent_dateTime":"OrderEventDateTime",
+	"orderEvent_status":"OrderEventStatus",
+	"orderEvent_description":"OrderEventDescription",
+	"item":"OrderItemCode",
+	"note":"Comment"
+  },
+  "observation_attribute_mapping":
+  {
+	"id":"trackedEntityInstance",
+	"identifier":"Identifier",
+	"status" : "ObservationStatus",
+	"category" :"ObservationCategorie",
+	"code" : "ObservationCode",
+	"subject" :"Subject",
+	"encounter" : "Encounter",
+	"effectiveDateTime" : "ObservationEffectiveDateTime",
+	"effectivePeriod_dateSup" : "ObservationEffectivePeriodeDateSup",
+	"effectivePeriod_dateInf" : "ObservationEffectivePeriodeDateInf",
+	"issued" : "ObservationIssued",
+	"performer" : "ObservationPerformer",
+	"valueQuantity_unit" : "ResultValueQuantityUnit",
+	"valueQuantity_value" : "ResultValueQuantityValue",
+	"valueCodeableConcept" : "ValueCodeableConcept",
+	"valueString" : "ResultValueString",
+	"valueRange_sup" : "ResultValueRangeSup",
+	"valueRange_Inf" : "ResultValueRangeInf",
+	"valueRatio_num" : "ResultValueRatioNum",
+	"valueRatio_denom" : "ResultValueRatioDenom",
+	"valueSampledData_origin" :"ResultSampleDataOrigin",
+	"valueSampledData_period" :"ResultSampleDataPeriod",
+	"valueSampledData_factor" :"ResultSampleDataFactor",
+	"valueSampledData_lowerLimit" :"ResultSampleDataLower",
+	"valueSampledData_upperLimit" :"ResultSampleDataUpper",
+	"valueSampledData_dimensions" :"ResultSampleDataDimension",
+	"valueSampledData_data" :"ResultSampleDataData",
+	"valueTime" : "ResultValueTime",
+	"valueDateTime" : "ResultValueDateTime",
+	"valuePeriod_start" :"ResultValuePeriodStart",
+	"valuePeriod_end" :"ResultValuePeriodEnd",
+	"dataAbsentReason" : "ResultDataAbsentReason",
+	"interpretation" : "ResultInterpretation",
+	"comments" : "ResultComments",
+	"bodySite" :"ResultBodySite",
+	"method" :"ResultMethod",
+	"specimen" :"Specimen",
+	"device" :"Device",
+	"referenceRange" :"ReferenceRange",
+	"related" : "Related",
+	"component" : "Component"
+  },
+  "diagnosticreport_attribute_mapping":
+  {
+	"id":"trackedEntityInstance",
+	"identifier":"Identifier",
+	"status":"DiagnosticStatus",
+	"category":"DiagnosticReportCategory",
+	"code":"DiagnosticReportCode",
+	"subject":"Subject",
+	"encounter":"Encounter",
+	"effectiveDateTime":"DiagnosticReportEffectiveDateTime",
+	"effectivePeriod_start":"DiagnosticReportEffectivePeriodStart",
+	"effectivePeriod_end":"DiagnosticReportEffectivePeriodEnd",
+	"issued":"DiagnosticReportIssued",
+	"performer":"Performer",
+	"request":"Request",
+	"specimen":"Specimen",
+	"result":"Result",
+	"imagingStudy":"ImagingStudy",
+	"image":"Image",
+	"conclusion":"Conclusion",
+	"codedDiagnosis":"CodedDiagnosis",
+	"presentedForm":"PresentedForm"
+  },
+  "authentication":"admin:district",
+  "temp_directory":"/home/server-hit/dhis2-fhir-data",
+  "manifest_generated_at": "Thu Dec 01 2016 10:27:06 GMT+0100 (CET)"
+}

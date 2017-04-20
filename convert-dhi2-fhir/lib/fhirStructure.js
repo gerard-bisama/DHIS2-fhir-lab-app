@@ -203,7 +203,7 @@ var DiagnosticOrder={
   "identifier" : [], // { Reference(Practitioner) } Identifiers assigned to this order
   "encounter" :"" , // { Reference(Encounter) } The encounter that this diagnostic order is associated with
   "reason" : [], // { CodeableConcept } Explanation/Justification for test
-  "supportingInformation" : [], // { Reference(Observation|Condition|DocumentReference) }Additional clinical information
+  "supportingInformation" : "", //[ { Reference(Observation|Condition|DocumentReference) }]Additional clinical information
   "specimen" : [], // { Reference(Specimen) } If the whole order relates to specific specimens
   "status" : "", //<code> proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed
   "priority" : "", //<code> routine | urgent | stat | asap
@@ -250,23 +250,23 @@ var Observation={
   "encounter" : "", //{ Reference(Patient|Group|Device|Location) } Healthcare event during which this observation is made
   // effective[x]: Clinically relevant time/time-period for observation. One of these 2:
   "effectiveDateTime" : "",
-  "effectivePeriod" : { Period },
+  "effectivePeriod" : {},//Period
   "issued" : "", // DateTime this was made available
   "performer" : [], //{ Reference(Practitioner|Organization|Patient|RelatedPerson) } Who is responsible for the observation
   // value[x]: Actual result. One of these 10:
-  "valueQuantity" : {Quantity},//Quantity
+  "valueQuantity" : {},//Quantity
   "valueCodeableConcept" : { CodeableConcept },
   "valueString" : "",//<string>
-  "valueRange" : { Range },
+  "valueRange" : {  },//Range
   "valueRatio" : { Ratio },
-  "valueSampledData" : { SampledData },
+  "valueSampledData" : {},
   "valueTime" : "",//<time>
   "valueDateTime" : "",//<dateTime>
-  "valuePeriod" : { Period },
+  "valuePeriod" : {  },//Period
   "dataAbsentReason" : { CodeableConcept }, // C? Why the result is missing
-  "interpretation" : { CodeableConcept }, // High, low, normal, etc.
+  "interpretation" : "", //{CodeableConcept} High, low, normal, etc.
   "comments" : "", //<string> Comments about result
-  "bodySite" : { CodeableConcept }, // Observed body part
+  "bodySite" : {  }, //CodeableConcept Observed body part
   "method" : { CodeableConcept }, // How it was done
   "specimen" :{}, // { Reference(Specimen) } Specimen used for this observation
   "device" : {}, //{ Reference(Device|DeviceMetric) } (Measurement) Device
@@ -295,7 +295,7 @@ var DiagnosticReport={
   "encounter" :"", //{ Reference(Encounter) } Health care event when test ordered
   // effective[x]: Clinically Relevant time/time-period for report. One of these 2:
   "effectiveDateTime" : "",//<dateTime>
-  "effectivePeriod" : {Period},
+  "effectivePeriod" : "",//{Period}
   "issued" : "", //<instant> R!  DateTime this version was released
   "performer" :"", //{ Reference(Practitioner|Organization) } R!  Responsible Diagnostic Service
   "request" : [], //{ Reference(DiagnosticOrder|ProcedureRequest|ReferralRequest) } What was requested
@@ -309,6 +309,54 @@ var DiagnosticReport={
   "codedDiagnosis" : [], //{ CodeableConcept } Codes for the conclusion
   "presentedForm" : [] // { Attachment } Entire report as issued
 };
+
+
+var Condition={
+  "resourceType" : "Condition",
+  // from Resource: id, meta, implicitRules, and language
+  // from DomainResource: text, contained, extension, and modifierExtension
+  "id":"",
+  "identifier" : [], //{ Identifier } External Ids for this condition
+  "patient" :"", //{ Reference(Patient) } R!  Who has the condition?
+  "encounter" :"", // { Reference(Encounter) } Encounter when condition first asserted
+  "asserter" : "", //{ Reference(Practitioner|Patient) } Person who asserts this condition
+  "dateRecorded" : "", //<date> When first entered
+  "code" :"", // R!  { CodeableConcept } Identification of the condition, problem or diagnosis
+  "category" : "", //{ CodeableConcept } complaint | symptom | finding | diagnosis
+  "clinicalStatus" : "", //<code> active | relapse | remission | resolved
+  "verificationStatus" : "", //<code> R!  provisional | differential | confirmed | refuted | entered-in-error | unknown
+  "severity" : "", //{ CodeableConcept } Subjective severity of condition
+  // onset[x]: Estimated or actual date,  date-time, or age. One of these 5:
+  "onsetDateTime" : "",//<dateTime>
+  "onsetQuantity" : "",//{ Quantity(Age) }
+  "onsetPeriod" : "",//{ Period }
+  "onsetRange" : "",//{ Range }
+  "onsetString" : "",//<string>
+  // abatement[x]: If/when in resolution/remission. One of these 6:
+  "abatementDateTime" : "",//<dateTime>
+  "abatementQuantity" : "",//{ Quantity(Age) }
+  "abatementBoolean" : "",//<boolean>
+  "abatementPeriod" : "",//{ Period }
+  "abatementRange" : "",//{ Range }
+  "abatementString" : "",//<string>
+  "stage" :"",  // Stage/grade, usually assessed formally
+  /*
+    {"summary" : { CodeableConcept }, // C? Simple summary (disease specific)
+    "assessment" : [{ Reference(ClinicalImpression|DiagnosticReport|Observation) }] // C? Formal record of assessment
+	},
+	* */
+  "evidence" : "",
+  /*
+	  [{ // Supporting evidence
+		"code" : { CodeableConcept }, // C? Manifestation/symptom
+		"detail" : [{ Reference(Any) }] // C? Supporting information found elsewhere
+	  }],
+	**/
+  "bodySite" :"" , //[{ CodeableConcept }] Anatomical location, if relevant
+  "notes" : "" // <string> Additional information about the Condition
+};
+
+
 var Entry={ // Entry in the bundle - will have a resource, or information
     "link" : [], //{ Content as for Bundle.link } Links related to this entry
     "fullUrl" : "", //<uri> Absolute URL for resource (server address, or UUID/OID)
@@ -366,5 +414,6 @@ exports.Period=Period;
 exports.Range=Range;
 exports.Ratio=Ratio;
 exports.DiagnosticReport=DiagnosticReport;
+exports.Condition=Condition;
 exports.Bundle=Bundle;
 exports.Entry=Entry;

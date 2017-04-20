@@ -14,37 +14,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ObservationOrchestratorActor extends UntypedActor {
+public class ConditionOrchestratorActor extends UntypedActor {
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private final MediatorConfig config;
     private MediatorFhirConfig mediatorConfiguration;
-    private ResolveObservationRequest originalRequest;
+    private ResolveConditionRequest originalRequest;
 
-    public static class ResolveObservationRequest extends SimpleMediatorRequest <List<String>>{
-        public ResolveObservationRequest(ActorRef requestHandler, ActorRef respondTo, List<String> requestObject) {
+    public static class ResolveConditionRequest extends SimpleMediatorRequest <List<String>>{
+        public ResolveConditionRequest(ActorRef requestHandler, ActorRef respondTo, List<String> requestObject) {
             super(requestHandler, respondTo, requestObject);
         }
     }
 
-    public static class ResolveObservationResponse extends SimpleMediatorResponse <String>{
-        public ResolveObservationResponse (MediatorRequestMessage originalRequest, String responseObject) {
+    public static class ResolveConditionResponse extends SimpleMediatorResponse <String>{
+        public ResolveConditionResponse (MediatorRequestMessage originalRequest, String responseObject) {
             super(originalRequest, responseObject);
         }
     }
 
-    public ObservationOrchestratorActor(MediatorConfig config) {
+    public ConditionOrchestratorActor(MediatorConfig config) {
         this.config = config;
         this.mediatorConfiguration=new MediatorFhirConfig();
     }
 
-    private void queryObservation(ResolveObservationRequest request)
+    private void queryCondition(ResolveConditionRequest request)
     {
         originalRequest = request;
         ActorSelection httpConnector = getContext().actorSelection(config.userPathFor("http-connector"));
         Map <String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
-        String resourceInformation="FHIR Observation resources";
+        String resourceInformation="FHIR Condition resources";
         log.info("Querying the HAPI Test servers");
 
 
@@ -53,7 +53,7 @@ public class ObservationOrchestratorActor extends UntypedActor {
         paramsRequest=request.getRequestObject();
 
 
-        builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByIds("Observation",paramsRequest);
+        builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByIds("Condition",paramsRequest);
         //builtRequestPath=request.getRequestObject();
         String ServerApp="";
         String baseServerRepoURI="";
@@ -71,9 +71,10 @@ public class ObservationOrchestratorActor extends UntypedActor {
         }
         catch (Exception exc)
         {
+            log.error(exc.getMessage());
+            //throw new Exception(exc.getMessage());
             FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
                     exc.getMessage(),"Error");
-            log.error(exc.getMessage());
             return;
         }
 
@@ -96,7 +97,7 @@ public class ObservationOrchestratorActor extends UntypedActor {
 
     }
 
-    private void processQueryObservationResponse(MediatorHTTPResponse response) {
+    private void processQueryConditionResponse(MediatorHTTPResponse response) {
         log.info("Received response Fhir repository Server");
         //originalRequest.getRespondTo().tell(response.toFinishRequest(), getSelf());
         //Perform the resource validation from the response
@@ -106,7 +107,7 @@ public class ObservationOrchestratorActor extends UntypedActor {
                 StringBuilder strResponse=new StringBuilder();
                 //Copy the response Char by char to avoid the string size limitation issues
                 strResponse.append(response.getBody());
-                ResolveObservationResponse actorResponse=new ResolveObservationResponse(originalRequest,strResponse.toString());
+                ResolveConditionResponse actorResponse=new ResolveConditionResponse(originalRequest,strResponse.toString());
                 originalRequest.getRespondTo().tell(actorResponse, getSelf());
             }
 
@@ -122,12 +123,12 @@ public class ObservationOrchestratorActor extends UntypedActor {
     }
     @Override
     public void onReceive(Object msg) throws Exception {
-        if (msg instanceof ResolveObservationRequest) {
-            queryObservation((ResolveObservationRequest) msg);
+        if (msg instanceof ResolveConditionRequest) {
+            queryCondition((ResolveConditionRequest) msg);
         }
         else if(msg instanceof MediatorHTTPResponse)
         {
-            processQueryObservationResponse((MediatorHTTPResponse) msg);
+            processQueryConditionResponse((MediatorHTTPResponse) msg);
         }
         else
         {

@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Specimen;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
@@ -159,6 +160,35 @@ public class FhirResourceValidator  {
 
     List<Specimen> listOfSpecimen=new ArrayList<Specimen>();
 
+    public List<Condition> getListOfCondition() {
+        return listOfCondition;
+    }
+
+    public void setListOfCondition(List<Condition> listOfCondition) {
+        this.listOfCondition = listOfCondition;
+    }
+
+    List<Condition> listOfCondition=new ArrayList<>();
+
+    public List<Condition> getListOfValidCondition() {
+        return listOfValidCondition;
+    }
+
+    public void setListOfValidCondition(List<Condition> listOfValidCondition) {
+        this.listOfValidCondition = listOfValidCondition;
+    }
+
+    List<Condition> listOfValidCondition=new ArrayList<>();
+
+    public List<Condition> getListOfInvalidCondition() {
+        return listOfInvalidCondition;
+    }
+
+    public void setListOfInvalidCondition(List<Condition> listOfInvalidCondition) {
+        this.listOfInvalidCondition = listOfInvalidCondition;
+    }
+
+    List<Condition> listOfInvalidCondition=new ArrayList<>();
 
     public List<Observation> getListOfObservation() {
         return listOfObservation;
@@ -273,6 +303,7 @@ public class FhirResourceValidator  {
                 listOfPatient=fhirProcessor.getListOfPatient();
                 listOfOrganization=fhirProcessor.getListOfOrganization();
                 listOfSpecimen=fhirProcessor.getListOfSpecimen();
+                listOfCondition=fhirProcessor.getListOfCondition();
                 listOfDiagnosticOrder=fhirProcessor.getListOfDiagnosticOrder();
                 listOfObservation=fhirProcessor.getListOfObservation();
                 listOfDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
@@ -290,6 +321,7 @@ public class FhirResourceValidator  {
                     listOfPatient.addAll(fhirProcessor.getListOfPatient());
                     listOfOrganization.addAll(fhirProcessor.getListOfOrganization());
                     listOfSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                    listOfCondition.addAll(fhirProcessor.getListOfCondition());
                     listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
                     listOfObservation.addAll(fhirProcessor.getListOfObservation());
                     listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
@@ -303,6 +335,7 @@ public class FhirResourceValidator  {
                         listOfPatient.addAll(fhirProcessor.getListOfPatient());
                         listOfOrganization.addAll(fhirProcessor.getListOfOrganization());
                         listOfSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                        listOfCondition.addAll(fhirProcessor.getListOfCondition());
                         listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
                         listOfObservation.addAll(fhirProcessor.getListOfObservation());
                         listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
@@ -317,6 +350,7 @@ public class FhirResourceValidator  {
                 resValidation.setListOfPatientToValidate(listOfPatient);
                 resValidation.setListOfOrganizationToValidate(listOfOrganization);
                 resValidation.setListOfSpecimenToValidate(listOfSpecimen);
+                resValidation.setListOfConditionToValidate(listOfCondition);
                 resValidation.setListOfDiagnosticOrderToValidate(listOfDiagnosticOrder);
                 resValidation.setListOfDiagnosticReportToValidate(listOfDiagnosticReport);
                 resValidation.setListOfObservationToValidate(listOfObservation);
@@ -327,6 +361,7 @@ public class FhirResourceValidator  {
                 listOfValidPatient=resValidation.getListOfValidPatient();
                 listOfValidOrganization=resValidation.getListOfValidOrganization();
                 listOfValidSpecimen=resValidation.getListOfValidSpecimen();
+                listOfValidCondition=resValidation.getListOfValidCondition();
                 listOfValidDiagnosticOrder=resValidation.getListOfValidDiagnosticOrder();
                 listOfValidDiagnosticReport=resValidation.getListOfValidDiagnosticReport();
                 listOfValidObservation=resValidation.getListOfValidObservation();
@@ -335,6 +370,7 @@ public class FhirResourceValidator  {
                 listOfInvalidPatient=resValidation.getListOfInvalidPatient();
                 listOfInvalidOrganization=resValidation.getListOfInvalidOrganization();
                 listOfInvalidSpecimen=resValidation.getListOfInvalidSpecimen();
+                listOfInvalidCondition=resValidation.getListOfInvalidCondition();
                 listOfInvalidDiagnosticOrder=resValidation.getListOfInvalidDiagnosticOrder();
                 listOfInvalidDiagnosticReport=resValidation.getListOfInvalidDiagnosticReport();
                 listOfInvalidObservation=resValidation.getListOfInvalidObservation();
@@ -404,6 +440,179 @@ public class FhirResourceValidator  {
             throw new Exception("Failed to parse the json string to Bundle");
         }
         return isProcessed;
+    }
+    public boolean processBundleEntryResource(Bundle bundleToProcess,String filePathError,String sourceServerURI) throws Exception
+    {
+        boolean isProcessed=false;
+        Bundle oBundle=bundleToProcess;
+        if(oBundle!=null )
+        {
+            if(oBundle.getEntry().size()==0)
+            {
+                throw new Exception("No entries found in the Bundle");
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                listOfPractitioners=fhirProcessor.getListOfPractitioner();
+                listOfPatient=fhirProcessor.getListOfPatient();
+                listOfOrganization=fhirProcessor.getListOfOrganization();
+                listOfSpecimen=fhirProcessor.getListOfSpecimen();
+                listOfCondition=fhirProcessor.getListOfCondition();
+                listOfDiagnosticOrder=fhirProcessor.getListOfDiagnosticOrder();
+                listOfObservation=fhirProcessor.getListOfObservation();
+                listOfDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
+
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+
+                    //There is additional ressource to Extract
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    listOfPractitioners.addAll(fhirProcessor.getListOfPractitioner());
+                    listOfPatient.addAll(fhirProcessor.getListOfPatient());
+                    listOfOrganization.addAll(fhirProcessor.getListOfOrganization());
+                    listOfSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                    listOfCondition.addAll(fhirProcessor.getListOfCondition());
+                    listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
+                    listOfObservation.addAll(fhirProcessor.getListOfObservation());
+                    listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        listOfPractitioners.addAll(fhirProcessor.getListOfPractitioner());
+                        listOfPatient.addAll(fhirProcessor.getListOfPatient());
+                        listOfOrganization.addAll(fhirProcessor.getListOfOrganization());
+                        listOfSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                        listOfCondition.addAll(fhirProcessor.getListOfCondition());
+                        listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
+                        listOfObservation.addAll(fhirProcessor.getListOfObservation());
+                        listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                        //nextPageBundle=subNextBundle.copy();
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
+                //Get the Valide Resource
+                //Skip the resource validation
+                listOfValidPractitioners.addAll(listOfPractitioners);
+                listOfValidPatient.addAll(listOfPatient);
+                listOfValidSpecimen.addAll(listOfSpecimen);
+                listOfValidCondition.addAll(listOfCondition);
+                listOfValidDiagnosticOrder.addAll(listOfDiagnosticOrder);
+                listOfValidObservation.addAll(listOfObservation);
+                listOfValidDiagnosticReport.addAll(listOfDiagnosticReport);
+                isProcessed=true;
+            }
+        }
+        else
+        {
+            throw new Exception("Failed to parse the json string to Bundle");
+        }
+        return isProcessed;
+    }
+    public List<Bundle>  processBundleResource(String filePathError,String sourceServerURI) throws Exception
+    {
+        boolean isProcessed=false;
+        List<Bundle> listOfProcessedBundle=new ArrayList<>();
+
+        if(this._jsonResource.toString().length()<2)
+        {
+            throw new Exception("Invalid  Json resource");
+        }
+        Bundle oBundle=_parser.parseResource(Bundle.class,this._jsonResource.toString());
+        if(oBundle!=null )
+        {
+            if(oBundle.getEntry().size()==0)
+            {
+                throw new Exception("No entries found in the Bundle");
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                listOfProcessedBundle.add(oBundle);
+
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+
+                    //There is additional ressource to Extract
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    listOfProcessedBundle.add(nextPageBundle);
+                   while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        listOfProcessedBundle.add(subNextBundle);
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
+
+
+                isProcessed=true;
+            }
+        }
+        else
+        {
+            throw new Exception("Failed to parse the json string to Bundle");
+        }
+        return listOfProcessedBundle;
+    }
+    public List<Bundle>  processBundleResourceContent(String filePathError,String sourceServerURI) throws Exception
+    {
+        boolean isProcessed=false;
+        List<Bundle> listOfProcessedBundle=new ArrayList<>();
+
+        if(this._jsonResource.toString().length()<2)
+        {
+            throw new Exception("Invalid  Json resource");
+        }
+        Bundle oBundle=_parser.parseResource(Bundle.class,this._jsonResource.toString());
+        if(oBundle!=null )
+        {
+            if(oBundle.getEntry().size()==0)
+            {
+                throw new Exception("No entries found in the Bundle");
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                for(Bundle resBundle :fhirProcessor.getListOfBundle())
+                {
+                    if(resBundle.getType().equals(BundleTypeEnum.COLLECTION.toString().toLowerCase()))
+                    {
+                        listOfProcessedBundle.add(resBundle);
+                        if(resBundle.getLink(Bundle.LINK_NEXT)!=null)
+                        {
+                            IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+
+                            //There is additional ressource to Extract
+                            Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                            listOfProcessedBundle.add(nextPageBundle);
+                            while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                            {
+                                Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                                listOfProcessedBundle.add(subNextBundle);
+                                nextPageBundle=CreateBundleCopy(subNextBundle);
+                            }
+                        }
+                    }
+                }
+                //listOfProcessedBundle.add(oBundle);
+
+                isProcessed=true;
+            }
+        }
+        else
+        {
+            throw new Exception("Failed to parse the json string to Bundle");
+        }
+        return listOfProcessedBundle;
     }
     private Bundle CreateBundleCopy(Bundle oBundle)
     {
@@ -527,6 +736,30 @@ public class FhirResourceValidator  {
 
 
         return extractedSpecimen;
+    }
+    public List<Condition> extractConditionFromBundleString(String bundleJsonString) throws Exception
+    {
+        List<Condition> extractedCondition=new ArrayList<>();
+        if(bundleJsonString.length()<2)
+        {
+            throw new Exception("Invalide  Json resource");
+        }
+        Bundle oBundle=_parser.parseResource(Bundle.class,bundleJsonString.toString());
+        if(oBundle!=null ) {
+            if (oBundle.getEntry().size() == 0) {
+                return extractedCondition;
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                extractedCondition=fhirProcessor.getListOfCondition();
+            }
+
+        }
+
+
+        return extractedCondition;
     }
     public List<DiagnosticOrder> extractDiagnosticOrderFromBundleString(String bundleJsonString) throws Exception
     {
@@ -660,6 +893,16 @@ class FhirResourceProcessor
 
     List<Specimen> _listOfSpecimen;
 
+    public List<Condition> getListOfCondition() {
+        return _listOfCondition;
+    }
+
+    public void setListOfCondition(List<Condition> _listOfCondition) {
+        this._listOfCondition = _listOfCondition;
+    }
+
+    List<Condition> _listOfCondition;
+
     public List<Observation> getListOfObservation() {
         return _listOfObservation;
     }
@@ -677,6 +920,12 @@ class FhirResourceProcessor
     }
 
     List<DiagnosticReport> _listOfDiagnosticReport;
+
+    public List<Bundle> getListOfBundle() {
+        return _listOfBundle;
+    }
+
+    List<Bundle> _listOfBundle;
 
     public Bundle get_oBundle() {
         return _oBundle;
@@ -797,9 +1046,11 @@ class FhirResourceProcessor
         this._listOfPatient=new ArrayList<>();
         this._listOfOrganization=new ArrayList<>();
         this._listOfSpecimen=new ArrayList<>();
+        this._listOfCondition=new ArrayList<>();
         this._listOfDiagnosticOrder=new ArrayList<>();
         this._listOfDiagnosticReport=new ArrayList<>();
         this._listOfObservation=new ArrayList<>();
+        this._listOfBundle=new ArrayList<>();
 
             for (IResource oResource:this._listOfResources){
                 //oResource.getRes
@@ -819,6 +1070,9 @@ class FhirResourceProcessor
                     case "Specimen":
                         this._listOfSpecimen.add((Specimen) oResource);
                         break;
+                    case "Condition":
+                        this._listOfCondition.add((Condition) oResource);
+                        break;
                     case "DiagnosticOrder":
                         this._listOfDiagnosticOrder.add((DiagnosticOrder) oResource);
                         break;
@@ -827,6 +1081,9 @@ class FhirResourceProcessor
                         break;
                     case "Observation":
                         this._listOfObservation.add((Observation) oResource);
+                        break;
+                    case "Bundle":
+                        this._listOfBundle.add((Bundle) oResource);
                         break;
                 }
         }
@@ -872,6 +1129,47 @@ class FhirResourceProcessor
         }
         return  stringTransactionResult;
     }
+    public static String createDiagnosticOrderInTransaction(FhirContext oContext,List<DiagnosticOrder> _listOfDiagnosticOrder,String serverUrl) throws Exception
+    {
+        Bundle respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+
+            Bundle resourceBundle=new Bundle();
+            resourceBundle.setType(BundleTypeEnum.TRANSACTION);
+            int compter=0;
+            for(DiagnosticOrder oDiagnosticOrder: _listOfDiagnosticOrder)
+            {
+                String searchPattern="DiagnosticOrder?";
+                searchPattern+="_id="+oDiagnosticOrder.getId().getValueAsString();
+                Entry oBundleEntry= new Entry().setResource(oDiagnosticOrder);
+                oBundleEntry.setElementSpecificId(oDiagnosticOrder.getId().getValueAsString());
+                oBundleEntry.setFullUrl(oDiagnosticOrder.getId());
+                oBundleEntry.getRequest().setUrl(searchPattern).setMethod(HTTPVerbEnum.PUT);
+                resourceBundle.addEntry(oBundleEntry);
+                compter++;
+                //if(compter==5) break;
+            }
+            //String filePath1="/home/server-hit/Desktop/"+"Bundle.json";
+            //ManageJsonFile.saveResourceInJSONFile(resourceBundle,oContext,filePath1);
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            String resJSONFormat=oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resourceBundle);
+            respOutcome=client.transaction().withBundle(resourceBundle).execute();
+            //System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respOutcome));
+            if(respOutcome!=null)
+            {
+                stringTransactionResult=FhirResourceProcessor.extractResponseStaticsFromBundleTransactionRespons(respOutcome,1);
+            }
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
+        return  stringTransactionResult;
+    }
+
     public static String createPractitioner(FhirContext oContext,List<Practitioner> listOfPractitioners,String serverUrl) throws Exception
     {
         MethodOutcome respOutcome=null;
@@ -981,6 +1279,42 @@ class FhirResourceProcessor
         }
         return  stringTransactionResult;
     }
+    public static String createBundle(FhirContext oContext,List<Bundle> listOfBundles,String serverUrl) throws Exception
+    {
+        MethodOutcome respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+
+            int compter=0;
+            int nbreResourceCreated=0;
+            int total=listOfBundles.size();
+            for(Bundle oBundle: listOfBundles )
+            {
+                respOutcome=client.update()
+                        .resource(oBundle)
+                        .prettyPrint()
+                        .encodedJson()
+                        .execute();
+                if(respOutcome.getCreated())
+                {
+                    nbreResourceCreated++;
+                }
+            }
+            int success=nbreResourceCreated;
+            int failed=total-success;
+            stringTransactionResult="total:"+total+"," +
+                    "succes:"+success+"," +
+                    "failed:"+failed+"}";
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
+        return  stringTransactionResult;
+    }
     public static String createSpecimen(FhirContext oContext,List<Specimen> listOfSpecimen,String serverUrl) throws Exception
     {
         MethodOutcome respOutcome=null;
@@ -1017,6 +1351,42 @@ class FhirResourceProcessor
         }
         return  stringTransactionResult;
     }
+    public static String createCondition(FhirContext oContext,List<Condition> listOfCondition,String serverUrl) throws Exception
+    {
+        MethodOutcome respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+
+            int compter=0;
+            int nbreResourceCreated=0;
+            int total=listOfCondition.size();
+            for(Condition oCondition: listOfCondition)
+            {
+                respOutcome=client.update()
+                        .resource(oCondition)
+                        .prettyPrint()
+                        .encodedJson()
+                        .execute();
+                if(respOutcome.getCreated())
+                {
+                    nbreResourceCreated++;
+                }
+            }
+            int success=nbreResourceCreated;
+            int failed=total-success;
+            stringTransactionResult="total:"+total+"," +
+                    "succes:"+success+"," +
+                    "failed:"+failed+"}";
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
+        return  stringTransactionResult;
+    }
     public static String createDiagnosticOrder(FhirContext oContext,List<DiagnosticOrder> listOfDiagnosticOrder,String serverUrl) throws Exception
     {
         MethodOutcome respOutcome=null;
@@ -1030,15 +1400,23 @@ class FhirResourceProcessor
             int total=listOfDiagnosticOrder.size();
             for(DiagnosticOrder oDiagnosticOrder: listOfDiagnosticOrder)
             {
-                respOutcome=client.update()
-                        .resource(oDiagnosticOrder)
-                        .prettyPrint()
-                        .encodedJson()
-                        .execute();
-                if(respOutcome.getCreated())
+                try
                 {
-                    nbreResourceCreated++;
+                    respOutcome=client.update()
+                            .resource(oDiagnosticOrder)
+                            .prettyPrint()
+                            .encodedJson()
+                            .execute();
+                    if(respOutcome.getCreated())
+                    {
+                        nbreResourceCreated++;
+                    }
                 }
+                catch (Exception exc)
+                {
+                    continue;
+                }
+
             }
             int success=nbreResourceCreated;
             int failed=total-success;
@@ -1294,6 +1672,48 @@ class FhirResourceProcessor
         }
         return stringTransactionResult;
     }
+    public static String updateConditionInTransaction(FhirContext oContext,List<Condition> listOfCondition, String serverUrl) throws Exception
+    {
+        Bundle respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+
+            Bundle resourceBundle=new Bundle();
+            resourceBundle.setType(BundleTypeEnum.TRANSACTION);
+            int compter=0;
+
+            for (Condition oCondition:listOfCondition)
+            {
+                String searchPattern="Condition?";
+                String key=null;
+                //getKey
+                searchPattern+="_id="+oCondition.getId().getValueAsString();
+                Entry oBundleEntry= new Entry().setResource(oCondition);
+                oBundleEntry.setFullUrl(oCondition.getId());
+                oBundleEntry.getRequest().setUrl(searchPattern).setMethod(HTTPVerbEnum.PUT);
+                resourceBundle.addEntry(oBundleEntry);
+            }
+            //ManageJsonFile.saveResourceInJSONFile(resourceBundle,oContext,filePath1);
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            //System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resourceBundle));
+            respOutcome=client.transaction().withBundle(resourceBundle).execute();
+            System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respOutcome));
+            if(respOutcome!=null)
+            {
+                stringTransactionResult=FhirResourceProcessor.extractResponseStaticsFromBundleTransactionRespons(respOutcome,2);
+            }
+
+            //respOutcome.gere
+
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
+        return stringTransactionResult;
+    }
     public static String updateDiagnosticOrderInTransaction(FhirContext oContext,List<DiagnosticOrder> listOfDiagnosticOrder, String serverUrl) throws Exception
     {
         Bundle respOutcome=null;
@@ -1451,6 +1871,15 @@ class ResourcesValidation
 
     List<Specimen> _listOfSpecimenToValidate;
 
+    public List<Condition> getListOfConditionToValidate() {
+        return _listOfConditionToValidate;
+    }
+
+    public void setListOfConditionToValidate(List<Condition> _listOfConditionToValidate) {
+        this._listOfConditionToValidate = _listOfConditionToValidate;
+    }
+
+    List<Condition> _listOfConditionToValidate;
     public void setListOfDiagnosticOrderToValidate(List<DiagnosticOrder> _listOfDiagnosticOrderToValidate) {
         this._listOfDiagnosticOrderToValidate = _listOfDiagnosticOrderToValidate;
     }
@@ -1492,6 +1921,16 @@ class ResourcesValidation
     }
 
     List<Specimen> _listOfValidSpecimen;
+
+    public List<Condition> getListOfValidCondition() {
+        return _listOfValidCondition;
+    }
+
+    public void setListOfValidCondition(List<Condition> _listOfValidCondition) {
+        this._listOfValidCondition = _listOfValidCondition;
+    }
+
+    List<Condition> _listOfValidCondition;
 
     public List<DiagnosticOrder> getListOfValidDiagnosticOrder() {
         return _listOfValidDiagnosticOrder;
@@ -1535,6 +1974,16 @@ class ResourcesValidation
 
     List<Specimen> _listOfInvalidSpecimen;
 
+    public List<Condition> getListOfInvalidCondition() {
+        return _listOfInvalidCondition;
+    }
+
+    public void setListOfInvalidCondition(List<Condition> _listOfInvalidCondition) {
+        this._listOfInvalidCondition = _listOfInvalidCondition;
+    }
+
+    List<Condition> _listOfInvalidCondition;
+
     public List<DiagnosticOrder> getListOfInvalidDiagnosticOrder() {
         return _listOfInvalidDiagnosticOrder;
     }
@@ -1560,6 +2009,7 @@ class ResourcesValidation
         this._listOfPatientToValidate=new ArrayList<>();
         this._listOfOrganizationToValidate=new ArrayList<>();
         this._listOfSpecimenToValidate=new ArrayList<>();
+        this._listOfConditionToValidate=new ArrayList<>();
         this._listOfDiagnosticOrderToValidate=new ArrayList<>();
         this._listOfDiagnosticReportToValidate=new ArrayList<>();
         this._listOfObservationToValidate=new ArrayList<>();
@@ -1568,6 +2018,7 @@ class ResourcesValidation
         this._listOfValidPatient=new ArrayList<>();
         this._listOfValidOrganization=new ArrayList<>();
         this._listOfValidSpecimen=new ArrayList<>();
+        this._listOfValidCondition=new ArrayList<>();
         this._listOfValidDiagnosticOrder=new ArrayList<>();
         this._listOfValidDiagnosticReport=new ArrayList<>();
         this._listOfValidObservation=new ArrayList<>();
@@ -1576,6 +2027,7 @@ class ResourcesValidation
         this._listOfInvalidPatient=new ArrayList<>();
         this._listOfInvalidOrganization=new ArrayList<>();
         this._listOfInvalidSpecimen=new ArrayList<>();
+        this._listOfInvalidCondition=new ArrayList<>();
         this._listOfInvalidDiagnosticOrder=new ArrayList<>();
         this._listOfInvalidDiagnosticReport=new ArrayList<>();
         this._listOfInvalidObservation=new ArrayList<>();
@@ -1642,6 +2094,19 @@ class ResourcesValidation
             else
             {
                 this._listOfInvalidSpecimen.add(oSpecimenToValidate);
+            }
+        }
+        for(Condition oConditionToValidate: this._listOfConditionToValidate)
+        {
+            ValidationResult res=null;
+            res=this._validator.validateWithResult(oConditionToValidate);
+            if(res.isSuccessful())
+            {
+                this._listOfValidCondition.add(oConditionToValidate);
+            }
+            else
+            {
+                this._listOfInvalidCondition.add(oConditionToValidate);
             }
         }
         for(DiagnosticOrder oDiagnosticOrderToValidate: this._listOfDiagnosticOrderToValidate)

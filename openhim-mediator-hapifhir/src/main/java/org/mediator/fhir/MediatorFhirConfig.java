@@ -1,8 +1,12 @@
 package org.mediator.fhir;
 
+import com.google.gson.Gson;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -212,6 +216,27 @@ public class MediatorFhirConfig {
 
     String pathForResourceWithError;
 
+    public String getLogFile() {
+        this.logFile=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            this.logFile= prop.getProperty("logFile");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        //return sourceServerFhirDataModel;
+        return this.logFile;
+    }
+
+    String logFile;
+
     public String getServerSourceAppName() {
         this.serverSourceAppName=null;
         try
@@ -240,6 +265,108 @@ public class MediatorFhirConfig {
     String serverTargetscheme;
     String serverTargetAppName;
     String serverTargetFhirDataModel;
+
+    public String getServerSourceDataAppName() {
+        this.serverSourceDataAppName=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverSourceDataAppName= prop.getProperty("serverSourceDataAppName");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return serverSourceDataAppName;
+    }
+
+    String serverSourceDataAppName;
+
+    public int getServerSourceDataPort() {
+        this.serverSourceDataPort=-1;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverSourceDataPort=Integer.parseInt(prop.getProperty("serverSourceDataPort"));
+        }
+        catch (IOException exc)
+        {
+            return -1;
+        }
+        catch (Exception exc)
+        {
+            return -1;
+        }
+        return serverSourceDataPort;
+    }
+
+    int serverSourceDataPort;
+
+    public String getServerSourceDataScheme() {
+        this.serverSourceDataScheme=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverSourceDataScheme= prop.getProperty("serverSourceDataScheme");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return serverSourceDataScheme;
+    }
+
+    String serverSourceDataScheme;
+
+    public String getServerSourceDataURI() {
+        this.serverSourceDataURI=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverSourceDataURI= prop.getProperty("serverSourceDataURI");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return serverSourceDataURI;
+    }
+
+    String serverSourceDataURI;
+
+    public String getServerSourceDataFhirDataModel() {
+        this.serverSourceDataFhirDataModel=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverSourceDataFhirDataModel= prop.getProperty("serverSourceDataFhirDataModel");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return serverSourceDataFhirDataModel;
+    }
+
+    String serverSourceDataFhirDataModel;
+
+
 
     public String getServerTargetFhirDataModel() {
         this.serverTargetFhirDataModel=null;
@@ -355,6 +482,184 @@ public class MediatorFhirConfig {
     public void setServerTargetURI(String serverTargetURI) {
         this.serverTargetURI = serverTargetURI;
     }
+
+    public String getServerTrackerURI() {
+
+        this.serverTrackerURI=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverTrackerURI= prop.getProperty("serverSourceTrackerURI");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return serverTrackerURI;
+    }
+
+    String serverTrackerURI;
+
+    public int getServerTrackerPort() {
+        this.serverTrackerPort=-1;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverTrackerPort=Integer.parseInt(prop.getProperty("serverSourceTrackerPort"));
+        }
+        catch (IOException exc)
+        {
+            return -1;
+        }
+        catch (Exception exc)
+        {
+            return -1;
+        }
+        return serverTrackerPort;
+        //return serverTrackerPort;
+    }
+
+    int serverTrackerPort;
+
+    public String getServerTrackerScheme() {
+        this.serverTrackerScheme=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverTrackerScheme= prop.getProperty("serverSourceTrackerScheme");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        //return serverTargetscheme;
+        return serverTrackerScheme;
+    }
+
+    String serverTrackerScheme;
+
+    public String getServerTrackerAppName() {
+        this.serverTrackerAppName=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverTrackerAppName= prop.getProperty("serverSourceTrackerAppName");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return serverTrackerAppName;
+    }
+
+    String serverTrackerAppName;
+
+    public String getServerTrackerFhirDataModel() {
+        this.serverTrackerFhirDataModel=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            serverTrackerFhirDataModel= prop.getProperty("serverSourceTrackerFhirDataModel");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        //return serverTrackerAppName;
+        return serverTrackerFhirDataModel;
+    }
+
+    String serverTrackerFhirDataModel;
+
+    public List<TrackerResourceMap> getTrackerResource() {
+        List<TrackerResourceMap> listResourceMap=new ArrayList<>();
+        this.trackerResource=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            trackerResource= prop.getProperty("trackersResourceId");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        //return serverTrackerAppName;
+        //transfor the resource to class
+        Gson gson=new Gson();
+        String[] trackerResourceTable=this.trackerResource.split(";");
+        for(String oTrackerResource:trackerResourceTable)
+        {
+            TrackerResourceMap oTrackerMap=gson.fromJson(oTrackerResource,TrackerResourceMap.class);
+            listResourceMap.add(oTrackerMap);
+        }
+
+        return listResourceMap;
+        //return trackerResource;
+    }
+
+    String trackerResource;
+
+    public String getAuthentication() {
+        this.authentication=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            authentication= prop.getProperty("authentication");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        //return serverTrackerAppName;
+        return authentication;
+    }
+
+    String authentication;
+
+    public String getTrackedEntity() {
+        this.trackedEntity=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            trackedEntity= prop.getProperty("trackedEntity");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        //return serverTrackerAppName;
+        return trackedEntity;
+    }
+
+    String trackedEntity;
 
 
 

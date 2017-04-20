@@ -21,7 +21,10 @@ public class MediatorMain {
         //TODO Configure routes here
         //...
         //routingTable.addRoute("Practitioners", DefaultOrchestrator.class);
+        routingTable.addRegexRoute("/csvfhir/.*", CSVFhirOrchestrator.class);
+        routingTable.addRegexRoute("/pushfhir/.*", FhirDHISOrchestrator.class);
         routingTable.addRegexRoute("/entitytrackers/.*", DefaultOrchestrator.class);
+
 
         return routingTable;
     }

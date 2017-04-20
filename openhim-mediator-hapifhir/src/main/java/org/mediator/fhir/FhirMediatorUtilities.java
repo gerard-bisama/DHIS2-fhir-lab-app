@@ -2,15 +2,31 @@ package org.mediator.fhir;
 
 //import org.hl7.fhir.dstu3.model.Identifier;
 //import org.hl7.fhir.dstu3.model.Practitioner;
+import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Specimen;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import com.google.gson.Gson;
 import scala.util.parsing.combinator.testing.Ident;
 
+import javax.tools.Diagnostic;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -112,6 +128,11 @@ public class FhirMediatorUtilities {
         }
         return buildRequestPath;
     }
+    public static String buildBundleSearchRequestByType()
+    {
+        String buildRequestPath="/Bundle?type=collection&_pretty=true";
+        return buildRequestPath;
+    }
     public static String buildResourcesSearchRequestByIds(String resourceType,List<String> listOfIds)
     {
         String buildRequestPath="";
@@ -134,6 +155,9 @@ public class FhirMediatorUtilities {
                 break;
             case "Observation":
                 buildRequestPath="/Observation?_id=";
+                break;
+            case "Condition":
+                buildRequestPath="/Condition?_id=";
                 break;
             case "DiagnosticReport":
                 buildRequestPath="/DiagnosticReport?_id=";
@@ -359,5 +383,268 @@ public class FhirMediatorUtilities {
         }
         return cleanedList;
     }
+    public static void writeInLogFile(String logFileName,String entry,String logLevel)
+    {
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+        String fileName=logFileName;
+        try
+        {
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date tempDate=new Date();
+            String convertedDate=simpleDateFormat.format(tempDate);
+            File file = new File(fileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            // true = append file
+            fw = new FileWriter(file.getAbsoluteFile(), true);
+            bw = new BufferedWriter(fw);
+            String fileLine=convertedDate+" | "+"["+logLevel+"]: "+entry;
+            bw.write(fileLine);
+            bw.newLine();
+        }
+        catch (IOException exc)
+        {
+            System.err.println(exc);
+        }
+        finally
+        {
+            try
+            {
+
+                if (bw != null)
+                    bw.close();
+
+                if (fw != null)
+                    fw.close();
+
+            } catch (IOException ex) {
+
+                ex.printStackTrace();
+
+            }
+        }
+    }
+    public static List<DhisEvent> constructListOfLabEvents(Patient patientToProcess,List<Specimen> listAssociatedSpecimen
+    ,List<Observation> listAssociatedObservation,List<TrackerResourceMap> listTrackerResource)
+    {
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        List<DhisEvent> listOfEvent=new ArrayList<>();
+        String trackedEntity="";
+        for(IdentifierDt oIdentifier:patientToProcess.getIdentifier())
+        {
+            if(oIdentifier.getType().getText().equals("Tracker identifier"))
+            {
+                trackedEntity=oIdentifier.getValue();
+            }
+        }
+        for(Observation oObservation: listAssociatedObservation)
+        {
+
+            //If status is final Construct the lab result then the lab request
+            if(oObservation.getStatus().equals("final"))
+            {
+                DhisEvent oEvent=new DhisEvent();
+                oEvent.program=listTrackerResource.get(0).programId;
+                oEvent.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+                oEvent.trackedEntityInstance=trackedEntity;
+                oEvent.programStage="aornzRfUbDZ";
+                DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
+                //cal.
+                String builtDate="";
+                builtDate=oDateTime.getYear().toString()+"-";
+                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth().toString():"0"+oDateTime.getMonth().toString();
+                builtDate+="-";
+                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+
+                oEvent.eventDate=builtDate;
+
+                String refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
+                oEvent.addDataValue("Ju7cS1sUwcF",refSpecimenId);
+                String testResult=oObservation.getInterpretation().getText();
+                String confirmedDisease=oObservation.getComments();
+                oEvent.addDataValue("ovY6E8BSdto",testResult);
+                oEvent.addDataValue("qIlO7yEpiVv",confirmedDisease);
+                listOfEvent.add(oEvent);
+                //if the current event is the lab result, it means that the request has
+                //been made
+                DhisEvent oEventRequested=new DhisEvent();
+                oEventRequested.program=listTrackerResource.get(0).programId;
+                oEventRequested.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+                oEventRequested.trackedEntityInstance=trackedEntity;
+                oEventRequested.programStage="YLMRmho6SdY";
+                Date oDate=(Date)oObservation.getIssued();
+                DateTimeDt dateTimeIssued=new DateTimeDt(oDate);
+                builtDate="";;
+                builtDate=dateTimeIssued.getYear().toString()+"-";
+                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth().toString():"0"+dateTimeIssued.getMonth().toString();
+                builtDate+="-";
+                builtDate+=dateTimeIssued.getDay().toString().length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
+
+                oEventRequested.eventDate=builtDate;
+                String refTestingLab=oObservation.getPerformer().get(0).getReference().getIdPart();
+                oEventRequested.addDataValue("ZJTVYdXtUdo",refTestingLab);
+                refSpecimenId="";
+                refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
+                oEventRequested.addDataValue("Ju7cS1sUwcF",refSpecimenId);
+                //Get SpecimenRef to observation
+                Specimen oSpecimenRef=null;
+                for(Specimen oSpecimen: listAssociatedSpecimen)
+                {
+                    if(oSpecimen.getId().getIdPart().split("-")[0].equals(refSpecimenId))
+                    {
+                        oSpecimenRef=oSpecimen;
+                    }
+                }
+                String refSpecimenType=oSpecimenRef.getType().getText();
+                oEventRequested.addDataValue("kL7PTi4lRSl",refSpecimenType);
+                listOfEvent.add(oEventRequested);
+
+
+            }//End if oObservation.getStatus()
+            else if (oObservation.getStatus().equals("registered"))
+            {
+                DhisEvent oEventRequested=new DhisEvent();
+                oEventRequested.program=listTrackerResource.get(0).programId;
+                oEventRequested.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+                oEventRequested.trackedEntityInstance=trackedEntity;
+                oEventRequested.programStage="YLMRmho6SdY";
+                Date oDate=(Date)oObservation.getIssued();
+                DateTimeDt dateTimeIssued=new DateTimeDt(oDate);
+                String builtDate="";
+                builtDate=dateTimeIssued.getYear().toString()+"-";
+                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth().toString():"0"+dateTimeIssued.getMonth().toString();
+                builtDate+="-";
+                builtDate+=dateTimeIssued.getDay().toString().length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
+
+                oEventRequested.eventDate=builtDate;
+                String refTestingLab=oObservation.getPerformer().get(0).getReference().getIdPart();
+                oEventRequested.addDataValue("ZJTVYdXtUdo",refTestingLab);
+                String refSpecimenId="";
+                refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
+                oEventRequested.addDataValue("Ju7cS1sUwcF",refSpecimenId);
+                //Get SpecimenRef to observation
+                Specimen oSpecimenRef=null;
+                for(Specimen oSpecimen: listAssociatedSpecimen)
+                {
+                    if(oSpecimen.getId().getIdPart().split("-")[0].equals(refSpecimenId))
+                    {
+                        oSpecimenRef=oSpecimen;
+                    }
+                }
+                String refSpecimenType=oSpecimenRef.getType().getText();
+                oEventRequested.addDataValue("kL7PTi4lRSl",refSpecimenType);
+                listOfEvent.add(oEventRequested);
+            }//end elseif oObservation.getStatus()
+            //oEvent.dataValues.add()
+
+        }
+        return listOfEvent;
+    }
+    public static String TransformListEventToJson(List<DhisEvent> listEvents)
+    {
+        Gson gson=new Gson();
+        String jsonString="{\"events\":[";
+        int compter=0;
+        for(DhisEvent oEvent : listEvents)
+        {
+            String res=gson.toJson(oEvent);
+            if(compter==0)
+            {
+                jsonString+=res;
+            }
+            else
+            {
+                jsonString+=","+res;
+            }
+            compter++;
+        }
+        jsonString+="]}";
+        return jsonString;
+    }
+    public static List<DhisTrackedEntity> constructListOfTrackedEntityInstance(Patient patientToProcess,String trackedEntityId,List<Condition> listAssociatedCondition,
+                                                                   List<DiagnosticReport> listAssociatedDiagnosticReport)
+    {
+        List<DhisTrackedEntity> listOfTrackedEntity=new ArrayList<>();
+        String trackedEntity="";
+        for(IdentifierDt oIdentifier:patientToProcess.getIdentifier())
+        {
+            if(oIdentifier.getType().getText().equals("Tracker identifier"))
+            {
+                trackedEntity=oIdentifier.getValue();
+            }
+        }
+        DhisTrackedEntity oTrackedEntity=new DhisTrackedEntity();
+        oTrackedEntity.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+        oTrackedEntity.trackedEntity=trackedEntityId;
+        oTrackedEntity.addAttribute("BChcyqBJCQN",patientToProcess.getId().getIdPart()
+                .split("-")[0]);
+        oTrackedEntity.addAttribute("sB1IHYu2xQT",patientToProcess.getName().get(0)
+                .getFamily().get(0).toString());
+        oTrackedEntity.addAttribute("OhGYnwya3jg",patientToProcess.getName().get(0)
+                .getGiven().get(0).toString());
+        if(patientToProcess.getBirthDate().toString()!="")
+        {
+            DateTimeDt dateTimeBirth=new DateTimeDt(patientToProcess.getBirthDate());
+            String builtDate="";
+            builtDate=dateTimeBirth.getYear().toString()+"-";
+            builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth().toString():"0"+dateTimeBirth.getMonth().toString();
+            builtDate+="-";
+            builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
+            oTrackedEntity.addAttribute("UezutfURtQG",builtDate);
+
+        }
+        oTrackedEntity.addAttribute("ttjZl7jvrRj",patientToProcess.getAddress().get(0).getText());
+
+
+
+        for(Condition oCondition:listAssociatedCondition)
+        {
+            if(oCondition.getCode().getText()!="")
+            {
+                oTrackedEntity.addAttribute("rpkGPScBEus",oCondition.getCode().getText());
+
+            }
+            if(oCondition.getCategory().getText()!="")
+            {
+                oTrackedEntity.addAttribute("TwGc5gV9ZXZ",oCondition.getCategory().getText());
+
+            }
+
+        }//End listAssociatedCondition
+        for(DiagnosticReport oReport:listAssociatedDiagnosticReport)
+        {
+            if(oReport.getConclusion()!="")
+            {
+                oTrackedEntity.addAttribute("Rx2fEI9zDJ3",oReport.getConclusion());
+            }
+
+        }
+        IDatatype oDeceased=patientToProcess.getDeceased();
+        if (oDeceased.toString().equals("true"))
+        {
+            oTrackedEntity.addAttribute("Fs892x4qy0d","Dead");
+        }
+        else
+        {
+            oTrackedEntity.addAttribute("Fs892x4qy0d","Alive");
+        }
+        listOfTrackedEntity.add(oTrackedEntity);
+        return listOfTrackedEntity;
+
+    }
+    public static String TransformListTrackedEntityToJson(List<DhisTrackedEntity> listOfTrackedEntity)
+    {
+        Gson gson=new Gson();
+        String jsonString="";
+        int compter=0;
+        for(DhisTrackedEntity oTrackedEntity:listOfTrackedEntity)
+        {
+            jsonString=gson.toJson(oTrackedEntity);
+        }
+        return jsonString;
+    }
+
 
 }

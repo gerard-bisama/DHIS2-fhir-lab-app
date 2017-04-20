@@ -9,6 +9,18 @@
       "host": "localhost",
       "port": "4000",
       "type": "http"
+    },
+    {
+      "name": "openhim-mediator-csvfhir-hapiserver Route",
+      "host": "localhost",
+      "port": "4000",
+      "type": "http"
+    },
+    {
+      "name": "openhim-mediator-pushfhir-dhis2 Route",
+      "host": "localhost",
+      "port": "4000",
+      "type": "http"
     }
   ],
   "defaultChannelConfig": [
@@ -20,6 +32,36 @@
       "routes": [
         {
           "name": "openhim-mediator-dhsi2-hapiserver Route",
+          "host": "localhost",
+          "port": "4000",
+          "type": "http",
+          "primary": "true"
+        }
+      ]
+    },
+    {
+      "name": "csv-jpa-mediator-channel",
+      "urlPattern": "/csvfhir/.*",
+      "type": "http",
+      "allow": ["tut"],
+      "routes": [
+        {
+          "name": "openhim-mediator-csvfhir-hapiserver Route",
+          "host": "localhost",
+          "port": "4000",
+          "type": "http",
+          "primary": "true"
+        }
+      ]
+    },
+    {
+      "name": "push-fhirdhis2-mediator-channel",
+      "urlPattern": "/pushfhir/.*",
+      "type": "http",
+      "allow": ["tut"],
+      "routes": [
+        {
+          "name": "openhim-mediator-pushfhir-dhis2 Route",
           "host": "localhost",
           "port": "4000",
           "type": "http",

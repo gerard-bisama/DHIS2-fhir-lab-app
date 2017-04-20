@@ -75,6 +75,8 @@ public class PractitionerOrchestratorActor extends UntypedActor {
         }
         catch (Exception exc)
         {
+            FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                    exc.getMessage(),"Error");
             log.error(exc.getMessage());
             return;
         }
@@ -115,6 +117,8 @@ public class PractitionerOrchestratorActor extends UntypedActor {
         }
         catch (Exception exc)
         {
+            FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                    exc.getMessage(),"Error");
             log.error(exc.getMessage());
             return;
         }

@@ -5,75 +5,84 @@ import akka.actor.ActorSelection;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.phloc.commons.base64.Base64;
 import org.apache.http.HttpStatus;
 import org.openhim.mediator.engine.MediatorConfig;
 import org.openhim.mediator.engine.messages.*;
+import sun.misc.BASE64Encoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ObservationOrchestratorActor extends UntypedActor {
+public class EventsOrchestratorActor extends UntypedActor {
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private final MediatorConfig config;
     private MediatorFhirConfig mediatorConfiguration;
-    private ResolveObservationRequest originalRequest;
+    private ResolveEventRequest originalRequest;
 
-    public static class ResolveObservationRequest extends SimpleMediatorRequest <List<String>>{
-        public ResolveObservationRequest(ActorRef requestHandler, ActorRef respondTo, List<String> requestObject) {
+    public static class ResolveEventRequest extends SimpleMediatorRequest <String>{
+        public ResolveEventRequest(ActorRef requestHandler, ActorRef respondTo, String requestObject) {
             super(requestHandler, respondTo, requestObject);
         }
     }
 
-    public static class ResolveObservationResponse extends SimpleMediatorResponse <String>{
-        public ResolveObservationResponse (MediatorRequestMessage originalRequest, String responseObject) {
+    public static class ResolveEventResponse extends SimpleMediatorResponse <String>{
+        public ResolveEventResponse (MediatorRequestMessage originalRequest, String responseObject) {
             super(originalRequest, responseObject);
         }
     }
 
-    public ObservationOrchestratorActor(MediatorConfig config) {
+    public EventsOrchestratorActor(MediatorConfig config) {
         this.config = config;
         this.mediatorConfiguration=new MediatorFhirConfig();
     }
 
-    private void queryObservation(ResolveObservationRequest request)
+    private void saveEvent(ResolveEventRequest request)
     {
         originalRequest = request;
+        String authentication=mediatorConfiguration.getAuthentication();
+        String authEncoded = Base64.encodeBytes(authentication.getBytes());
         ActorSelection httpConnector = getContext().actorSelection(config.userPathFor("http-connector"));
         Map <String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
-        String resourceInformation="FHIR Observation resources";
+        headers.put("Content-Type","application/json");
+        headers.put("Authorization","Basic "+authEncoded);
+        String resourceInformation="Dhis2 event resources to push";
         log.info("Querying the HAPI Test servers");
 
 
         String builtRequestPath="";
-        List<String> paramsRequest=new ArrayList<>();
+        builtRequestPath="/events";
+        String paramsRequest="";
         paramsRequest=request.getRequestObject();
+        String requestBody=paramsRequest;
 
 
-        builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByIds("Observation",paramsRequest);
+        //builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByIds("Condition",paramsRequest);
         //builtRequestPath=request.getRequestObject();
         String ServerApp="";
         String baseServerRepoURI="";
         try
         {
-            ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
+            ServerApp=mediatorConfiguration.getServerTrackerAppName().equals("null")?null:mediatorConfiguration.getServerTrackerAppName();
             baseServerRepoURI=FhirMediatorUtilities.buidServerRepoBaseUri(
-                    this.mediatorConfiguration.getServerTargetscheme(),
-                    this.mediatorConfiguration.getServerTargetURI(),
-                    this.mediatorConfiguration.getServerTargetPort(),
+                    this.mediatorConfiguration.getServerTrackerScheme(),
+                    this.mediatorConfiguration.getServerTrackerURI(),
+                    this.mediatorConfiguration.getServerTrackerPort(),
                     ServerApp,
-                    this.mediatorConfiguration.getServerTargetFhirDataModel()
+                    this.mediatorConfiguration.getServerTrackerFhirDataModel()
             );
 
         }
         catch (Exception exc)
         {
+            log.error(exc.getMessage());
+            //throw new Exception(exc.getMessage());
             FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
                     exc.getMessage(),"Error");
-            log.error(exc.getMessage());
             return;
         }
 
@@ -86,9 +95,9 @@ public class ObservationOrchestratorActor extends UntypedActor {
                 request.getRequestHandler(),
                 getSelf(),
                 resourceInformation,
-                "GET",
+                "POST",
                 encodedUriSourceServer,
-                null,
+                requestBody,
                 headers,
                 null);
 
@@ -96,7 +105,7 @@ public class ObservationOrchestratorActor extends UntypedActor {
 
     }
 
-    private void processQueryObservationResponse(MediatorHTTPResponse response) {
+    private void processEventResponse(MediatorHTTPResponse response) {
         log.info("Received response Fhir repository Server");
         //originalRequest.getRespondTo().tell(response.toFinishRequest(), getSelf());
         //Perform the resource validation from the response
@@ -106,7 +115,7 @@ public class ObservationOrchestratorActor extends UntypedActor {
                 StringBuilder strResponse=new StringBuilder();
                 //Copy the response Char by char to avoid the string size limitation issues
                 strResponse.append(response.getBody());
-                ResolveObservationResponse actorResponse=new ResolveObservationResponse(originalRequest,strResponse.toString());
+                ResolveEventResponse actorResponse=new ResolveEventResponse(originalRequest,strResponse.toString());
                 originalRequest.getRespondTo().tell(actorResponse, getSelf());
             }
 
@@ -122,12 +131,12 @@ public class ObservationOrchestratorActor extends UntypedActor {
     }
     @Override
     public void onReceive(Object msg) throws Exception {
-        if (msg instanceof ResolveObservationRequest) {
-            queryObservation((ResolveObservationRequest) msg);
+        if (msg instanceof ResolveEventRequest) {
+            saveEvent((ResolveEventRequest) msg);
         }
         else if(msg instanceof MediatorHTTPResponse)
         {
-            processQueryObservationResponse((MediatorHTTPResponse) msg);
+            processEventResponse((MediatorHTTPResponse) msg);
         }
         else
         {

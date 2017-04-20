@@ -71,6 +71,8 @@ public class PatientOrchestratorActor extends UntypedActor {
         }
         catch (Exception exc)
         {
+            FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                    exc.getMessage(),"Error");
             log.error(exc.getMessage());
             return;
         }

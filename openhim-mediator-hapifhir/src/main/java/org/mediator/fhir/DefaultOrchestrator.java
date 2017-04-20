@@ -30,6 +30,7 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<String> listSolvedPatientResponse;
     private List<String> listSolvedOrganizationResponse;
     private List<String> listSolvedSpecimenResponse;
+    private List<String> listSolvedConditionResponse;
     private List<String> listSolvedDiagnosticOrderResponse;
     private List<String> listSolvedObservationResponse;
     private List<String> listSolvedDiagnosticReportResponse;
@@ -38,12 +39,14 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<Specimen> listOfValidSpecimen;
     private List<Organization> listOfValidOrganization;
     private List<DiagnosticOrder> listOfValidDiagnosticOrder;
+    private List<Condition> listOfValidCondition;
     private List<Observation> listOfValidObservation;
     private List<DiagnosticReport> listOfValidDiagnosticReport;
     private List<Practitioner> listOfPractitionerToUpdate;
     private List<Patient> listOfPatientToUpdate;
     private List<Organization> listOfOrganizationToUpdate;
     private List<Specimen> listOfSpecimenToUpdate;
+    private List<Condition> listOfConditionToUpdate;
     private List<DiagnosticOrder> listOfDiagnosticOrderToUpdate;
     private List<Observation> listOfObservationToUpdate;
     private List<DiagnosticReport> listOfDiagnosticReportToUpdate;
@@ -51,6 +54,7 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<Patient> listOfPatientToAdd;
     private List<Organization> listOfOrganizationToAdd;
     private List<Specimen> listOfSpecimenToAdd;
+    private List<Condition> listOfConditionToAdd;
     private List<DiagnosticOrder> listOfDiagnosticOrderToAdd;
     private List<Observation> listOfObservationToAdd;
     private List<DiagnosticReport> listOfDiagnosticReportToAdd;
@@ -62,6 +66,7 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<String> listIdsPatientUsedForSearch;
     private List<String> listIdsOrganizationUsedForSearch;
     private List<String> listIdsSpecimenUsedForSearch;
+    private List<String> listIdsConditionUsedForSearch;
     private List<String> listIdsDiagnosticOrderUsedForSearch;
     private List<String> listIdsObservationUsedForSearch;
     private List<String> listIdsDiagnosticReportUsedForSearch;
@@ -80,9 +85,25 @@ public class DefaultOrchestrator extends UntypedActor {
     String responsePractitioner=null;
     String responseOrganization=null;
     String responseSpecimen=null;
+    String responseCondition=null;
     String responseDiagnosticOrder=null;
     String responseObservation=null;
     String responseDiagnosticReport=null;
+    String nullResponse="{\n" +
+            "  \"resourceType\": \"Bundle\",\n" +
+            "  \"id\": \"a01c54cb-8794-491e-8100-5c8c737bbb49\",\n" +
+            "  \"meta\": {\n" +
+            "    \"lastUpdated\": \"2017-03-23T11:18:03.000+03:00\"\n" +
+            "  },\n" +
+            "  \"type\": \"searchset\",\n" +
+            "  \"total\": 0,\n" +
+            "  \"link\": [\n" +
+            "    {\n" +
+            "      \"relation\": \"self\",\n" +
+            "      \"url\": \"http://localhost:8084/hapi-fhir-jpaserver-local/baseDstu2/Patient?_pretty=true&family=xxxxx\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
 
 
     public DefaultOrchestrator(MediatorConfig config) {
@@ -98,6 +119,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listSolvedPatientResponse=new ArrayList<>();
         listSolvedOrganizationResponse=new ArrayList<>();
         listSolvedSpecimenResponse=new ArrayList<>();
+        listSolvedConditionResponse=new ArrayList<>();
         listSolvedDiagnosticOrderResponse=new ArrayList<>();
         listSolvedObservationResponse=new ArrayList<>();
         listSolvedDiagnosticReportResponse=new ArrayList<>();
@@ -105,6 +127,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listOfValidPatient=new ArrayList<>();
         listOfValidOrganization=new ArrayList<>();
         listOfValidSpecimen=new ArrayList<>();
+        listOfValidCondition=new ArrayList<>();
         listOfValidDiagnosticOrder=new ArrayList<>();
         listOfValidObservation=new ArrayList<>();
         listOfValidDiagnosticReport=new ArrayList<>();
@@ -112,6 +135,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listOfOrganizationToUpdate=new ArrayList<>();
         listOfPatientToUpdate=new ArrayList<>();
         listOfSpecimenToUpdate=new ArrayList<>();
+        listOfConditionToUpdate=new ArrayList<>();
         listOfDiagnosticOrderToUpdate=new ArrayList<>();
         listOfObservationToUpdate=new ArrayList<>();
         listOfDiagnosticReportToUpdate=new ArrayList<>();
@@ -119,6 +143,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listOfPatientToAdd=new ArrayList<>();
         listOfOrganizationToAdd=new ArrayList<>();
         listOfSpecimenToAdd=new ArrayList<>();
+        listOfConditionToAdd=new ArrayList<>();
         listOfDiagnosticOrderToAdd=new ArrayList<>();
         listOfObservationToAdd=new ArrayList<>();
         listOfDiagnosticReportToAdd=new ArrayList<>();
@@ -127,6 +152,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listIdsPatientUsedForSearch=new ArrayList<>();
         listIdsOrganizationUsedForSearch=new ArrayList<>();
         listIdsSpecimenUsedForSearch=new ArrayList<>();
+        listIdsConditionUsedForSearch=new ArrayList<>();
         listIdsDiagnosticOrderUsedForSearch=new ArrayList<>();
         listIdsObservationUsedForSearch=new ArrayList<>();
         listIdsDiagnosticReportUsedForSearch=new ArrayList<>();
@@ -200,6 +226,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 int nbrRetreivedPatient=resourceBundle.getListOfPatient().size();
                 int nbrRetreivedOrganization=resourceBundle.getListOfOrganization().size();
                 int nbrRetreivedSpecimen=resourceBundle.getListOfSpecimen().size();
+                int nbrRetreivedCondition=resourceBundle.getListOfCondition().size();
                 int nbrRetreivedDiagnosticOrder=resourceBundle.getListOfDiagnosticOrder().size();
                 int nbrRetreivedDiagnosticReport=resourceBundle.getListOfDiagnosticReport().size();
                 int nbrRetreivedObservation=resourceBundle.getListOfObservation().size();
@@ -209,6 +236,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 int nbrValidPatient=resourceBundle.getListOfValidPatient().size();
                 int nbrValidOrganization=resourceBundle.getListOfValidOrganization().size();
                 int nbrValidSpecimen=resourceBundle.getListOfValidSpecimen().size();
+                int nbrValidCondition=resourceBundle.getListOfValidCondition().size();
                 int nbrValidDiagnosticOrder=resourceBundle.getListOfValidDiagnosticOrder().size();
                 int nbrValidDiagnosticReport=resourceBundle.getListOfValidDiagnosticReport().size();
                 int nbrValidPObservation=resourceBundle.getListOfValidObservation().size();
@@ -218,6 +246,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 int nbreInvalidPatient=resourceBundle.getListOfInvalidPatient().size();
                 int nbreInvalidOrganization=resourceBundle.getListOfInvalidOrganization().size();
                 int nbreInvalidSpecimen=resourceBundle.getListOfInvalidSpecimen().size();
+                int nbreInvalidCondition=resourceBundle.getListOfInvalidCondition().size();
                 int nbreInvalidDiagnosticOrder=resourceBundle.getListOfInvalidDiagnosticOrder().size();
                 int nbreInvalidDiagnosticReport=resourceBundle.getListOfInvalidDiagnosticReport().size();
                 int nbreInvalidObservation=resourceBundle.getListOfInvalidObservation().size();
@@ -268,15 +297,16 @@ public class DefaultOrchestrator extends UntypedActor {
                         "totalObservationFound:"+nbrRetreivedObservation+","+
                         "totalNbreOfValidObservation:"+nbrValidPObservation+","+
                         "totalNbreOfInvalidObservation:"+nbreInvalidObservation+",";
-                ;
+
 
                 PractitionerOrchestratorActor.ResolvePractitionerRequest PractitionerRequest =null;
                 PatientOrchestratorActor.ResolvePatientRequest patientRequest =null;
                 OrganizationOrchestratorActor.ResolveOrganizationRequest organizationRequest=null;
                 SpecimenOrchestratorActor.ResolveSpecimenRequest specimenRequest=null;
-                DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest;
-                ObservationOrchestratorActor.ResolveObservationRequest observationRequest;
-                DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest diagnosticReportRequest;
+                ConditionOrchestratorActor.ResolveConditionRequest conditionRequest=null;
+                DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest=null;
+                ObservationOrchestratorActor.ResolveObservationRequest observationRequest=null;
+                DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest diagnosticReportRequest=null;
                 //Identify the number of Practitioner that are used to be searched
                 //By their id, the id is supposed to be the same (Internal DHIS2 ID)
                 /*
@@ -314,6 +344,10 @@ public class DefaultOrchestrator extends UntypedActor {
                     organizationProcessed=true;
 
                 }
+                else
+                {
+                    responseOrganization=nullResponse;
+                }
                 if(resourceBundle.getListOfValidePractitioners().size()>0)
                 {
                     this.listOfValidPractitioner=resourceBundle.getListOfValidePractitioners();
@@ -334,6 +368,10 @@ public class DefaultOrchestrator extends UntypedActor {
                             Props.create(PractitionerOrchestratorActor.class,config));
                     practitionerRequestOrchestrator.tell(PractitionerRequest,getSelf());
 
+                }
+                else
+                {
+                    responsePractitioner=nullResponse;
                 }
                 if(resourceBundle.getListOfValidPatient().size()>0)
                 {
@@ -356,6 +394,10 @@ public class DefaultOrchestrator extends UntypedActor {
                     patientRequestOrchestrator.tell(patientRequest,getSelf());
 
                 }
+                else
+                {
+                    responsePatient=nullResponse;
+                }
                 if(resourceBundle.getListOfValidSpecimen().size()>0)
                 {
                     this.listOfValidSpecimen=resourceBundle.getListOfValidSpecimen();
@@ -376,6 +418,32 @@ public class DefaultOrchestrator extends UntypedActor {
                     specimenRequestOrchestrator.tell(specimenRequest,getSelf());
 
                 }
+                else
+                {
+                    responseSpecimen=nullResponse;
+                }
+                if(resourceBundle.getListOfValidCondition().size()>0)
+                {
+                    this.listOfValidCondition=resourceBundle.getListOfValidCondition();
+                    List<String> listOfId=new ArrayList<>();
+                    for(Condition oCondition:this.listOfValidCondition)
+                    {
+                        listOfId.add(oCondition.getId().getIdPart());
+                    }
+                    listIdsConditionUsedForSearch=listOfId;
+                    conditionRequest=new ConditionOrchestratorActor.ResolveConditionRequest(
+                            originalRequest.getRequestHandler(),
+                            getSelf(),
+                            listOfId
+                    );
+                    ActorRef conditionRequestOrchestrator=getContext().actorOf(
+                            Props.create(ConditionOrchestratorActor.class,config));
+                    conditionRequestOrchestrator.tell(conditionRequest,getSelf());
+                }
+                else
+                {
+                    responseCondition=nullResponse;
+                }
                 if(resourceBundle.getListOfValidDiagnosticOrder().size()>0)
                 {
                     this.listOfValidDiagnosticOrder=resourceBundle.getListOfValidDiagnosticOrder();
@@ -394,6 +462,10 @@ public class DefaultOrchestrator extends UntypedActor {
                             Props.create(DiagnosticOrderOrchestratorActor.class,config));
                     diagnosticOrderRequestOrchestrator.tell(diagnosticOrderRequest,getSelf());
 
+                }
+                else
+                {
+                    responseDiagnosticOrder=nullResponse;
                 }
                 if(resourceBundle.getListOfValidObservation().size()>0)
                 {
@@ -414,6 +486,10 @@ public class DefaultOrchestrator extends UntypedActor {
                     observationRequestOrchestrator.tell(observationRequest,getSelf());
 
                 }
+                else
+                {
+                    responseObservation=nullResponse;
+                }
                 if(resourceBundle.getListOfValidDiagnosticReport().size()>0)
                 {
                     this.listOfValidDiagnosticReport=resourceBundle.getListOfValidDiagnosticReport();
@@ -431,6 +507,10 @@ public class DefaultOrchestrator extends UntypedActor {
                     ActorRef diagnosticReportRequestOrchestrator=getContext().actorOf(
                             Props.create(DiagnosticReportOrchestratorActor.class,config));
                     diagnosticReportRequestOrchestrator.tell(diagnosticReportRequest,getSelf());
+                }
+                else
+                {
+                    responseDiagnosticReport=nullResponse;
                 }
 
 
@@ -458,6 +538,8 @@ public class DefaultOrchestrator extends UntypedActor {
         }
         catch (Exception exc)
         {
+            FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                    exc.getMessage(),"Error");
             log.error(exc.getMessage());
             logResult+="::error:"+exc.getMessage();
             originalRequest.getRespondTo().tell(logResult, getSelf());
@@ -554,6 +636,8 @@ public class DefaultOrchestrator extends UntypedActor {
             }
             catch (Exception exc)
             {
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 log.error(exc.getMessage());
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
@@ -657,6 +741,8 @@ public class DefaultOrchestrator extends UntypedActor {
             catch (Exception exc)
             {
                 log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
                 fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
@@ -753,6 +839,8 @@ public class DefaultOrchestrator extends UntypedActor {
             catch (Exception exc)
             {
                 log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
                 fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
@@ -849,6 +937,8 @@ public class DefaultOrchestrator extends UntypedActor {
             catch (Exception exc)
             {
                 log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
                 fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
@@ -860,6 +950,105 @@ public class DefaultOrchestrator extends UntypedActor {
         //return;
 
     }
+    private void finalizeConditionRequest(String conditionResponse) {
+
+
+        if(conditionResponse==null )
+        {
+            return;
+        }
+        else
+        {
+            listSolvedConditionResponse.add(conditionResponse);
+            logResult="";
+            FinishRequest fr =null;
+            try
+            {
+                //finish
+                System.out.println(listSolvedConditionResponse.size());
+                //Identify List of Patient to add and to Update
+                identifyConditionToUpdate(listSolvedConditionResponse);//Always run update identification before the add identification
+                identifyConditionToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+                String ServerApp="";
+                String baseServerRepoURI="";
+                ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
+                baseServerRepoURI=FhirMediatorUtilities.buidServerRepoBaseUri(
+                        this.mediatorConfiguration.getServerTargetscheme(),
+                        this.mediatorConfiguration.getServerTargetURI(),
+                        this.mediatorConfiguration.getServerTargetPort(),
+                        ServerApp,
+                        this.mediatorConfiguration.getServerTargetFhirDataModel()
+                );
+                String resultInsertion=null;
+                //resultOutPutHeader+="res:";
+                if(listOfConditionToAdd.size()>0){
+                    resultInsertion =FhirResourceProcessor.createCondition(resourceBundle.getContext(),
+                            this.listOfConditionToAdd,
+                            baseServerRepoURI);
+                }
+                if(resultInsertion!=null)
+                {
+                    //resultOutPutHeader+="["+resultInsertion+",";
+                    resultOutPutHeader+=resultInsertion+",";
+                }
+                String  resultUpdate=null;
+                if(this.listOfConditionToUpdate.size()>0)
+                {
+                    resultUpdate=FhirResourceProcessor.updateConditionInTransaction(resourceBundle.getContext(),
+                            this.listOfConditionToUpdate,
+                            baseServerRepoURI);
+                }
+                //organizationProcessed=false;
+                if(resultUpdate!=null || resultInsertion!=null)
+                {
+                    //resultOutPutHeader+="[Specimen:";
+                    resultOutPutHeader+="Condition:";
+                    if(resultUpdate!=null)
+                    {
+                        resultOutPutHeader+=resultUpdate;
+                    }
+                    if(resultInsertion!=null)
+                    {
+                        resultOutPutHeader+=","+resultInsertion;
+                    }
+                    //resultOutPutHeader+="]";
+                    resultOutPutHeader+="";
+                }
+                else
+                {
+                    //resultOutPutHeader+="[]";
+                    resultOutPutHeader+="";
+                }
+                resultOutPutHeader+=resultOutPutTail+",";
+
+                System.out.print(0);
+                logResult+=resultOutPutHeader;
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                logResult+="::"+simpleDateFormat.format(new Date()).toString()+":";
+                logResult+="Operation completed!";
+
+                //this.syncConfiguration.setLastSyncDate(this.stringSyncDate);
+                //fr = new FinishRequest(resultOutPutHeader, "application/json", HttpStatus.SC_OK);
+                fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
+            }
+            catch (Exception exc)
+            {
+                log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
+                String errorMessage="{error:"+exc.getMessage()+"}";
+                logResult+="::error:"+exc.getMessage();
+                fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
+            }
+            //originalRequest.getRespondTo().tell(fr, getSelf());
+            //stopRequestProcessing(fr);
+        }
+
+        //return;
+
+    }
+
     private void finalizeDiagnosticOrderRequest(String diagnosticOrderResponse) {
 
 
@@ -893,9 +1082,14 @@ public class DefaultOrchestrator extends UntypedActor {
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfDiagnosticOrderToAdd.size()>0){
+
                     resultInsertion =FhirResourceProcessor.createDiagnosticOrder(resourceBundle.getContext(),
                             this.listOfDiagnosticOrderToAdd,
                             baseServerRepoURI);
+                    /*resultInsertion =FhirResourceProcessor.createDiagnosticOrderInTransaction(resourceBundle.getContext(),
+                            this.listOfDiagnosticOrderToAdd,
+                            baseServerRepoURI);*/
+
                 }
                 if(resultInsertion!=null)
                 {
@@ -945,6 +1139,8 @@ public class DefaultOrchestrator extends UntypedActor {
             catch (Exception exc)
             {
                 log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
                 fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
@@ -1041,6 +1237,8 @@ public class DefaultOrchestrator extends UntypedActor {
             catch (Exception exc)
             {
                 log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
                 fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
@@ -1137,6 +1335,8 @@ public class DefaultOrchestrator extends UntypedActor {
             catch (Exception exc)
             {
                 log.error(exc.getMessage());
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        exc.getMessage(),"Error");
                 String errorMessage="{error:"+exc.getMessage()+"}";
                 logResult+="::error:"+exc.getMessage();
                 fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
@@ -1151,7 +1351,10 @@ public class DefaultOrchestrator extends UntypedActor {
 
     private void mainFinalize() {
         if(responseOrganization==null || responsePatient ==null || responsePractitioner==null
-                || responseSpecimen==null || responseObservation==null || responseDiagnosticReport==null)
+                || responseSpecimen==null || responseObservation==null || responseDiagnosticReport==null
+                || responseDiagnosticOrder==null || responseCondition==null)
+
+        //if(responseOrganization==null || responsePatient ==null)
         {
             return ;
         }
@@ -1162,6 +1365,7 @@ public class DefaultOrchestrator extends UntypedActor {
             finalizeRequest(responsePractitioner);
             finalizePatientRequest(responsePatient);
             finalizeSpecimenRequest(responseSpecimen);
+            finalizeConditionRequest(responseCondition);
             finalizeDiagnosticOrderRequest(responseDiagnosticOrder);
             finalizeObservationRequest(responseObservation);
             finalizeDiagnosticReportRequest(responseDiagnosticReport);
@@ -1260,6 +1464,20 @@ public class DefaultOrchestrator extends UntypedActor {
             if(oSpecimen.getId().getIdPart().equals(id))
             {
                 return oSpecimen;
+            }
+            else
+            {
+                continue;
+            }
+        }
+        return null;
+    }
+    Condition getConditionFromValidList(String id)
+    {
+        for (Condition oCondition:this.listOfValidCondition) {
+            if(oCondition.getId().getIdPart().equals(id))
+            {
+                return oCondition;
             }
             else
             {
@@ -1389,6 +1607,38 @@ public class DefaultOrchestrator extends UntypedActor {
                         if(tempSpecimen!=null)
                         {
                             this.listOfSpecimenToUpdate.add(tempSpecimen);
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                //ListIdentifiedForUpdateTarget.addAll(resourceBundle.extractPractitionerFromBundleString(oBundleSearchResult));
+            }
+        }
+        catch (Exception exc)
+        {
+            log.error(exc.getMessage());
+            //return ;
+        }
+    }
+    void identifyConditionToUpdate(List<String> bundleSearchResultSet)
+    {
+        //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
+        try
+        {
+            for (String oBundleSearchResult:bundleSearchResultSet)
+            {
+                for (Condition oCondition :resourceBundle.extractConditionFromBundleString(oBundleSearchResult))
+                {
+                    if(listIdsConditionUsedForSearch.contains(oCondition.getId().getIdPart()))
+                    {
+                        //this.listOfOrganizationToUpdate.add(oOrganization);
+                        Condition tempCondition=getConditionFromValidList(oCondition.getId().getIdPart());
+                        if(tempCondition!=null)
+                        {
+                            this.listOfConditionToUpdate.add(tempCondition);
                         }
                     }
                     else
@@ -1602,6 +1852,29 @@ public class DefaultOrchestrator extends UntypedActor {
             log.error(exc.getMessage());
         }
     }
+    void identifyConditionToAdd()
+    {
+        try
+        {
+            List<String> listOfIdsForUpdate=new ArrayList<>();
+            for(Condition oCondition : this.listOfConditionToUpdate)
+            {
+                listOfIdsForUpdate.add(oCondition.getId().getIdPart());
+            }
+            for(Condition oCondition  : this.listOfValidCondition)
+            {
+                boolean isToDiscard=false;
+                if(listOfIdsForUpdate.contains(oCondition.getId().getIdPart())==false)
+                {
+                    this.listOfConditionToAdd.add(oCondition);
+                }
+            }
+        }
+        catch (Exception exc)
+        {
+            log.error(exc.getMessage());
+        }
+    }
     void identifyDiagnosticOrderToAdd()
     {
         try
@@ -1698,6 +1971,12 @@ public class DefaultOrchestrator extends UntypedActor {
         }
         else if (msg instanceof SpecimenOrchestratorActor.ResolveSpecimenResponse){
             responseSpecimen =((SpecimenOrchestratorActor.ResolveSpecimenResponse)msg).getResponseObject();
+            //finalizePatientRequest(responseObject);
+            //finalizeOrganizationRequest(responseOrganization);
+            mainFinalize();
+        }
+        else if (msg instanceof ConditionOrchestratorActor.ResolveConditionResponse){
+            responseCondition =((ConditionOrchestratorActor.ResolveConditionResponse)msg).getResponseObject();
             //finalizePatientRequest(responseObject);
             //finalizeOrganizationRequest(responseOrganization);
             mainFinalize();

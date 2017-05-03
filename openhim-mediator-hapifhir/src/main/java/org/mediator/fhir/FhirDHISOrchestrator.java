@@ -241,70 +241,68 @@ public class FhirDHISOrchestrator extends UntypedActor {
                                 ,"Error");
                         continue;
                     }
-                    else
-                    {
+                    else {
 
-                        int nbrRetreivedPractitioner=resourceBundle.getListOfPractitioners().size();
-                        int nbrRetreivedPatient=resourceBundle.getListOfPatient().size();
-                        int nbrRetreivedOrganization=resourceBundle.getListOfOrganization().size();
-                        int nbrRetreivedSpecimen=resourceBundle.getListOfSpecimen().size();
-                        int nbrRetreivedCondition=resourceBundle.getListOfCondition().size();
-                        int nbrRetreivedDiagnosticOrder=resourceBundle.getListOfDiagnosticOrder().size();
-                        int nbrRetreivedDiagnosticReport=resourceBundle.getListOfDiagnosticReport().size();
-                        int nbrRetreivedObservation=resourceBundle.getListOfObservation().size();
+                        int nbrRetreivedPractitioner = resourceBundle.getListOfPractitioners().size();
+                        int nbrRetreivedPatient = resourceBundle.getListOfPatient().size();
+                        int nbrRetreivedOrganization = resourceBundle.getListOfOrganization().size();
+                        int nbrRetreivedSpecimen = resourceBundle.getListOfSpecimen().size();
+                        int nbrRetreivedCondition = resourceBundle.getListOfCondition().size();
+                        int nbrRetreivedDiagnosticOrder = resourceBundle.getListOfDiagnosticOrder().size();
+                        int nbrRetreivedDiagnosticReport = resourceBundle.getListOfDiagnosticReport().size();
+                        int nbrRetreivedObservation = resourceBundle.getListOfObservation().size();
 
                         //Valid tracked entities after the bundle processing
-                        int nbrValidPractitioner=resourceBundle.getListOfValidePractitioners().size();
-                        int nbrValidPatient=resourceBundle.getListOfValidPatient().size();
-                        int nbrValidOrganization=resourceBundle.getListOfValidOrganization().size();
-                        int nbrValidSpecimen=resourceBundle.getListOfValidSpecimen().size();
-                        int nbrValidCondition=resourceBundle.getListOfValidCondition().size();
-                        int nbrValidDiagnosticOrder=resourceBundle.getListOfValidDiagnosticOrder().size();
-                        int nbrValidDiagnosticReport=resourceBundle.getListOfValidDiagnosticReport().size();
-                        int nbrValidPObservation=resourceBundle.getListOfValidObservation().size();
+                        int nbrValidPractitioner = resourceBundle.getListOfValidePractitioners().size();
+                        int nbrValidPatient = resourceBundle.getListOfValidPatient().size();
+                        int nbrValidOrganization = resourceBundle.getListOfValidOrganization().size();
+                        int nbrValidSpecimen = resourceBundle.getListOfValidSpecimen().size();
+                        int nbrValidCondition = resourceBundle.getListOfValidCondition().size();
+                        int nbrValidDiagnosticOrder = resourceBundle.getListOfValidDiagnosticOrder().size();
+                        int nbrValidDiagnosticReport = resourceBundle.getListOfValidDiagnosticReport().size();
+                        int nbrValidPObservation = resourceBundle.getListOfValidObservation().size();
 
-                        //InValid tracked entities after the bundle processing
+                    }//End of else resProcessing
+                }//End of for Bundle
 
-                        PatientOrchestratorActor.ResolvePatientRequest patientRequest =null;
-                        SpecimenOrchestratorActor.ResolveSpecimenRequest specimenRequest=null;
-                        ConditionOrchestratorActor.ResolveConditionRequest conditionRequest=null;
-                        DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest=null;
-                        ObservationOrchestratorActor.ResolveObservationRequest observationRequest=null;
-                        DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest diagnosticReportRequest=null;
+                this.listOfValidPatient.addAll(resourceBundle.getListOfValidPatient());
+                this.listOfValidSpecimen.addAll(resourceBundle.getListOfValidSpecimen());
+                this.listOfValidCondition.addAll(resourceBundle.getListOfValidCondition());
+                this.listOfValidDiagnosticOrder.addAll(resourceBundle.getListOfValidDiagnosticOrder());
+                this.listOfValidObservation.addAll(resourceBundle.getListOfValidObservation());
+                this.listOfValidDiagnosticReport.addAll(resourceBundle.getListOfValidDiagnosticReport());
 
-                        this.listOfValidSpecimen.addAll(resourceBundle.getListOfValidSpecimen());
-                        this.listOfValidCondition.addAll(resourceBundle.getListOfValidCondition());
-                        this.listOfValidDiagnosticOrder.addAll(resourceBundle.getListOfValidDiagnosticOrder());
-                        this.listOfValidObservation.addAll(resourceBundle.getListOfValidObservation());
-                        this.listOfValidDiagnosticReport.addAll(resourceBundle.getListOfValidDiagnosticReport());
-                        if(resourceBundle.getListOfValidPatient().size()>0)
-                        {
-                            this.listOfValidPatient=resourceBundle.getListOfValidPatient();
-                            //nbrOfSearchRequestToWaitFor=resourceBundle.getListOfValidePractitioners().size();
-                            List<String> listOfId=new ArrayList<>();
-                            for(Patient oPatientToIdentify:resourceBundle.getListOfValidPatient())
-                            {
-                                listOfId.add(oPatientToIdentify.getId().getIdPart());
+                PatientOrchestratorActor.ResolvePatientRequest patientRequest =null;
+                SpecimenOrchestratorActor.ResolveSpecimenRequest specimenRequest=null;
+                ConditionOrchestratorActor.ResolveConditionRequest conditionRequest=null;
+                DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest=null;
+                ObservationOrchestratorActor.ResolveObservationRequest observationRequest=null;
+                DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest diagnosticReportRequest=null;
 
-                            }
-                            listIdsPatientUsedForSearch=listOfId;
-                            patientRequest=new PatientOrchestratorActor.ResolvePatientRequest(
-                                    originalRequest.getRequestHandler(),
-                                    getSelf(),
-                                    listOfId
-                            );
-                            ActorRef patientRequestOrchestrator=getContext().actorOf(
-                                    Props.create(PatientOrchestratorActor.class,config));
-                            patientRequestOrchestrator.tell(patientRequest,getSelf());
-
-                        }
-                        else
-                        {
-                            responsePatient=nullResponse;
-                        }
+                if(this.listOfValidPatient.size()>0)
+                {
+                    this.listOfValidPatient=resourceBundle.getListOfValidPatient();
+                    //nbrOfSearchRequestToWaitFor=resourceBundle.getListOfValidePractitioners().size();
+                    List<String> listOfId=new ArrayList<>();
+                    for(Patient oPatientToIdentify:resourceBundle.getListOfValidPatient())
+                    {
+                        listOfId.add(oPatientToIdentify.getId().getIdPart());
 
                     }
+                    listIdsPatientUsedForSearch=listOfId;
+                    patientRequest=new PatientOrchestratorActor.ResolvePatientRequest(
+                            originalRequest.getRequestHandler(),
+                            getSelf(),
+                            listOfId
+                    );
+                    ActorRef patientRequestOrchestrator=getContext().actorOf(
+                            Props.create(PatientOrchestratorActor.class,config));
+                    patientRequestOrchestrator.tell(patientRequest,getSelf());
 
+                }
+                else
+                {
+                    responsePatient=nullResponse;
                 }
                 FinishRequest fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
                 //originalRequest.getRespondTo().tell(logResult, getSelf());
@@ -333,6 +331,39 @@ public class FhirDHISOrchestrator extends UntypedActor {
         }
 
     }
+    private void addUniquePatientInList(Patient patientToAdd)
+    {
+        boolean found=false;
+        for(Patient oPatient:listOfValidPatient)
+        {
+            if(oPatient.getId().getIdPart().equals(patientToAdd.getId().getIdPart()))
+            {
+                found=true;
+            }
+        }
+        if(found==false)
+        {
+            this.listOfValidPatient.add(patientToAdd);
+        }
+
+    }
+    private void addUniqueSpecimenInList(Specimen specimenToAdd)
+    {
+        boolean found=false;
+        for(Specimen oSpecimen:listOfValidSpecimen)
+        {
+            if(oSpecimen.getId().getIdPart().equals(specimenToAdd.getId().getIdPart()))
+            {
+                found=true;
+            }
+        }
+        if(found==false)
+        {
+            this.listOfValidSpecimen.add(specimenToAdd);
+        }
+
+    }
+
     private void finalizeCsvFhirRequest(List<Bundle> listBundle2Process)
     {
         FinishRequest fr =null;
@@ -402,13 +433,25 @@ public class FhirDHISOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTrackerFhirDataModel()
                 );
+                String ServerTargetApp="";
+                String baseServerTargetRepoURI="";
+                ServerTargetApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
+                baseServerTargetRepoURI=FhirMediatorUtilities.buidServerRepoBaseUri(
+                        this.mediatorConfiguration.getServerTargetscheme(),
+                        this.mediatorConfiguration.getServerTargetURI(),
+                        this.mediatorConfiguration.getServerTargetPort(),
+                        ServerTargetApp,
+                        this.mediatorConfiguration.getServerTargetFhirDataModel()
+                );
                 List<TrackerResourceMap> listTrackerResource=this.mediatorConfiguration.getTrackerResource();
+                List<DataElement> listDataElementMapping= FhirMediatorUtilities.getDataElementMapping(this.mediatorConfiguration.getDataElementMappingFile());
                 String  resultUpdate=null;
                 if(this.listOfPatientToUpdate.size()>0)
                 {
-                    List<DhisEvent> listOfEventToAdd=new ArrayList<>();
+
                    for(Patient oPatient:listOfPatientToUpdate)
                     {
+                        List<DhisEvent> listOfEventToAdd=new ArrayList<>();
                         List<Specimen> listAssociatedSpecimen=new ArrayList<>();
                         List<Condition> listAssociatedCondition=new ArrayList<>();
                         List<DiagnosticOrder> listAssociatedDiagnosticOrder=new ArrayList<>();
@@ -455,14 +498,18 @@ public class FhirDHISOrchestrator extends UntypedActor {
                                 listAssociatedDiagnosticReport.add(oDiagnosticReport);
                             }
                         }
-                        List<DhisEvent> res=FhirMediatorUtilities.constructListOfLabEvents(
-                                oPatient,listAssociatedSpecimen,listAssociatedObservation,
-                                listTrackerResource);
-                        listOfEventToAdd.addAll(res);
-                        String trackedEntityId= this.mediatorConfiguration.getTrackedEntity();
-                        List<DhisTrackedEntity> resEntityInstance=FhirMediatorUtilities.constructListOfTrackedEntityInstance(
-                                oPatient,trackedEntityId,listAssociatedCondition,listAssociatedDiagnosticReport
+                        List<Condition> ListTrackedCondition=FhirResourceProcessor.getListConditionTrackedForPatient(
+                                resourceBundle.getContext(),oPatient.getId().getIdPart(),
+                                baseServerTargetRepoURI,this.mediatorConfiguration.getLogFile()
                         );
+
+
+                        listOfEventToAdd=FhirMediatorUtilities.constructListOfLabEvents(
+                                oPatient,listAssociatedSpecimen,listAssociatedObservation,
+                                listTrackerResource,listDataElementMapping);
+                        //listOfEventToAdd.addAll(res);
+                        String trackedEntityId= this.mediatorConfiguration.getTrackedEntity();
+
                         String trackedEntity="";
                         for(IdentifierDt oIdentifier:oPatient.getIdentifier())
                         {
@@ -473,11 +520,6 @@ public class FhirDHISOrchestrator extends UntypedActor {
                         }
                         connection=null;
                         String builtRequestPath="";
-                        builtRequestPath="/trackedEntityInstances/"+trackedEntity;
-                        String trackedEntityJsonString=FhirMediatorUtilities.TransformListTrackedEntityToJson(
-                                resEntityInstance
-                        );
-                        String uriRepServer=baseServerRepoURI+builtRequestPath;
 
                         String authentication=mediatorConfiguration.getAuthentication();
                         String authEncoded = com.phloc.commons.base64.Base64.encodeBytes(authentication.getBytes());
@@ -485,30 +527,243 @@ public class FhirDHISOrchestrator extends UntypedActor {
                         //Handle connection exception
                         try
                         {
-                            URL url = new URL(uriRepServer);
-                            connection = (HttpURLConnection) url.openConnection();
-                            connection.setRequestProperty("Authorization", "Basic " + authEncoded);
-                            connection.setRequestMethod("PUT");
-                            connection.setDoOutput(true);
-                            connection.setDoInput(true);
-                            connection.setRequestProperty("Content-Type","application/json");
-                            connection.setUseCaches (false);
-                            DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
-                            wr.writeBytes (trackedEntityJsonString);
-                            wr.flush ();
-                            wr.close ();
-                            //Get Response
-                            InputStream content=(InputStream)connection.getInputStream();
-                            BufferedReader rd=new BufferedReader (new InputStreamReader(content));
-                            StringBuffer response = new StringBuffer();
-                            String line;
-                            while ((line = rd.readLine()) != null) {
-                                response.append(line);
-                                response.append('\r');
-                            }
-                            rd.close();
-                            String result= response.toString();
+                            if(ListTrackedCondition.size()==0)
+                            {
+                                //if no condition has been tracked just update the existing TEI and add
+                                //associated events
+                                List<DhisTrackedEntity> resEntityInstance=FhirMediatorUtilities.constructListOfTrackedEntityInstance(
+                                        oPatient,trackedEntityId,listAssociatedCondition,listAssociatedDiagnosticReport
+                                ,listDataElementMapping);
+                                String trackedEntityJsonString=FhirMediatorUtilities.TransformListTrackedEntityToJson(
+                                        resEntityInstance
+                                );
+                                builtRequestPath="/trackedEntityInstances/"+trackedEntity;
+                                String uriRepServer=baseServerRepoURI+builtRequestPath;
+                                URL url = new URL(uriRepServer);
+                                connection = (HttpURLConnection) url.openConnection();
+                                connection.setRequestProperty("Authorization", "Basic " + authEncoded);
+                                connection.setRequestMethod("PUT");
+                                connection.setDoOutput(true);
+                                connection.setDoInput(true);
+                                connection.setRequestProperty("Content-Type","application/json");
+                                connection.setUseCaches (false);
+                                DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
+                                wr.writeBytes (trackedEntityJsonString);
+                                wr.flush ();
+                                wr.close ();
+                                InputStream content=(InputStream)connection.getInputStream();
+                                BufferedReader rd=new BufferedReader (new InputStreamReader(content));
+                                StringBuffer response = new StringBuffer();
+                                String line;
+                                while ((line = rd.readLine()) != null) {
+                                    response.append(line);
+                                    response.append('\r');
+                                }
+                                rd.close();
+                                String result= response.toString();
+                                //Then add associated events
+                                String eventJsonString=FhirMediatorUtilities.TransformListEventToJson(listOfEventToAdd);
+                                connection=null;
+                                builtRequestPath="";
+                                builtRequestPath="/events";
+                                //builtRequestPath="/dhis-web-commons/security/login.action";
+                                uriRepServer=baseServerRepoURI+builtRequestPath;
+                                url= new URL(uriRepServer);
+                                connection = (HttpURLConnection) url.openConnection();
+                                connection.setRequestProperty("Authorization","Basic "+authEncoded);
 
+                                connection.setRequestMethod("POST");
+                                connection.setDoOutput(true);
+                                connection.setDoInput(true);
+                                connection.setRequestProperty("Content-Type","application/json");
+                                connection.setUseCaches (false);
+                                wr=null;
+                                wr = new DataOutputStream (connection.getOutputStream ());
+                                wr.writeBytes (eventJsonString);
+                                wr.flush ();
+                                wr.close ();
+                                content=null;
+                                content=(InputStream)connection.getInputStream();
+                                rd=null;
+                                rd=new BufferedReader (new InputStreamReader(content));
+                                response=null;
+                                response = new StringBuffer();
+                                line=null;
+                                while ((line = rd.readLine()) != null) {
+                                    response.append(line);
+                                    response.append('\r');
+                                }
+                                rd.close();
+                                result=null;
+                                result= response.toString();
+
+
+                            }
+                           else if(ListTrackedCondition.size()>0)
+                            {
+                                //Check if Condition has been already tracked
+                                for(Condition oConditionAssociated:listAssociatedCondition)
+                                {
+                                    String nameConditionAssociated=oConditionAssociated.getCode().getText();
+                                    boolean foundConditionTracked=false;
+                                    for(Condition conditionTracked:ListTrackedCondition)
+                                    {
+                                        if(conditionTracked.getCode().getText().equals(nameConditionAssociated))
+                                        {
+                                            foundConditionTracked=true;
+                                            break;
+                                        }
+                                    }
+                                    if(foundConditionTracked)
+                                    {
+                                        //Condition already tracked, add just event and update lab event
+                                        List<Condition> listConditionAssociatedToEntity=new ArrayList<>();
+                                        listConditionAssociatedToEntity.add(oConditionAssociated);
+                                        List<DhisTrackedEntity> resEntityInstance=FhirMediatorUtilities.constructListOfTrackedEntityInstance(
+                                                oPatient,trackedEntityId,listConditionAssociatedToEntity,listAssociatedDiagnosticReport
+                                        ,listDataElementMapping);
+                                        String trackedEntityJsonString=FhirMediatorUtilities.TransformListTrackedEntityToJson(
+                                                resEntityInstance
+                                        );
+                                        builtRequestPath="/trackedEntityInstances/"+trackedEntity;
+                                        String uriRepServer=baseServerRepoURI+builtRequestPath;
+                                        URL url = new URL(uriRepServer);
+                                        connection = (HttpURLConnection) url.openConnection();
+                                        connection.setRequestProperty("Authorization", "Basic " + authEncoded);
+                                        connection.setRequestMethod("PUT");
+                                        connection.setDoOutput(true);
+                                        connection.setDoInput(true);
+                                        connection.setRequestProperty("Content-Type","application/json");
+                                        connection.setUseCaches (false);
+                                        DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
+                                        wr.writeBytes (trackedEntityJsonString);
+                                        wr.flush ();
+                                        wr.close ();
+                                        InputStream content=(InputStream)connection.getInputStream();
+                                        BufferedReader rd=new BufferedReader (new InputStreamReader(content));
+                                        StringBuffer response = new StringBuffer();
+                                        String line;
+                                        while ((line = rd.readLine()) != null) {
+                                            response.append(line);
+                                            response.append('\r');
+                                        }
+                                        rd.close();
+                                        String result= response.toString();
+                                        //Then add associated events
+                                        String eventJsonString=FhirMediatorUtilities.TransformListEventToJson(listOfEventToAdd);
+                                        connection=null;
+                                        builtRequestPath="";
+                                        builtRequestPath="/events";
+                                        //builtRequestPath="/dhis-web-commons/security/login.action";
+                                        uriRepServer=baseServerRepoURI+builtRequestPath;
+                                        url= new URL(uriRepServer);
+                                        connection = (HttpURLConnection) url.openConnection();
+                                        connection.setRequestProperty("Authorization","Basic "+authEncoded);
+
+                                        connection.setRequestMethod("POST");
+                                        connection.setDoOutput(true);
+                                        connection.setDoInput(true);
+                                        connection.setRequestProperty("Content-Type","application/json");
+                                        connection.setUseCaches (false);
+                                        wr=null;
+                                        wr = new DataOutputStream (connection.getOutputStream ());
+                                        wr.writeBytes (eventJsonString);
+                                        wr.flush ();
+                                        wr.close ();
+                                        content=null;
+                                        content=(InputStream)connection.getInputStream();
+                                        rd=null;
+                                        rd=new BufferedReader (new InputStreamReader(content));
+                                        response=null;
+                                        response = new StringBuffer();
+                                        line=null;
+                                        while ((line = rd.readLine()) != null) {
+                                            response.append(line);
+                                            response.append('\r');
+                                        }
+                                        rd.close();
+                                        result=null;
+                                        result= response.toString();
+                                    }
+                                    else
+                                    {
+                                        FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                                                oConditionAssociated.getCode().getText()+" is not been tracked for the case "+oPatient.getId().getIdPart(),"Error");
+                                        //create a new line of trackedEntity with the new condition
+                                        /*
+                                        List<Condition> listConditionAssociatedToEntity=new ArrayList<>();
+                                        listConditionAssociatedToEntity.add(oConditionAssociated);
+                                        List<DhisTrackedEntity> resEntityInstance=FhirMediatorUtilities.constructListOfTrackedEntityInstance(
+                                                oPatient,trackedEntityId,listConditionAssociatedToEntity,listAssociatedDiagnosticReport
+                                        , listDataElementMapping);
+                                        String trackedEntityJsonString=FhirMediatorUtilities.TransformListTrackedEntityToJson(
+                                                resEntityInstance
+                                        );
+                                        builtRequestPath="/trackedEntityInstances";
+                                        String uriRepServer=baseServerRepoURI+builtRequestPath;
+                                        URL url = new URL(uriRepServer);
+                                        connection = (HttpURLConnection) url.openConnection();
+                                        connection.setRequestProperty("Authorization", "Basic " + authEncoded);
+                                        connection.setRequestMethod("POST");
+                                        connection.setDoOutput(true);
+                                        connection.setDoInput(true);
+                                        connection.setRequestProperty("Content-Type","application/json");
+                                        connection.setUseCaches (false);
+                                        DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
+                                        wr.writeBytes (trackedEntityJsonString);
+                                        wr.flush ();
+                                        wr.close ();
+                                        InputStream content=(InputStream)connection.getInputStream();
+                                        BufferedReader rd=new BufferedReader (new InputStreamReader(content));
+                                        StringBuffer response = new StringBuffer();
+                                        String line;
+                                        while ((line = rd.readLine()) != null) {
+                                            response.append(line);
+                                            response.append('\r');
+                                        }
+                                        rd.close();
+                                        String result= response.toString();
+                                        //Then add associated events
+                                        String eventJsonString=FhirMediatorUtilities.TransformListEventToJson(listOfEventToAdd);
+                                        connection=null;
+                                        builtRequestPath="";
+                                        builtRequestPath="/events";
+                                        //builtRequestPath="/dhis-web-commons/security/login.action";
+                                        uriRepServer=baseServerRepoURI+builtRequestPath;
+                                        url= new URL(uriRepServer);
+                                        connection = (HttpURLConnection) url.openConnection();
+                                        connection.setRequestProperty("Authorization","Basic "+authEncoded);
+
+                                        connection.setRequestMethod("POST");
+                                        connection.setDoOutput(true);
+                                        connection.setDoInput(true);
+                                        connection.setRequestProperty("Content-Type","application/json");
+                                        connection.setUseCaches (false);
+                                        wr=null;
+                                        wr = new DataOutputStream (connection.getOutputStream ());
+                                        wr.writeBytes (eventJsonString);
+                                        wr.flush ();
+                                        wr.close ();
+                                        content=null;
+                                        content=(InputStream)connection.getInputStream();
+                                        rd=null;
+                                        rd=new BufferedReader (new InputStreamReader(content));
+                                        response=null;
+                                        response = new StringBuffer();
+                                        line=null;
+                                        while ((line = rd.readLine()) != null) {
+                                            response.append(line);
+                                            response.append('\r');
+                                        }
+                                        rd.close();
+                                        result=null;
+                                        result= response.toString();
+                                        */
+
+                                    }//End else create a new entity
+                                }//End for conditionAssociated
+                            }//End elseif trackedCondition.size
+                            //Get Response
 
                         }
                         catch (Exception exc)
@@ -527,59 +782,16 @@ public class FhirDHISOrchestrator extends UntypedActor {
 
 
                     }//End for Patient
-                    if(listOfEventToAdd.size()>0)
-                    {
-                        String eventJsonString=FhirMediatorUtilities.TransformListEventToJson(listOfEventToAdd);
-
-                        /*
-
-                        ActorRef dhis2EventRequestOrchestrator=getContext().actorOf(
-                                Props.create(EventsOrchestratorActor.class,config));
-                        dhis2EventRequestOrchestrator.tell(dhis2EventRequest,getSelf());
-                        */
-                        connection=null;
-                        String builtRequestPath="";
-                        builtRequestPath="/events";
-                        //builtRequestPath="/dhis-web-commons/security/login.action";
-                        String uriRepServer=baseServerRepoURI+builtRequestPath;
-                        String authentication=mediatorConfiguration.getAuthentication();
-                        String authEncoded = com.phloc.commons.base64.Base64.encodeBytes(authentication.getBytes());
-                        URL url= new URL(uriRepServer);
-                        connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestProperty("Authorization","Basic "+authEncoded);
-                        //connection=null;
-
-                        connection.setRequestMethod("POST");
-                        connection.setDoOutput(true);
-                        connection.setDoInput(true);
-                        connection.setRequestProperty("Content-Type","application/json");
-                        connection.setUseCaches (false);
-                        //connection.set
-                        //Send request
-                        DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
-                        wr.writeBytes (eventJsonString);
-                        wr.flush ();
-                        wr.close ();
-
-                        //Get Response
-                        InputStream content=(InputStream)connection.getInputStream();
-                        BufferedReader rd=new BufferedReader (new InputStreamReader(content));
-                        StringBuffer response = new StringBuffer();
-                        String line;
-                        while ((line = rd.readLine()) != null) {
-                            response.append(line);
-                            response.append('\r');
-                        }
-                        rd.close();
-                        String result= response.toString();
-
-                        System.out.println("Traratataa!");
-
-                    }
-
                 }//End of this.listOfPatientToUpdate.size
 
-
+                //Then delete Bundle treated
+                for(Bundle oBundle:listOfValidBundle)
+                {
+                    FhirResourceProcessor.deleteBundle(
+                            resourceBundle.getContext(),oBundle.getId(),
+                            baseServerTargetRepoURI,this.mediatorConfiguration.getLogFile()
+                    );
+                }
                 resultOutPutHeader+=resultOutPutTail+",";
                 logResult+=resultOutPutHeader;
                 SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -632,7 +844,7 @@ public class FhirDHISOrchestrator extends UntypedActor {
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Patient oPatient :resourceBundle.extractPatientFromBundleString(oBundleSearchResult))
+                for (Patient oPatient :resourceBundle.extractPatientFromBundleString(oBundleSearchResult,baseServerRepoURI))
                 {
                     if(listIdsPatientUsedForSearch.contains(oPatient.getId().getIdPart()))
                     {

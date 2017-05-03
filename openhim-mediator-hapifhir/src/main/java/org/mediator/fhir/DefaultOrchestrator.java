@@ -20,7 +20,7 @@ import java.util.*;
 
 public class DefaultOrchestrator extends UntypedActor {
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-
+    String logFileName;
     private final MediatorConfig config;
     private MediatorFhirConfig mediatorConfiguration;
     private SynDateConfigFile syncConfiguration;
@@ -161,6 +161,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listIdentifiedPractitionerAndIdForUpdateSource=new HashMap<>();
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         logResult=simpleDateFormat.format(new Date()).toString()+"::";
+        logFileName=this.mediatorConfiguration.getLogFile();
     }
 
     private void queryDHIS2FhirRepositoryResources(MediatorHTTPRequest request)
@@ -667,10 +668,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedPatientResponse.size());
-                //Identify List of Patient to add and to Update
-                identifyPatientToUpdate(listSolvedPatientResponse);//Always run update identification before the add identification
-                identifyPatientToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -681,12 +678,17 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifyPatientToUpdate(listSolvedPatientResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyPatientToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfPatientToAdd.size()>0){
                     resultInsertion =FhirResourceProcessor.createPatient(resourceBundle.getContext(),
                             this.listOfPatientToAdd,
-                            baseServerRepoURI);
+                            baseServerRepoURI,logFileName);
                 }
                 if(resultInsertion!=null)
                 {
@@ -770,10 +772,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedOrganizationResponse.size());
-                //Identify List of Patient to add and to Update
-                identifyOrganizationToUpdate(listSolvedOrganizationResponse);//Always run update identification before the add identification
-                identifyOrganizationToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -784,6 +782,11 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifyOrganizationToUpdate(listSolvedOrganizationResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyOrganizationToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfOrganizationToAdd.size()>0){
@@ -868,10 +871,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedSpecimenResponse.size());
-                //Identify List of Patient to add and to Update
-                identifySpecimenToUpdate(listSolvedSpecimenResponse);//Always run update identification before the add identification
-                identifySpecimenToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -882,12 +881,17 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifySpecimenToUpdate(listSolvedSpecimenResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifySpecimenToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfSpecimenToAdd.size()>0){
                     resultInsertion =FhirResourceProcessor.createSpecimen(resourceBundle.getContext(),
                             this.listOfSpecimenToAdd,
-                            baseServerRepoURI);
+                            baseServerRepoURI,logFileName);
                 }
                 if(resultInsertion!=null)
                 {
@@ -966,10 +970,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedConditionResponse.size());
-                //Identify List of Patient to add and to Update
-                identifyConditionToUpdate(listSolvedConditionResponse);//Always run update identification before the add identification
-                identifyConditionToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -980,12 +980,17 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifyConditionToUpdate(listSolvedConditionResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyConditionToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfConditionToAdd.size()>0){
                     resultInsertion =FhirResourceProcessor.createCondition(resourceBundle.getContext(),
                             this.listOfConditionToAdd,
-                            baseServerRepoURI);
+                            baseServerRepoURI,logFileName);
                 }
                 if(resultInsertion!=null)
                 {
@@ -1065,10 +1070,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedDiagnosticOrderResponse.size());
-                //Identify List of Patient to add and to Update
-                identifyDiagnosticOrderToUpdate(listSolvedDiagnosticOrderResponse);//Always run update identification before the add identification
-                identifyDiagnosticOrderToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -1079,13 +1080,18 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifyDiagnosticOrderToUpdate(listSolvedDiagnosticOrderResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyDiagnosticOrderToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfDiagnosticOrderToAdd.size()>0){
 
                     resultInsertion =FhirResourceProcessor.createDiagnosticOrder(resourceBundle.getContext(),
                             this.listOfDiagnosticOrderToAdd,
-                            baseServerRepoURI);
+                            baseServerRepoURI,logFileName);
                     /*resultInsertion =FhirResourceProcessor.createDiagnosticOrderInTransaction(resourceBundle.getContext(),
                             this.listOfDiagnosticOrderToAdd,
                             baseServerRepoURI);*/
@@ -1168,10 +1174,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedObservationResponse.size());
-                //Identify List of Patient to add and to Update
-                identifyObservationToUpdate(listSolvedObservationResponse);//Always run update identification before the add identification
-                identifyObservationToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -1182,12 +1184,17 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifyObservationToUpdate(listSolvedObservationResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyObservationToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfObservationToAdd.size()>0){
                     resultInsertion =FhirResourceProcessor.createObservation(resourceBundle.getContext(),
                             this.listOfObservationToAdd,
-                            baseServerRepoURI);
+                            baseServerRepoURI,logFileName);
                 }
                 if(resultInsertion!=null)
                 {
@@ -1266,10 +1273,6 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 //finish
                 System.out.println(listSolvedDiagnosticReportResponse.size());
-                //Identify List of Patient to add and to Update
-                identifyDiagnosticReportToUpdate(listSolvedDiagnosticReportResponse);//Always run update identification before the add identification
-                identifyDiagnosticReportToAdd();
-                //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
                 ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
@@ -1280,12 +1283,17 @@ public class DefaultOrchestrator extends UntypedActor {
                         ServerApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
+                //Identify List of Patient to add and to Update
+                identifyDiagnosticReportToUpdate(listSolvedDiagnosticReportResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyDiagnosticReportToAdd();
+                //from the original list of Practitioner found, extract the rest of Practitioner to add
+
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
                 if(listOfDiagnosticReportToAdd.size()>0){
                     resultInsertion =FhirResourceProcessor.createDiagnosticReport(resourceBundle.getContext(),
                             this.listOfDiagnosticReportToAdd,
-                            baseServerRepoURI);
+                            baseServerRepoURI,logFileName);
                 }
                 if(resultInsertion!=null)
                 {
@@ -1528,14 +1536,14 @@ public class DefaultOrchestrator extends UntypedActor {
         }
         return null;
     }
-    void identifyPatientToUpdate(List<String> bundleSearchResultSet)
+    void identifyPatientToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Patient oPatient :resourceBundle.extractPatientFromBundleString(oBundleSearchResult))
+                for (Patient oPatient :resourceBundle.extractPatientFromBundleString(oBundleSearchResult,serverRepoURI))
                 {
                     if(listIdsPatientUsedForSearch.contains(oPatient.getId().getIdPart()))
                     {
@@ -1559,14 +1567,14 @@ public class DefaultOrchestrator extends UntypedActor {
             //return ;
         }
     }
-    void identifyOrganizationToUpdate(List<String> bundleSearchResultSet)
+    void identifyOrganizationToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Organization oOrganization :resourceBundle.extractOrganizationFromBundleString(oBundleSearchResult))
+                for (Organization oOrganization :resourceBundle.extractOrganizationFromBundleString(oBundleSearchResult,serverRepoURI))
                 {
                     if(listIdsOrganizationUsedForSearch.contains(oOrganization.getId().getIdPart()))
                     {
@@ -1591,14 +1599,14 @@ public class DefaultOrchestrator extends UntypedActor {
             //return ;
         }
     }
-    void identifySpecimenToUpdate(List<String> bundleSearchResultSet)
+    void identifySpecimenToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Specimen oSpecimen :resourceBundle.extractSpecimenFromBundleString(oBundleSearchResult))
+                for (Specimen oSpecimen :resourceBundle.extractSpecimenFromBundleString(oBundleSearchResult, serverRepoURI))
                 {
                     if(listIdsSpecimenUsedForSearch.contains(oSpecimen.getId().getIdPart()))
                     {
@@ -1623,14 +1631,14 @@ public class DefaultOrchestrator extends UntypedActor {
             //return ;
         }
     }
-    void identifyConditionToUpdate(List<String> bundleSearchResultSet)
+    void identifyConditionToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Condition oCondition :resourceBundle.extractConditionFromBundleString(oBundleSearchResult))
+                for (Condition oCondition :resourceBundle.extractConditionFromBundleString(oBundleSearchResult,serverRepoURI))
                 {
                     if(listIdsConditionUsedForSearch.contains(oCondition.getId().getIdPart()))
                     {
@@ -1655,14 +1663,14 @@ public class DefaultOrchestrator extends UntypedActor {
             //return ;
         }
     }
-    void identifyDiagnosticOrderToUpdate(List<String> bundleSearchResultSet)
+    void identifyDiagnosticOrderToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (DiagnosticOrder oDiagnosticOrder :resourceBundle.extractDiagnosticOrderFromBundleString(oBundleSearchResult))
+                for (DiagnosticOrder oDiagnosticOrder :resourceBundle.extractDiagnosticOrderFromBundleString(oBundleSearchResult,serverRepoURI))
                 {
                     if(listIdsDiagnosticOrderUsedForSearch.contains(oDiagnosticOrder.getId().getIdPart()))
                     {
@@ -1687,14 +1695,14 @@ public class DefaultOrchestrator extends UntypedActor {
             //return ;
         }
     }
-    void identifyObservationToUpdate(List<String> bundleSearchResultSet)
+    void identifyObservationToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Observation oObservation :resourceBundle.extractObservationFromBundleString(oBundleSearchResult))
+                for (Observation oObservation :resourceBundle.extractObservationFromBundleString(oBundleSearchResult, serverRepoURI))
                 {
                     if(listIdsObservationUsedForSearch.contains(oObservation.getId().getIdPart()))
                     {
@@ -1719,14 +1727,14 @@ public class DefaultOrchestrator extends UntypedActor {
             //return ;
         }
     }
-    void identifyDiagnosticReportToUpdate(List<String> bundleSearchResultSet)
+    void identifyDiagnosticReportToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (DiagnosticReport oDiagnosticReport :resourceBundle.extractDiagnosticReportFromBundleString(oBundleSearchResult))
+                for (DiagnosticReport oDiagnosticReport :resourceBundle.extractDiagnosticReportFromBundleString(oBundleSearchResult,serverRepoURI))
                 {
                     if(listIdsDiagnosticReportUsedForSearch.contains(oDiagnosticReport.getId().getIdPart()))
                     {
@@ -1838,14 +1846,23 @@ public class DefaultOrchestrator extends UntypedActor {
             {
                 listOfIdsForUpdate.add(oSpecimen.getId().getIdPart());
             }
+            String inTheList="";
+            String notInThelist="";
             for(Specimen oSpecimen  : this.listOfValidSpecimen)
             {
                 boolean isToDiscard=false;
+
                 if(listOfIdsForUpdate.contains(oSpecimen.getId().getIdPart())==false)
                 {
                     this.listOfSpecimenToAdd.add(oSpecimen);
+                    inTheList+=oSpecimen.getId().getIdPart()+",";
+                }
+                else
+                {
+                    notInThelist+=oSpecimen.getId().getIdPart()+",";
                 }
             }
+            System.out.print(0);
         }
         catch (Exception exc)
         {

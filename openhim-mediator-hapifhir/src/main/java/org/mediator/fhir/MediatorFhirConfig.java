@@ -661,6 +661,65 @@ public class MediatorFhirConfig {
 
     String trackedEntity;
 
+    public String getResourceTempLocation() {
+        this.resourceTempLocation=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            resourceTempLocation= prop.getProperty("resourceTempLocation");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return resourceTempLocation;
+    }
+
+    String resourceTempLocation;
+
+    public String getDataElementMappingFile() {
+        this.dataElementMappingFile=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            dataElementMappingFile= prop.getProperty("dataElementMappingFile");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return dataElementMappingFile;
+    }
+
+    String dataElementMappingFile;
+
+    public String getFhirAttributeMapping() {
+        this.fhirAttributeMapping=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            fhirAttributeMapping= prop.getProperty("fhirAttributeMapping");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return fhirAttributeMapping;
+    }
+
+    String fhirAttributeMapping;
 
 
 }

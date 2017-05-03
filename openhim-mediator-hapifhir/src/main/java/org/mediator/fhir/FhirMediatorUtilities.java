@@ -11,16 +11,17 @@ import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import scala.util.parsing.combinator.testing.Ident;
 
 import javax.tools.Diagnostic;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
@@ -427,8 +428,36 @@ public class FhirMediatorUtilities {
         }
     }
     public static List<DhisEvent> constructListOfLabEvents(Patient patientToProcess,List<Specimen> listAssociatedSpecimen
-    ,List<Observation> listAssociatedObservation,List<TrackerResourceMap> listTrackerResource)
+    ,List<Observation> listAssociatedObservation,List<TrackerResourceMap> listTrackerResource
+    ,List<DataElement> listDataElementMappingList)
     {
+        String labResultSpecimenIdDataElementId="";
+        String labResultTestResultDataElementId="";
+        String labResultconfirmedDiseaseDataElementId="";
+        String labRequestTestingLabDataElementId="";
+        String labRequestSpecimenTypeDataElementId="";
+        for(DataElement oDataElement:listDataElementMappingList)
+        {
+            String displayName=oDataElement.displayName;
+            switch (displayName)
+            {
+                case "Lab Results/Specimen ID":
+                    labResultSpecimenIdDataElementId=oDataElement.id;
+                    break;
+                case "Lab Results/Test Result":
+                    labResultTestResultDataElementId=oDataElement.id;
+                    break;
+                case "Lab Results/Confirmed Disease":
+                    labResultconfirmedDiseaseDataElementId=oDataElement.id;
+                    break;
+                case "Lab Request/Testing Laboratory":
+                    labRequestTestingLabDataElementId=oDataElement.id;
+                    break;
+                case "Lab Request/Specimen Type":
+                    labRequestSpecimenTypeDataElementId=oDataElement.id;
+                    break;
+            }
+        }
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
         List<DhisEvent> listOfEvent=new ArrayList<>();
         String trackedEntity="";
@@ -451,21 +480,20 @@ public class FhirMediatorUtilities {
                 oEvent.trackedEntityInstance=trackedEntity;
                 oEvent.programStage="aornzRfUbDZ";
                 DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
-                //cal.
                 String builtDate="";
                 builtDate=oDateTime.getYear().toString()+"-";
-                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth().toString():"0"+oDateTime.getMonth().toString();
+                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
                 builtDate+="-";
                 builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
 
                 oEvent.eventDate=builtDate;
 
                 String refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
-                oEvent.addDataValue("Ju7cS1sUwcF",refSpecimenId);
+                oEvent.addDataValue(labResultSpecimenIdDataElementId,refSpecimenId);
                 String testResult=oObservation.getInterpretation().getText();
                 String confirmedDisease=oObservation.getComments();
-                oEvent.addDataValue("ovY6E8BSdto",testResult);
-                oEvent.addDataValue("qIlO7yEpiVv",confirmedDisease);
+                oEvent.addDataValue(labResultTestResultDataElementId,testResult);
+                oEvent.addDataValue(labResultconfirmedDiseaseDataElementId,confirmedDisease);
                 listOfEvent.add(oEvent);
                 //if the current event is the lab result, it means that the request has
                 //been made
@@ -476,18 +504,18 @@ public class FhirMediatorUtilities {
                 oEventRequested.programStage="YLMRmho6SdY";
                 Date oDate=(Date)oObservation.getIssued();
                 DateTimeDt dateTimeIssued=new DateTimeDt(oDate);
-                builtDate="";;
+                builtDate="";
                 builtDate=dateTimeIssued.getYear().toString()+"-";
-                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth().toString():"0"+dateTimeIssued.getMonth().toString();
+                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth()+1:""+dateTimeIssued.getMonth()+1;
                 builtDate+="-";
                 builtDate+=dateTimeIssued.getDay().toString().length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
 
                 oEventRequested.eventDate=builtDate;
                 String refTestingLab=oObservation.getPerformer().get(0).getReference().getIdPart();
-                oEventRequested.addDataValue("ZJTVYdXtUdo",refTestingLab);
+                oEventRequested.addDataValue(labRequestTestingLabDataElementId,refTestingLab);
                 refSpecimenId="";
                 refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
-                oEventRequested.addDataValue("Ju7cS1sUwcF",refSpecimenId);
+                oEventRequested.addDataValue(labResultSpecimenIdDataElementId,refSpecimenId);
                 //Get SpecimenRef to observation
                 Specimen oSpecimenRef=null;
                 for(Specimen oSpecimen: listAssociatedSpecimen)
@@ -498,7 +526,7 @@ public class FhirMediatorUtilities {
                     }
                 }
                 String refSpecimenType=oSpecimenRef.getType().getText();
-                oEventRequested.addDataValue("kL7PTi4lRSl",refSpecimenType);
+                oEventRequested.addDataValue(labRequestSpecimenTypeDataElementId,refSpecimenType);
                 listOfEvent.add(oEventRequested);
 
 
@@ -514,16 +542,16 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeIssued=new DateTimeDt(oDate);
                 String builtDate="";
                 builtDate=dateTimeIssued.getYear().toString()+"-";
-                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth().toString():"0"+dateTimeIssued.getMonth().toString();
+                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth()+1:""+dateTimeIssued.getMonth()+1;
                 builtDate+="-";
                 builtDate+=dateTimeIssued.getDay().toString().length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
 
                 oEventRequested.eventDate=builtDate;
                 String refTestingLab=oObservation.getPerformer().get(0).getReference().getIdPart();
-                oEventRequested.addDataValue("ZJTVYdXtUdo",refTestingLab);
+                oEventRequested.addDataValue(labRequestTestingLabDataElementId,refTestingLab);
                 String refSpecimenId="";
                 refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
-                oEventRequested.addDataValue("Ju7cS1sUwcF",refSpecimenId);
+                oEventRequested.addDataValue(labResultSpecimenIdDataElementId,refSpecimenId);
                 //Get SpecimenRef to observation
                 Specimen oSpecimenRef=null;
                 for(Specimen oSpecimen: listAssociatedSpecimen)
@@ -534,7 +562,7 @@ public class FhirMediatorUtilities {
                     }
                 }
                 String refSpecimenType=oSpecimenRef.getType().getText();
-                oEventRequested.addDataValue("kL7PTi4lRSl",refSpecimenType);
+                oEventRequested.addDataValue(labRequestSpecimenTypeDataElementId,refSpecimenType);
                 listOfEvent.add(oEventRequested);
             }//end elseif oObservation.getStatus()
             //oEvent.dataValues.add()
@@ -564,7 +592,7 @@ public class FhirMediatorUtilities {
         return jsonString;
     }
     public static List<DhisTrackedEntity> constructListOfTrackedEntityInstance(Patient patientToProcess,String trackedEntityId,List<Condition> listAssociatedCondition,
-                                                                   List<DiagnosticReport> listAssociatedDiagnosticReport)
+                                                                   List<DiagnosticReport> listAssociatedDiagnosticReport,List<DataElement> listDataElementMappingList)
     {
         List<DhisTrackedEntity> listOfTrackedEntity=new ArrayList<>();
         String trackedEntity="";
@@ -577,25 +605,85 @@ public class FhirMediatorUtilities {
         }
         DhisTrackedEntity oTrackedEntity=new DhisTrackedEntity();
         oTrackedEntity.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
-        oTrackedEntity.trackedEntity=trackedEntityId;
-        oTrackedEntity.addAttribute("BChcyqBJCQN",patientToProcess.getId().getIdPart()
+        if(trackedEntityId!=null) {
+            oTrackedEntity.trackedEntity = trackedEntityId;
+        }
+        String uniqueCaseDataElementId="";
+        String firstNameDataElementId="";
+        String lastNameDataElementId="";
+        String dateOfBirthDataElementId="";
+        String villageDataElementId="";
+        String notifiableDiseaseDataElementId="";
+        String mainSymptomDataElementId="";
+        String classificationDataElementId="";
+        String immediateOutcomeDataElementId="";
+        for(DataElement oDataElement:listDataElementMappingList)
+        {
+            String displayName=oDataElement.displayName;
+            switch (displayName)
+            {
+                case "Unique Case ID":
+                    uniqueCaseDataElementId=oDataElement.id;
+                    break;
+                case "First Name":
+                    firstNameDataElementId=oDataElement.id;
+                    break;
+                case "Last name":
+                    lastNameDataElementId=oDataElement.id;
+                    break;
+                case "Age (Years)":
+                    dateOfBirthDataElementId=oDataElement.id;
+                    break;
+                case "Village/Domicile":
+                    villageDataElementId=oDataElement.id;
+                    break;
+                case "Notifiable Disease/Condition":
+                    notifiableDiseaseDataElementId=oDataElement.id;
+                    break;
+                case "Main Symptom":
+                    mainSymptomDataElementId=oDataElement.id;
+                    break;
+                case "Classification of disease/event":
+                    classificationDataElementId=oDataElement.id;
+                    break;
+                case "Immediate Outcome":
+                    immediateOutcomeDataElementId=oDataElement.id;
+                    break;
+            }
+        }
+
+
+
+        //for(DataElement)
+        oTrackedEntity.addAttribute(uniqueCaseDataElementId,patientToProcess.getId().getIdPart()
                 .split("-")[0]);
-        oTrackedEntity.addAttribute("sB1IHYu2xQT",patientToProcess.getName().get(0)
-                .getFamily().get(0).toString());
-        oTrackedEntity.addAttribute("OhGYnwya3jg",patientToProcess.getName().get(0)
-                .getGiven().get(0).toString());
-        if(patientToProcess.getBirthDate().toString()!="")
+        if(patientToProcess.getName()!=null)
+        {
+            oTrackedEntity.addAttribute(firstNameDataElementId,patientToProcess.getName().get(0)
+                    .getFamily().get(0).toString());
+            oTrackedEntity.addAttribute(lastNameDataElementId,patientToProcess.getName().get(0)
+                    .getGiven().get(0).toString());
+        }
+
+        if(patientToProcess.getBirthDate()!=null)
         {
             DateTimeDt dateTimeBirth=new DateTimeDt(patientToProcess.getBirthDate());
             String builtDate="";
             builtDate=dateTimeBirth.getYear().toString()+"-";
-            builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth().toString():"0"+dateTimeBirth.getMonth().toString();
+            builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
             builtDate+="-";
             builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
-            oTrackedEntity.addAttribute("UezutfURtQG",builtDate);
+            Date date= new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            int currentYear = cal.get(Calendar.YEAR);
+            int age=currentYear-dateTimeBirth.getYear();
+            oTrackedEntity.addAttribute(dateOfBirthDataElementId,""+age);
 
         }
-        oTrackedEntity.addAttribute("ttjZl7jvrRj",patientToProcess.getAddress().get(0).getText());
+        if(patientToProcess.getAddress().size()>0) {
+            oTrackedEntity.addAttribute(villageDataElementId, patientToProcess.getAddress().get(0).getText());
+        }
 
 
 
@@ -603,12 +691,12 @@ public class FhirMediatorUtilities {
         {
             if(oCondition.getCode().getText()!="")
             {
-                oTrackedEntity.addAttribute("rpkGPScBEus",oCondition.getCode().getText());
+                oTrackedEntity.addAttribute(notifiableDiseaseDataElementId,oCondition.getCode().getText());
 
             }
             if(oCondition.getCategory().getText()!="")
             {
-                oTrackedEntity.addAttribute("TwGc5gV9ZXZ",oCondition.getCategory().getText());
+                oTrackedEntity.addAttribute(mainSymptomDataElementId,oCondition.getCategory().getText());
 
             }
 
@@ -617,18 +705,22 @@ public class FhirMediatorUtilities {
         {
             if(oReport.getConclusion()!="")
             {
-                oTrackedEntity.addAttribute("Rx2fEI9zDJ3",oReport.getConclusion());
+                oTrackedEntity.addAttribute(classificationDataElementId,oReport.getConclusion());
             }
 
         }
         IDatatype oDeceased=patientToProcess.getDeceased();
-        if (oDeceased.toString().equals("true"))
+        if(oDeceased!=null)
         {
-            oTrackedEntity.addAttribute("Fs892x4qy0d","Dead");
-        }
-        else
-        {
-            oTrackedEntity.addAttribute("Fs892x4qy0d","Alive");
+
+            if (oDeceased.toString().equals("true"))
+            {
+                oTrackedEntity.addAttribute(immediateOutcomeDataElementId,"Dead");
+            }
+            else
+            {
+                oTrackedEntity.addAttribute(immediateOutcomeDataElementId,"Alive");
+            }
         }
         listOfTrackedEntity.add(oTrackedEntity);
         return listOfTrackedEntity;
@@ -644,6 +736,81 @@ public class FhirMediatorUtilities {
             jsonString=gson.toJson(oTrackedEntity);
         }
         return jsonString;
+    }
+    public static List<String> getListOfFile(String directoryName)
+    {
+        List<String> listOfFile=new ArrayList<>();
+        File directory=new File(directoryName);
+        long startTime = System.currentTimeMillis();
+        long elapsedTime = 0L;
+        while (elapsedTime < 2*30*1000) {
+            elapsedTime = (new Date()).getTime() - startTime;
+        }
+
+        for(File oFile : directory.listFiles())
+        {
+            listOfFile.add(oFile.getName());
+        }
+        return listOfFile;
+    }
+    public static Bundle getBundleObjectFromJsonFile(String filePath) throws Exception
+    {
+        Gson gson=new Gson();
+        Bundle oBundle=null;
+        try {
+            FileReader oFileReader = new FileReader(filePath);
+            oBundle= gson.fromJson(oFileReader, Bundle.class);
+            //return oBundle;
+        }
+        catch (IOException exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return oBundle;
+    }
+    public static List<DataElement> getDataElementMapping (String filePath) throws Exception
+    {
+        List<DataElement> listDataElement=new ArrayList<>();
+        Gson gson=new Gson();
+        try {
+            JsonArray json=(JsonArray)gson.fromJson(new FileReader(filePath), JsonElement.class);
+            for(int iterator=0;iterator<json.size();iterator++)
+            {
+                JsonElement oElement=json.get(iterator);
+                DataElement oDataElement=gson.fromJson(oElement,DataElement.class);
+                listDataElement.add(oDataElement);
+
+            }
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return listDataElement;
+    }
+    public static PatientFhirMapping getPatientMappingAttributes (String filePath) throws Exception
+    {
+        PatientFhirMapping patientAttributeMapping=new PatientFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonArray json=(JsonArray)gson.fromJson(new FileReader(filePath), JsonElement.class);
+            for(int iterator=0;iterator<json.size();iterator++)
+            {
+                JsonElement oElement=json.get(iterator);
+                if(oElement.toString()=="patient_attribute_mapping")
+                {
+                    patientAttributeMapping=gson.fromJson(oElement,PatientFhirMapping.class);
+                }
+
+            }
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return patientAttributeMapping;
     }
 
 

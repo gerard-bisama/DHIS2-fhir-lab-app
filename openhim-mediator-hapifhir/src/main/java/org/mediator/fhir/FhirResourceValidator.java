@@ -2,25 +2,20 @@ package org.mediator.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Practitioner;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Specimen;
-import ca.uhn.fhir.model.dstu2.resource.Condition;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 //import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 
 
@@ -441,6 +436,79 @@ public class FhirResourceValidator  {
         }
         return isProcessed;
     }
+    public boolean processBundleJsonResourceWithoutValidation(String filePathError,String sourceServerURI) throws Exception
+    {
+        boolean isProcessed=false;
+
+        if(this._jsonResource.toString().length()<2)
+        {
+            throw new Exception("Invalid  Json resource");
+        }
+        Bundle oBundle=_parser.parseResource(Bundle.class,this._jsonResource.toString());
+        if(oBundle!=null )
+        {
+            if(oBundle.getEntry().size()==0)
+            {
+                throw new Exception("No entries found in the Bundle");
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                listOfPractitioners=fhirProcessor.getListOfPractitioner();
+                listOfPatient=fhirProcessor.getListOfPatient();
+                listOfOrganization=fhirProcessor.getListOfOrganization();
+                listOfSpecimen=fhirProcessor.getListOfSpecimen();
+                listOfCondition=fhirProcessor.getListOfCondition();
+                listOfDiagnosticOrder=fhirProcessor.getListOfDiagnosticOrder();
+                listOfObservation=fhirProcessor.getListOfObservation();
+                listOfDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
+
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+
+                    //There is additional ressource to Extract
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    listOfPractitioners.addAll(fhirProcessor.getListOfPractitioner());
+                    listOfPatient.addAll(fhirProcessor.getListOfPatient());
+                    listOfOrganization.addAll(fhirProcessor.getListOfOrganization());
+                    listOfSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                    listOfCondition.addAll(fhirProcessor.getListOfCondition());
+                    listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
+                    listOfObservation.addAll(fhirProcessor.getListOfObservation());
+                    listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        listOfPractitioners.addAll(fhirProcessor.getListOfPractitioner());
+                        listOfPatient.addAll(fhirProcessor.getListOfPatient());
+                        listOfOrganization.addAll(fhirProcessor.getListOfOrganization());
+                        listOfSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                        listOfCondition.addAll(fhirProcessor.getListOfCondition());
+                        listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
+                        listOfObservation.addAll(fhirProcessor.getListOfObservation());
+                        listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                        //nextPageBundle=subNextBundle.copy();
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
+                //Get the Valide Resource
+                isProcessed=true;
+            }
+        }
+        else
+        {
+            throw new Exception("Failed to parse the json string to Bundle");
+        }
+        return isProcessed;
+    }
     public boolean processBundleEntryResource(Bundle bundleToProcess,String filePathError,String sourceServerURI) throws Exception
     {
         boolean isProcessed=false;
@@ -665,7 +733,7 @@ public class FhirResourceValidator  {
 
         return extractedPractitioner;
     }
-    public List<Patient> extractPatientFromBundleString(String bundleJsonString) throws Exception
+    public List<Patient> extractPatientFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
     {
         List<Patient> extractedPatient=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -682,6 +750,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedPatient=fhirProcessor.getListOfPatient();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedPatient.addAll(fhirProcessor.getListOfPatient());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedPatient.addAll(fhirProcessor.getListOfPatient());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -689,7 +775,7 @@ public class FhirResourceValidator  {
 
         return extractedPatient;
     }
-    public List<Organization> extractOrganizationFromBundleString(String bundleJsonString) throws Exception
+    public List<Organization> extractOrganizationFromBundleString(String bundleJsonString,String sourceServerURI ) throws Exception
     {
         List<Organization> extractedOrganization=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -706,6 +792,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedOrganization=fhirProcessor.getListOfOrganization();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedOrganization.addAll(fhirProcessor.getListOfOrganization());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedOrganization.addAll(fhirProcessor.getListOfOrganization());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -713,7 +817,7 @@ public class FhirResourceValidator  {
 
         return extractedOrganization;
     }
-    public List<Specimen> extractSpecimenFromBundleString(String bundleJsonString) throws Exception
+    public List<Specimen> extractSpecimenFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
     {
         List<Specimen> extractedSpecimen=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -730,6 +834,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedSpecimen=fhirProcessor.getListOfSpecimen();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedSpecimen.addAll(fhirProcessor.getListOfSpecimen());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -737,7 +859,7 @@ public class FhirResourceValidator  {
 
         return extractedSpecimen;
     }
-    public List<Condition> extractConditionFromBundleString(String bundleJsonString) throws Exception
+    public List<Condition> extractConditionFromBundleString(String bundleJsonString, String sourceServerURI) throws Exception
     {
         List<Condition> extractedCondition=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -754,6 +876,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedCondition=fhirProcessor.getListOfCondition();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedCondition.addAll(fhirProcessor.getListOfCondition());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedCondition.addAll(fhirProcessor.getListOfCondition());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -761,7 +901,7 @@ public class FhirResourceValidator  {
 
         return extractedCondition;
     }
-    public List<DiagnosticOrder> extractDiagnosticOrderFromBundleString(String bundleJsonString) throws Exception
+    public List<DiagnosticOrder> extractDiagnosticOrderFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
     {
         List<DiagnosticOrder> extractedDiagnosticOrder=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -778,6 +918,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedDiagnosticOrder=fhirProcessor.getListOfDiagnosticOrder();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -785,7 +943,7 @@ public class FhirResourceValidator  {
 
         return extractedDiagnosticOrder;
     }
-    public List<Observation> extractObservationFromBundleString(String bundleJsonString) throws Exception
+    public List<Observation> extractObservationFromBundleString(String bundleJsonString, String sourceServerURI) throws Exception
     {
         List<Observation> extractedObservation=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -802,6 +960,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedObservation=fhirProcessor.getListOfObservation();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedObservation.addAll(fhirProcessor.getListOfObservation());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedObservation.addAll(fhirProcessor.getListOfObservation());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -809,7 +985,7 @@ public class FhirResourceValidator  {
 
         return extractedObservation;
     }
-    public List<DiagnosticReport> extractDiagnosticReportFromBundleString(String bundleJsonString) throws Exception
+    public List<DiagnosticReport> extractDiagnosticReportFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
     {
         List<DiagnosticReport> extractedDiagnosticReport=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -826,6 +1002,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }
@@ -1207,12 +1401,12 @@ class FhirResourceProcessor
         }
         return  stringTransactionResult;
     }
-    public static String createPatient(FhirContext oContext,List<Patient> listOfPatient,String serverUrl) throws Exception
+    public static String createPatient(FhirContext oContext,List<Patient> listOfPatient,String serverUrl
+    ,String logFileName) throws Exception
     {
         MethodOutcome respOutcome=null;
         String stringTransactionResult="{TransactionResultStatus:no}";
-        try
-        {
+
             IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
 
             int compter=0;
@@ -1220,14 +1414,25 @@ class FhirResourceProcessor
             int total=listOfPatient.size();
             for(Patient oPatient: listOfPatient)
             {
-                respOutcome=client.update()
-                        .resource(oPatient)
-                        .prettyPrint()
-                        .encodedJson()
-                        .execute();
-                if(respOutcome.getCreated())
+                try {
+                    //specimenToTrace = oSpecimen;
+                    respOutcome = client.update()
+                            .resource(oPatient)
+                            .prettyPrint()
+                            .encodedJson()
+                            .execute();
+                    if(respOutcome.getCreated())
+                    {
+                        nbreResourceCreated++;
+                    }
+                }
+                catch (Exception exc)
                 {
-                    nbreResourceCreated++;
+                    FhirMediatorUtilities.writeInLogFile(logFileName,
+                            oPatient.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+                    continue;
+
+                    //throw new Exception(exc.getMessage());
                 }
             }
             int success=nbreResourceCreated;
@@ -1235,12 +1440,6 @@ class FhirResourceProcessor
             stringTransactionResult="total:"+total+"," +
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
-
-        }
-        catch (Exception exc)
-        {
-            throw new Exception(exc.getMessage());
-        }
         return  stringTransactionResult;
     }
     public static String createOrganization(FhirContext oContext,List<Organization> listOfOrganization,String serverUrl) throws Exception
@@ -1315,12 +1514,13 @@ class FhirResourceProcessor
         }
         return  stringTransactionResult;
     }
-    public static String createSpecimen(FhirContext oContext,List<Specimen> listOfSpecimen,String serverUrl) throws Exception
+    public static String createSpecimen(FhirContext oContext,List<Specimen> listOfSpecimen,String serverUrl,
+                                        String logFileName)
     {
         MethodOutcome respOutcome=null;
         String stringTransactionResult="{TransactionResultStatus:no}";
-        try
-        {
+        Specimen specimenToTrace=null;
+
             IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
 
             int compter=0;
@@ -1328,15 +1528,27 @@ class FhirResourceProcessor
             int total=listOfSpecimen.size();
             for(Specimen oSpecimen: listOfSpecimen)
             {
-                respOutcome=client.update()
-                        .resource(oSpecimen)
-                        .prettyPrint()
-                        .encodedJson()
-                        .execute();
-                if(respOutcome.getCreated())
-                {
-                    nbreResourceCreated++;
+                try {
+                    //specimenToTrace = oSpecimen;
+                    respOutcome = client.update()
+                            .resource(oSpecimen)
+                            .prettyPrint()
+                            .encodedJson()
+                            .execute();
+                    if(respOutcome.getCreated())
+                    {
+                        nbreResourceCreated++;
+                    }
                 }
+                catch (Exception exc)
+                {
+                    FhirMediatorUtilities.writeInLogFile(logFileName,
+                            oSpecimen.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+                    continue;
+
+                    //throw new Exception(exc.getMessage());
+                }
+
             }
             int success=nbreResourceCreated;
             int failed=total-success;
@@ -1344,14 +1556,10 @@ class FhirResourceProcessor
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
 
-        }
-        catch (Exception exc)
-        {
-            throw new Exception(exc.getMessage());
-        }
         return  stringTransactionResult;
     }
-    public static String createCondition(FhirContext oContext,List<Condition> listOfCondition,String serverUrl) throws Exception
+    public static String createCondition(FhirContext oContext,List<Condition> listOfCondition,String serverUrl
+    ,String logFileName) throws Exception
     {
         MethodOutcome respOutcome=null;
         String stringTransactionResult="{TransactionResultStatus:no}";
@@ -1364,14 +1572,25 @@ class FhirResourceProcessor
             int total=listOfCondition.size();
             for(Condition oCondition: listOfCondition)
             {
-                respOutcome=client.update()
-                        .resource(oCondition)
-                        .prettyPrint()
-                        .encodedJson()
-                        .execute();
-                if(respOutcome.getCreated())
+                try {
+                    //specimenToTrace = oSpecimen;
+                    respOutcome = client.update()
+                            .resource(oCondition)
+                            .prettyPrint()
+                            .encodedJson()
+                            .execute();
+                    if(respOutcome.getCreated())
+                    {
+                        nbreResourceCreated++;
+                    }
+                }
+                catch (Exception exc)
                 {
-                    nbreResourceCreated++;
+                    FhirMediatorUtilities.writeInLogFile(logFileName,
+                            oCondition.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+                    continue;
+
+                    //throw new Exception(exc.getMessage());
                 }
             }
             int success=nbreResourceCreated;
@@ -1387,12 +1606,11 @@ class FhirResourceProcessor
         }
         return  stringTransactionResult;
     }
-    public static String createDiagnosticOrder(FhirContext oContext,List<DiagnosticOrder> listOfDiagnosticOrder,String serverUrl) throws Exception
+    public static String createDiagnosticOrder(FhirContext oContext,List<DiagnosticOrder> listOfDiagnosticOrder,String serverUrl
+    , String logFileName) throws Exception
     {
         MethodOutcome respOutcome=null;
         String stringTransactionResult="{TransactionResultStatus:no}";
-        try
-        {
             IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
 
             int compter=0;
@@ -1414,6 +1632,9 @@ class FhirResourceProcessor
                 }
                 catch (Exception exc)
                 {
+                    FhirMediatorUtilities.writeInLogFile(logFileName,
+                            oDiagnosticOrder.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+
                     continue;
                 }
 
@@ -1423,20 +1644,13 @@ class FhirResourceProcessor
             stringTransactionResult="total:"+total+"," +
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
-
-        }
-        catch (Exception exc)
-        {
-            throw new Exception(exc.getMessage());
-        }
         return  stringTransactionResult;
     }
-    public static String createObservation(FhirContext oContext,List<Observation> listOfObservation,String serverUrl) throws Exception
+    public static String createObservation(FhirContext oContext,List<Observation> listOfObservation,String serverUrl
+    , String logFileName) throws Exception
     {
         MethodOutcome respOutcome=null;
         String stringTransactionResult="{TransactionResultStatus:no}";
-        try
-        {
             IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
 
             int compter=0;
@@ -1444,14 +1658,24 @@ class FhirResourceProcessor
             int total=listOfObservation.size();
             for(Observation oObservation: listOfObservation)
             {
-                respOutcome=client.update()
-                        .resource(oObservation)
-                        .prettyPrint()
-                        .encodedJson()
-                        .execute();
-                if(respOutcome.getCreated())
+                try
                 {
-                    nbreResourceCreated++;
+                    respOutcome=client.update()
+                            .resource(oObservation)
+                            .prettyPrint()
+                            .encodedJson()
+                            .execute();
+                    if(respOutcome.getCreated())
+                    {
+                        nbreResourceCreated++;
+                    }
+                }
+                catch (Exception exc)
+                {
+                    FhirMediatorUtilities.writeInLogFile(logFileName,
+                            oObservation.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+
+                    continue;
                 }
             }
             int success=nbreResourceCreated;
@@ -1459,20 +1683,13 @@ class FhirResourceProcessor
             stringTransactionResult="total:"+total+"," +
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
-
-        }
-        catch (Exception exc)
-        {
-            throw new Exception(exc.getMessage());
-        }
         return  stringTransactionResult;
     }
-    public static String createDiagnosticReport(FhirContext oContext,List<DiagnosticReport> listOfDiagnosticReport,String serverUrl) throws Exception
+    public static String createDiagnosticReport(FhirContext oContext,List<DiagnosticReport> listOfDiagnosticReport,String serverUrl
+    ,String logFileName) throws Exception
     {
         MethodOutcome respOutcome=null;
         String stringTransactionResult="{TransactionResultStatus:no}";
-        try
-        {
             IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
 
             int compter=0;
@@ -1480,14 +1697,24 @@ class FhirResourceProcessor
             int total=listOfDiagnosticReport.size();
             for(DiagnosticReport oDiagnosticReport: listOfDiagnosticReport)
             {
-                respOutcome=client.update()
-                        .resource(oDiagnosticReport)
-                        .prettyPrint()
-                        .encodedJson()
-                        .execute();
-                if(respOutcome.getCreated())
+                try
                 {
-                    nbreResourceCreated++;
+                    respOutcome=client.update()
+                            .resource(oDiagnosticReport)
+                            .prettyPrint()
+                            .encodedJson()
+                            .execute();
+                    if(respOutcome.getCreated())
+                    {
+                        nbreResourceCreated++;
+                    }
+                }
+                catch (Exception exc)
+                {
+                    FhirMediatorUtilities.writeInLogFile(logFileName,
+                            oDiagnosticReport.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+
+                    continue;
                 }
             }
             int success=nbreResourceCreated;
@@ -1495,12 +1722,6 @@ class FhirResourceProcessor
             stringTransactionResult="total:"+total+"," +
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
-
-        }
-        catch (Exception exc)
-        {
-            throw new Exception(exc.getMessage());
-        }
         return  stringTransactionResult;
     }
 
@@ -1839,6 +2060,49 @@ class FhirResourceProcessor
             throw new Exception(exc.getMessage());
         }
         return stringTransactionResult;
+    }
+    public static List<Condition> getListConditionTrackedForPatient(FhirContext oContext,String patientId,String serverUrl,String logFileName)
+    {
+        List<Condition> listOfAssociatedCondition=new ArrayList<>();
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            Bundle oBundle=client.search()
+                    .forResource(Condition.class)
+                    .where(new StringClientParam("patient").matches().value(patientId))
+                    .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+                    .execute();
+            for(Entry oEntry:oBundle.getEntry())
+            {
+                listOfAssociatedCondition.add((Condition)oEntry.getResource());
+            }
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
+        return listOfAssociatedCondition;
+    }
+    public static void deleteBundle(FhirContext oContext, IdDt idBundle, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            IBaseOperationOutcome resp=client.delete().resourceById(idBundle)
+                    .execute();
+            if(resp!=null)
+            {
+                OperationOutcome outcome = (OperationOutcome) resp;
+                System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+            }
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
     }
 
 

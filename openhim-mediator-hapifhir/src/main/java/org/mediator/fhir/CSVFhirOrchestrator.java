@@ -213,6 +213,18 @@ public class CSVFhirOrchestrator extends UntypedActor {
         try
         {
             if (response.getStatusCode() == HttpStatus.SC_OK) {
+                String tempPathResource=this.mediatorConfiguration.getResourceTempLocation();
+                List<String> listOfBundleFile=FhirMediatorUtilities.getListOfFile(tempPathResource);
+                //for(String )
+                for(String oFileResource:listOfBundleFile)
+                {
+                    String filePath=this.mediatorConfiguration.getResourceTempLocation()+
+                            "/"+oFileResource;
+                    Bundle oExtractedBundle=FhirMediatorUtilities.getBundleObjectFromJsonFile(
+                            filePath
+                    );
+                }
+
                 StringBuilder strResponse=new StringBuilder();
                 //Copy the response Char by char to avoid the string size limitation issues
                 strResponse.append(response.getBody());

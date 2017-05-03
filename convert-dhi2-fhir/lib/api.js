@@ -128,7 +128,7 @@ exports.GetDataElementsFromProgramStages= function GetDataElementsFromProgramSta
 }
 exports.getAllProgramEvents= function getAllProgramEvents(programId,listoProgramStages,callback)
 {
-	var urlRequest=`${serverUrl}/events.json?program=${programId}&paging=false&fields=:all`;
+	var urlRequest=`${serverUrl}/events.json?program=${programId}&skipPaging=true&fields=:all`;
 	var request = new XMLHttpRequest();
 	request.open('GET',urlRequest, true);
 	request.setRequestHeader( 'Content-Type',   'application/json' );
@@ -265,7 +265,7 @@ exports.GetTrackedEntityInstancesFromOrgunitListAndProgramIdAndKeepDataElementsT
 		
 	}
 	queryPrograms=programId;
-	var urlRequest=`${serverUrl}/trackedEntityInstances.json?ou=${queryOrgUnits}&program=${queryPrograms}&paging=false&fields=:all`;
+	var urlRequest=`${serverUrl}/trackedEntityInstances.json?ou=${queryOrgUnits}&program=${queryPrograms}&skipPaging=true&fields=:all`;
 	//console.log(urlRequest);
 	var request = new XMLHttpRequest();
 	request.open('GET',urlRequest, true);
@@ -337,7 +337,7 @@ exports.getProgramMetaDataInfo= function getProgramMetaDataInfo(programId,callba
 	request.send();
 	
 }
-exports.getProgramStageMetaDataInfo= function getProgramStageMetaDataInfo(programStageIds,listOfAttributeFields,callback)
+exports.getProgramStageMetaDataInfo= function getProgramStageMetaDataInfo(programStageIds,listOfAttributeFields,listDisplayNameIdMapping,callback)
 {
 	var queryStageIds="";
 	for(var i=0;i<programStageIds.length;i++)
@@ -360,7 +360,7 @@ exports.getProgramStageMetaDataInfo= function getProgramStageMetaDataInfo(progra
 	request.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
         var myArr = JSON.parse(this.responseText);
-        var modifierArray=[myArr,listOfAttributeFields,programStageIds];
+        var modifierArray=[myArr,listOfAttributeFields,programStageIds,listDisplayNameIdMapping];
         //console.log(myArr);
         return callback(modifierArray);
 		}
@@ -369,7 +369,7 @@ exports.getProgramStageMetaDataInfo= function getProgramStageMetaDataInfo(progra
 	request.send();
 	
 }
-exports.getDatsElementsMetaDataInfo= function getDatsElementsMetaDataInfo(dataElemtsIds,progStage,listOfAttributeFields,callback)
+exports.getDatsElementsMetaDataInfo= function getDatsElementsMetaDataInfo(dataElemtsIds,progStage,listOfAttributeFields,listDisplayNameIdMapping,callback)
 {
 	var urlRequest=`${serverUrl}/dataElements.json?paging=false&filter=id:in:[${dataElemtsIds}]`;
 	var request = new XMLHttpRequest();
@@ -380,7 +380,7 @@ exports.getDatsElementsMetaDataInfo= function getDatsElementsMetaDataInfo(dataEl
 	request.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
         var myArr = JSON.parse(this.responseText);
-        var modifierArray=[progStage,myArr,listOfAttributeFields];
+        var modifierArray=[progStage,myArr,listOfAttributeFields,listDisplayNameIdMapping];
         //myArr.push("parent");
         //console.log(myArr);
         return callback(modifierArray);
@@ -478,11 +478,16 @@ function ReadJSONFile(fileName)
 	var jsonContent = JSON.parse(contents);
 	return jsonContent;
 }
+exports.writeJSONFile= function writeJSONFile(fileName,jsonContent)
+{
+	var filePath=manifest.temp_directory+fileName+".json";
+	var res = fs.writeFileSync(filePath,jsonContent,"utf-8");
+}
 exports.generateCSVFile = function generateCSVFile(listHeader,filename,programName)
 {
 	
 	var writer = csvWriter({ headers: listHeader});
-	writer.pipe(fs.createWriteStream('/home/server-hit/Documents/datalab/'+filename+'.csv'));
+	writer.pipe(fs.createWriteStream(manifest.temp_directory+filename+'.csv'));
 	var listContentCSV=[];
 	listContentCSV.push(programName);
 	for(var i=0;i<listHeader.length-1;i++)

@@ -2620,7 +2620,7 @@
 							oIdentifier.type={"text":"Medical Record Number"};
 							oIdentifier.system="http://hl7.org/fhir/";
 							oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
-							oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value+"-";
+							oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value.trim()+"-";
 							listOfIdentifier.push(oIdentifier);
 							PatientSet=true;
 							break;
@@ -2658,8 +2658,23 @@
 							PatientSet=true;;
 						break;
 						case patientAttributesMapping.birthDate:
-							oPatient.birthDate=oTrackedEntity.attributes[iteratorAttribute].value;
-							PatientSet=true;
+							if(oTrackedEntity.attributes[iteratorAttribute].value!="" && oTrackedEntity.attributes[iteratorAttribute].value.includes("-")==false)
+							{
+								var currentYear=new Date().getFullYear();
+								var ageOfPatient=parseInt(oTrackedEntity.attributes[iteratorAttribute].value);
+								var yearOfBirth=currentYear-ageOfPatient;
+								//console.log(yearOfBirth);
+								var dateOfBirth=""+yearOfBirth+"-01-01";
+								oPatient.birthDate=dateOfBirth;
+								PatientSet=true;
+								//console.log(new Date().getFullYear()-patientAttributesMapping.birthDate);
+							}
+							else if(oTrackedEntity.attributes[iteratorAttribute].value!="" && oTrackedEntity.attributes[iteratorAttribute].value.includes("-")==true)
+							{
+								oPatient.birthDate=oTrackedEntity.attributes[iteratorAttribute].value;
+								PatientSet=true;
+							}
+							
 						case patientAttributesMapping.deceasedBoolean:
 							if(oTrackedEntity.attributes[iteratorAttribute].value=="Alive")
 							{
@@ -2742,19 +2757,6 @@
 			var listOfConditionIdentifier=[];
 			var conditionIsSet=false;
 			
-			//Order Initialization
-			var oOrder={};
-			oOrder= Object.create(DiagnosticOrder);
-			oOrder.resourceType="DiagnosticOrder";
-			var listOfOrderIdentifier=[];
-			var oOrderEvent={};
-			oOrderEvent= Object.create(OrderEvent);
-			oOrder.specimen=[];
-			oOrder.supportingInformation=[];
-			var orderIsSet=false;
-			//console.log(oEvent);
-			//console.log("----------------------------------------");
-			
 			//Observation initialization
 			var oObservation={};
 			oObservation= Object.create(Observation);
@@ -2811,7 +2813,7 @@
 						oIdentifier.type={"text":"Specimen Identification"};
 						oIdentifier.system="http://hl7.org/fhir/";
 						oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
-						oSpecimen.id=oEvent.dataValues[iteratorDataValues].value+"-";
+						oSpecimen.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
 						listOfSpecimenIdentifier.push(oIdentifier);
 						specimenIsSet=true;
 						continue;
@@ -2841,10 +2843,10 @@
 							specimenIsSet=true;
 							break;
 						case specimenAttributesMapping.receivedTime:
-							oSpecimen.receivedTime=oEvent.dataValues[iteratorDataValues].value;
+							oSpecimen.receivedTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
 							break;
 						case specimenAttributesMapping.collectedDateTime:
-							oCollection.collectedDateTime=oEvent.dataValues[iteratorDataValues].value;
+							oCollection.collectedDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
 							hasCollectionInfo=true;
 							specimenIsSet=true;
 							break;
@@ -2931,16 +2933,16 @@
 							conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.patient:
-							oCondition.patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
-							conditionIsSet=true;
+							//oCondition.patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							//conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.encounter:
 							oCondition.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
 							conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.dateRecorded:
-							oCondition.dateRecorded=extractDateFromDateTime(oEvent.dataValues[iteratorDataValues].value);
-							conditionIsSet=true;
+							//oCondition.dateRecorded=extractDateFromDateTime(oEvent.dataValues[iteratorDataValues].value);
+							//conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.code:
 							var  oConcept={};
@@ -2975,97 +2977,13 @@
 							conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.onsetDateTime:
-							oCondition.onsetDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
-							conditionIsSet=true;
+							//oCondition.onsetDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							//conditionIsSet=true;
 							break;
 					}//End of switch
 					
 				}
-				inTheList=false;
-				itemListAttributesMapping=[];
-				itemListAttributesMapping=getListOfDiagnosticOrderAttributeMapping();
-				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
-				if(inTheList==true)
-				{
-					switch(oAttribute)
-					{
-						case orderAttributesMapping.identifier:
-							var oIdentifier={};
-							oIdentifier=Object.create(Identifier);
-							//assignment of Identifier
-							oIdentifier.use="official";
-							oIdentifier.type={"text":"Order Identification"};
-							oIdentifier.system="http://hl7.org/fhir/";
-							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
-							listOfOrderIdentifier.push(oIdentifier);
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.subject:
-							oOrder.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.orderer:
-							oOrder.orderer={"reference":"Practitioner/"+oEvent.dataValues[iteratorDataValues].value};
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.encounter:
-							oOrder.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.reason:
-							var oConcept={};
-							oConcept= Object.create(CodeableConcept);
-							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
-							oOrder.reason=[oConcept];
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.supportingInformation:
-							oOrder.supportingInformation=[oEvent.dataValues[iteratorDataValues]];
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.specimen:
-							oOrder.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value};
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.status:
-							oOrder.status=oEvent.dataValues[iteratorDataValues].value;
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.priority:
-							oOrder.priority=oEvent.dataValues[iteratorDataValues].value;
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.orderEvent_dateTime:
-							oOrderEvent.dateTime=oEvent.dataValues[iteratorDataValues].value;
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.orderEvent_status:
-							oOrderEvent.status=oEvent.dataValues[iteratorDataValues].value;
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.orderEvent_description:
-							var oConcept={};
-							oConcept= Object.create(CodeableConcept);
-							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
-							oOrderEvent.description=oConcept;
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.item:
-							var oConcept={};
-							oConcept= Object.create(CodeableConcept);
-							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
-							oOrder.item=[oConcept];
-							orderIsSet=true;
-							break;
-						case orderAttributesMapping.note:
-							oOrder.note={"text":oEvent.dataValues[iteratorDataValues].value};
-							orderIsSet=true;
-							break;
-						
-					}
-						
-				}
-			
+				
 				inTheList=false;
 				itemListAttributesMapping=[];
 				itemListAttributesMapping=getListOfObservationAttributeMapping();
@@ -3113,15 +3031,15 @@
 							observationIsSet=true;
 							break;
 						case observationAttributesMapping.subject:
-							oObservation.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
-							observationIsSet=true;
+							//oObservation.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
 							break;
 						case observationAttributesMapping.encounter:
 							oObservation.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
 							observationIsSet=true;
 							break;
 						case observationAttributesMapping.effectiveDateTime:
-							oObservation.effectiveDateTime=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
 							observationIsSet=true;
 							break;
 						case observationAttributesMapping.effectivePeriod_dateSup:
@@ -3136,6 +3054,7 @@
 							break;
 						case observationAttributesMapping.issued:
 							oObservation.issued=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							observationIsSet=true;
 							break;
 						case observationAttributesMapping.valueQuantity_unit:
 							oValueQuantity.unit=oEvent.dataValues[iteratorDataValues].value;
@@ -3259,12 +3178,12 @@
 							observationIsSet=true;
 							break;
 						case observationAttributesMapping.specimen:
-							oObservation.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value};
-							observationIsSet=true;
+							//oObservation.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
 							break;
 						case observationAttributesMapping.device:
-							oObservation.device={"reference":"Device/"+oEvent.dataValues[iteratorDataValues].value};
-							observationIsSet=true;
+							//oObservation.device={"reference":"Device/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
 							break;
 						case observationAttributesMapping.referenceRange:
 							//oObservation.referenceRange=[];
@@ -3385,6 +3304,7 @@
 				oConcept.text="Microscopic Observation";
 				oConcept.code=[{"code":"10355-6"}];
 				oObservation.code=oConcept;
+				
 				if (PatientSet==true)
 				{
 					oObservation.subject={"reference":"Patient/"+oPatient.id};
@@ -3419,7 +3339,7 @@
 				//Add additional information for validation
 				if(oCondition.dateRecorded=="")
 				{
-					oCondition.dateRecorded=formatDateInZform(oTrackedEntity.created);
+					oCondition.dateRecorded=extractDateFromDateTime(oTrackedEntity.created);
 				}
 				if(oCondition.clinicalStatus=="")
 				{
@@ -3439,50 +3359,169 @@
 				}
 				listConditionExtracted.push(oCondition);
 			}
-			if(orderIsSet==true)
-			{
-				
-				oOrder.id=oEvent.id;
-				//oOrder.Identifier=listOfOrderIdentifier;
-				//Add additional information to allow to mapping of order to the patient
-				//as there is information of order amoung the patient attribute
-				//
-				var associatedEntityIdentifier={};
-				associatedEntityIdentifier=Object.create(Identifier);
-				//assignment of Identifier
-				associatedEntityIdentifier.use="secondary";
-				associatedEntityIdentifier.type={"text":"Associated TEI"};
-				associatedEntityIdentifier.system="http://hl7.org/fhir/";
-				associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
-				listOfOrderIdentifier.push(associatedEntityIdentifier);
-				oOrder.identifier=listOfOrderIdentifier;
-				//Add additional information for validation
-				oOrderEvent.status="requested";
-				var defaultEventDateTime=formatDateInZform(oEvent.eventDate);
-				oOrderEvent.dateTime=defaultEventDateTime;
-				oOrder.event=[oOrderEvent];
-				
-				if (PatientSet==true && oPatient.id!="")
-				{
-					oOrder.subject={"reference":"Patient/"+oPatient.id};
-				}
-				if (specimenIsSet==true && oSpecimen.id!="")
-				{
-					var specimenRef={"reference":"Specimen/"+oSpecimen.id};
-					oOrder.specimen.push(specimenRef);
-				}
-				if (conditionIsSet==true && oCondition.id!="")
-				{
-					var resourceRef={"reference":"Condition/"+oCondition.id};
-					oOrder.supportingInformation.push(resourceRef);
-				}
-				listDiagnosticOrderExtracted.push(oOrder);
-				
-			}
 			
 		}//end iteratorEvent
-		
-		
+		//Special loop for DiagnosticOrder
+		/*
+		if(listSpecimenExtracted.length>0)
+		{
+			var specimenIdConcatenate="";
+			//Concatenate specimenId to generate order unique ID
+			for(var iterator =0;iterator<listSpecimenExtracted.length;iterator++)
+			{
+				specimenIdConcatenate+=listSpecimenExtracted[iterator].id
+			}
+			for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
+			{
+				var oEvent=listOfEvents[iteratorEvent];
+				//Order Initialization
+				var oOrder={};
+				oOrder= Object.create(DiagnosticOrder);
+				oOrder.resourceType="DiagnosticOrder";
+				var listOfOrderIdentifier=[];
+				var oOrderEvent={};
+				oOrderEvent= Object.create(OrderEvent);
+				oOrder.specimen=[];
+				oOrder.supportingInformation=[];
+				var orderIsSet=false;
+				for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+				{
+					inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfDiagnosticOrderAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+							case orderAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Order Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+								listOfOrderIdentifier.push(oIdentifier);
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.subject:
+								oOrder.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderer:
+								oOrder.orderer={"reference":"Practitioner/"+oEvent.dataValues[iteratorDataValues].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.encounter:
+								oOrder.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.reason:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+								oOrder.reason=[oConcept];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.supportingInformation:
+								oOrder.supportingInformation=[oEvent.dataValues[iteratorDataValues]];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.specimen:
+								oOrder.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.status:
+								oOrder.status=oEvent.dataValues[iteratorDataValues].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.priority:
+								oOrder.priority=oEvent.dataValues[iteratorDataValues].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_dateTime:
+								oOrderEvent.dateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_status:
+								oOrderEvent.status=oEvent.dataValues[iteratorDataValues].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_description:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+								oOrderEvent.description=oConcept;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.item:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+								oOrder.item=[oConcept];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.note:
+								oOrder.note={"text":oEvent.dataValues[iteratorDataValues].value};
+								orderIsSet=true;
+								break;
+							
+						}
+							
+					}//End if nTheList
+			
+				}//End for iteratorDataValues
+				//orderIsSet=true;
+				if(orderIsSet==true)
+				{
+					
+					oOrder.id=oEvent.trackedEntityInstance+"-"+specimenIdConcatenate;//concatenate
+					//oOrder.Identifier=listOfOrderIdentifier;
+					//Add additional information to allow to mapping of order to the patient
+					//as there is information of order amoung the patient attribute
+					//
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
+					listOfOrderIdentifier.push(associatedEntityIdentifier);
+					oOrder.identifier=listOfOrderIdentifier;
+					//Add additional information for validation
+					oOrderEvent.status="requested";
+					var defaultEventDateTime=formatDateInZform(oEvent.eventDate);
+					if(oOrderEvent.dateTime=="")
+					{
+						oOrderEvent.dateTime=defaultEventDateTime;
+					}
+					oOrder.event=[oOrderEvent];
+					
+					if (PatientSet==true && oPatient.id!="")
+					{
+						oOrder.subject={"reference":"Patient/"+oPatient.id};
+					}
+					for(var iterator=0;iterator<listSpecimenExtracted.length;iterator++)
+					{
+						var specimenRef={"reference":"Specimen/"+listSpecimenExtracted[iterator].id};
+						oOrder.specimen.push(specimenRef);
+					}
+					for (var iterator=0;iterator<listConditionExtracted.length;iterator++)
+					{
+						var resourceRef={"reference":"Condition/"+listConditionExtracted[iterator].id};
+						oOrder.supportingInformation.push(resourceRef);
+					}
+					listDiagnosticOrderExtracted.push(oOrder);
+					
+				}
+			break;//Only one order for fits for a set of Specimen and Condition
+			}//End for iteratorEvent
+		}//end if listSpecimenExtracted.length
+		*/
+		//console.log("--------------"+oPatient.id+"--------------------");
+		//console.log(listDiagnosticOrderExtracted);
 		//Special loop for DiagnosticReport
 		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
 		{
@@ -3540,16 +3579,16 @@
 							diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.subject:
-							oDiagnosticReport.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.encounter:
 							oDiagnosticReport.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
 							diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.effectiveDateTime:
-							oDiagnosticReport.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.effectivePeriod_start:
 							oEffectivePeriod.start=oEvent.dataValues[iteratorDataValues].value;
@@ -3560,8 +3599,8 @@
 							diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.issued:
-							oDiagnosticReport.issued=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.issued=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.performer:
 							oDiagnosticReport.performer={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
@@ -4069,7 +4108,7 @@
 			indexIdCondition=getIndexOfFhirResourceByIdentification(listConditionExtracted,idConditionToSearch);
 			if(indexIdCondition>=0)
 			{
-				console.log("Entered!!")
+				console.log("Entered in condition statement!!")
 				var listOfConditionIdentifier=[];
 				if(listConditionExtracted[indexIdCondition].identifier.length>0)
 				{
@@ -4188,7 +4227,7 @@
 								conditionIsSet=true;
 								break;
 							case conditionAttributesMapping.patient:
-								oCondition.patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//oCondition.patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
 								conditionIsSet=true;
 								break;
 							case conditionAttributesMapping.encounter:
@@ -4200,18 +4239,25 @@
 								conditionIsSet=true;
 								break;
 							case conditionAttributesMapping.code:
-								var  oConcept={};
-								oConcept= Object.create(CodeableConcept);
-								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
-								oCondition.code=oConcept;
-								conditionIsSet=true;
+								
+								if(oTrackedEntity.attributes[iteratorAttribute].value!="")
+								{
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									oCondition.code=oConcept;
+									conditionIsSet=true;
+								}
 								break;
 							case conditionAttributesMapping.category:
-								var  oConcept={};
-								oConcept= Object.create(CodeableConcept);
-								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
-								oCondition.category=oConcept;
-								conditionIsSet=true;
+								if(oTrackedEntity.attributes[iteratorAttribute].value!="")
+								{
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									oCondition.category=oConcept;
+									conditionIsSet=true;
+								}
 								break;
 							case conditionAttributesMapping.clinicalStatus:
 								oCondition.clinicalStatus=oTrackedEntity.attributes[iteratorAttribute].value;
@@ -4240,7 +4286,7 @@
 					
 					}
 				}
-				if(conditionIsSet==true)
+				if(conditionIsSet==true && oCondition.code!="" && oCondition.category!="")
 				{
 					
 					oCondition.id=oTrackedEntity.trackedEntityInstance;
@@ -4324,16 +4370,16 @@
 								orderIsSet=true;
 								break;
 							case orderAttributesMapping.subject:
-								listDiagnosticOrderExtracted[indexIdOrder].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								listDiagnosticOrderExtracted[indexIdOrder].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value.trim()+"-"};
 								orderIsSet=true;
 								break;
 							case orderAttributesMapping.orderer:
-								listDiagnosticOrderExtracted[indexIdOrder].orderer={"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value};
-								orderIsSet=true;
+								//listDiagnosticOrderExtracted[indexIdOrder].orderer={"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//orderIsSet=true;
 								break;
 							case orderAttributesMapping.encounter:
-								listDiagnosticOrderExtracted[indexIdOrder].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
-								orderIsSet=true;
+								//listDiagnosticOrderExtracted[indexIdOrder].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//orderIsSet=true;
 								break;
 							case orderAttributesMapping.reason:
 								var oConcept={};
@@ -4347,8 +4393,8 @@
 								orderIsSet=true;
 								break;
 							case orderAttributesMapping.specimen:
-								listDiagnosticOrderExtracted[indexIdOrder].specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
-								orderIsSet=true;
+								//listDiagnosticOrderExtracted[indexIdOrder].specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
+								//orderIsSet=true;
 								break;
 							case orderAttributesMapping.status:
 								listDiagnosticOrderExtracted[indexIdOrder].status=oTrackedEntity.attributes[iteratorAttribute].value;
@@ -4693,7 +4739,7 @@
 								observationIsSet=true;
 								break;
 							case observationAttributesMapping.subject:
-								listObservationExtracted[indexIdObservation].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//listObservationExtracted[indexIdObservation].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
 								break;
 							case observationAttributesMapping.encounter:
 								listObservationExtracted[indexIdObservation].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
@@ -4715,8 +4761,8 @@
 								listObservationExtracted[indexIdObservation].issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
 								break;
 							case observationAttributesMapping.performer:
-								listObservationExtracted[indexIdObservation].performer=[{"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value}];
-								observationIsSet=true;
+								//listObservationExtracted[indexIdObservation].performer=[{"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+								//observationIsSet=true;
 								break;
 							case observationAttributesMapping.valueQuantity_unit:
 									oValueQuantity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
@@ -4824,11 +4870,11 @@
 									observationIsSet=true;
 									break;
 							case observationAttributesMapping.specimen:
-									listObservationExtracted[indexIdObservation].specimen={"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value};
+									//listObservationExtracted[indexIdObservation].specimen={"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value};
 									break;
 							case observationAttributesMapping.device:
-									listObservationExtracted[indexIdObservation].device={"reference":"Device/"+oTrackedEntity.attributes[iteratorAttribute].value};
-									observationIsSet=true;
+									//listObservationExtracted[indexIdObservation].device={"reference":"Device/"+oTrackedEntity.attributes[iteratorAttribute].value};
+									//observationIsSet=true;
 									break;
 							case observationAttributesMapping.referenceRange:
 									listObservationExtracted[indexIdObservation].referenceRange=[];
@@ -5326,16 +5372,16 @@
 							diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.subject:
-							oDiagnosticReport.subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.encounter:
 							oDiagnosticReport.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
 							diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.effectiveDateTime:
-							oDiagnosticReport.effectiveDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.effectiveDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.effectivePeriod_start:
 							oEffectivePeriod.start=oTrackedEntity.attributes[iteratorAttribute].value;
@@ -5348,8 +5394,8 @@
 							diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.issued:
-							oDiagnosticReport.issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.performer:
 							oDiagnosticReport.performer={"reference":"Organization/"+oTrackedEntity.attributes[iteratorAttribute].value};
@@ -5788,7 +5834,7 @@
 						}
 					}//end for
 					var tempParams=[];
-					entityAPI.getProgramStageMetaDataInfo(listOfStageId,programId,function(resStages)
+					entityAPI.getProgramStageMetaDataInfo(listOfStageId,programId,[],function(resStages)
 					{
 						var  entryIterator=0;
 						var dataElementIds="";
@@ -5831,7 +5877,7 @@
 						
 						var programId=resStages[1];//Instead of progStage we use programId here
 						//Instead of List of attribute fields we use listOfProgramStages Object
-						entityAPI.getDatsElementsMetaDataInfo(dataElementIds,programId,listoProgramStages,function(resDataElements)
+						entityAPI.getDatsElementsMetaDataInfo(dataElementIds,programId,listoProgramStages,[],function(resDataElements)
 						{
 							var listoDataElements=[];
 							listoProgramStages=resDataElements[2];
@@ -5992,12 +6038,20 @@
 							//Replace list of Stages by the list of object Events
 							entityAPI.GetTrackedEntityInstancesFromOrgunitListAndProgramIdAndKeepDataElementsTrack(listOfOrgUnitId,programId,listObjectEvents,listoDataElements,function(listTrackedEntities)
 							{
+								
 								var listObjectEvents=listTrackedEntities[2];
+								//console.log("---------------listOfEvents------------");
+								//console.log(listObjectEvents);
 								if(listTrackedEntities[0].trackedEntityInstances.length>0)
 								{
 									for(var j=0;j<listTrackedEntities[0].trackedEntityInstances.length;j++)
 									{
 										var listObjectEventsAssociated=getListEvents(listObjectEvents,listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance);
+										if(listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance=="s5ocelNgzoH")
+										{
+											//console.log("---------------AssociatedEvent------------");
+											//console.log(listObjectEventsAssociated);
+										}
 										//console.log("TEI :"+listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance+", events:"+listObjectEventsAssociated.length);
 										var tempListOfTrackedEntity=[];
 										tempListOfTrackedEntity.push(listTrackedEntities[0].trackedEntityInstances[j]);
@@ -6214,6 +6268,7 @@
 			
 			entityAPI.getProgramMetaDataInfo(oProgAndStage.id,function(resProgram)
 			{
+				var listDisplayNameIdMapping=[];
 				if(resProgram.programs.length==0)
 				{
 					console.log("The program "+oProgAndStage.id+" does not exist");
@@ -6221,6 +6276,7 @@
 				else
 				{
 					var oProgram=resProgram.programs[0];
+					//console.log(oProgram);
 					//console.log(oProgam.name);
 					console.log("");
 					console.log("######### Mapping information for program :"+oProgram.name+"##########");
@@ -6229,14 +6285,24 @@
 					listFieldProgram.push('Program');
 					listFieldProgram.push('Registering Unit');
 					console.log("Attributes to map with corresponding fhir resources :");
+					
 					for(var j=0;j<oProgram.programTrackedEntityAttributes.length;j++)
 					{
+						var DiplayNameIdMapping={
+							"id":"",
+							"displayName":""
+							};
+						
 						var oAttributes=oProgram.programTrackedEntityAttributes[j];
+						DiplayNameIdMapping.id=oAttributes.trackedEntityAttribute.id;
 						var attributeCombinedName=oAttributes.displayName.split(oProgram.name);
 						//console.log(attributeCombinedName);
 						console.log(""+(j+1)+" - "+attributeCombinedName[1]);
+						DiplayNameIdMapping.displayName=attributeCombinedName[1].trim();
 						listFieldProgram.push(attributeCombinedName[1]);
+						listDisplayNameIdMapping.push(DiplayNameIdMapping);
 					}
+					//console.log(listDisplayNameIdMapping);
 					
 					//var listProgramStages=oProgram.
 					var listOfStages=oProgAndStage.stages;
@@ -6257,7 +6323,7 @@
 						//console.log("Stages of the programs:"+stageIds);
 						
 						
-						entityAPI.getProgramStageMetaDataInfo(listOfStages,listFieldProgram,function(resStages)
+						entityAPI.getProgramStageMetaDataInfo(listOfStages,listFieldProgram,listDisplayNameIdMapping,function(resStages)
 						{
 							//console.log(resStages.programStages.programStageDataElements);
 							//console.log(listFieldProgram);
@@ -6268,6 +6334,7 @@
 								var stageName=resStages[0].programStages[countProgStages].name;
 								var executionDateLabel=resStages[0].programStages[countProgStages].executionDateLabel;
 								var tempListFieldProgram=[];
+								var listDisplayNameIdMapping=resStages[3];
 								tempListFieldProgram=resStages[1];
 								tempListFieldProgram.push(stageName+"/"+executionDateLabel);
 								listFieldProgram=tempListFieldProgram;
@@ -6294,21 +6361,30 @@
 								{
 									//console.log(stageName);
 									//console.log(dataElementIds);
-									entityAPI.getDatsElementsMetaDataInfo(dataElementIds,stageName,listFieldProgram,function(resDataElements)
+									entityAPI.getDatsElementsMetaDataInfo(dataElementIds,stageName,listFieldProgram,listDisplayNameIdMapping,function(resDataElements)
 									{
 										//console.log(stageName);
 										//console.log(listFieldProgram);
 										var tempNameStage=resDataElements[0];
 										var tempListFieldProgram=resDataElements[2];
-										
+										var listDisplayNameIdMapping=resDataElements[3];
+										//console.log(resDataElements[1].dataElements);
 										//console.log(resDataElements[1].dataElements);
 										for(var countDataElement=0;countDataElement<resDataElements[1].dataElements.length;countDataElement++)
 										{
+											var DiplayNameIdMapping={
+											"id":"",
+											"displayName":""
+											};
 											console.log(""+(j++)+" - "+tempNameStage+"/"+resDataElements[1].dataElements[countDataElement].displayName);
+											DiplayNameIdMapping.id=resDataElements[1].dataElements[countDataElement].id;
+											DiplayNameIdMapping.displayName=tempNameStage+"/"+resDataElements[1].dataElements[countDataElement].displayName;
 											tempListFieldProgram.push(tempNameStage+"/"+resDataElements[1].dataElements[countDataElement].displayName);
+											listDisplayNameIdMapping.push(DiplayNameIdMapping);
 										}
-										//console.log(oProgram.name);
+										//console.log(listDisplayNameIdMapping);
 										//console.log(tempListFieldProgram);
+										entityAPI.writeJSONFile("FileMapping",JSON.stringify(listDisplayNameIdMapping));
 										entityAPI.generateCSVFile(tempListFieldProgram,oProgram.name,oProgram.name);
 										console.log("");
 										console.log("-----------------------------------------------------");

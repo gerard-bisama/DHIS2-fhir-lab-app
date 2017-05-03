@@ -33,7 +33,7 @@
 	"observation":"",
 	"diagnosticReport":""
   },
-  "patient_attribute_mapping":
+ "patient_attribute_mapping":
   {
 	"id":"trackedEntityInstance",
 	"managingOrganization":"Registering Unit",
@@ -43,7 +43,7 @@
 	"telecom_phone":"",
 	"telecom_email":"",
 	"gender":"",
-	"birthDate":"Age (Years) if DoB unknown",
+	"birthDate":"Age (Years)",
 	"address":"Village/Domicile",
 	"deceasedBoolean":"Immediate Outcome"
   },
@@ -61,7 +61,7 @@
   "specimen_attribute_mapping":
   {
 	"id":"trackedEntityInstance",
-	"identifier":"Lab Request/Specimen ID,Lab Resulting/Specimen ID",
+	"identifier":"Lab Request/Specimen ID,Lab Results/Specimen ID",
 	"status":"",
 	"type":"Lab Request/Specimen Type",
 	"subject":"Unique Case ID",
@@ -106,11 +106,11 @@
 	"code" : "",
 	"subject" :"Unique Case ID",
 	"encounter" : "",
-	"effectiveDateTime" : "Lab Resulting/Date of Resulting",
+	"effectiveDateTime" : "Lab Results/Date of Results",
 	"effectivePeriod_dateSup" : "",
 	"effectivePeriod_dateInf" : "",
 	"issued" : "Lab Request/Date of Lab Request",
-	"performer" : "Lab Resulting/Testing Laboratory,Lab Request/Testing Laboratory",
+	"performer" : "Lab Results/Testing Laboratory,Lab Request/Testing Laboratory",
 	"valueQuantity_unit" : "",
 	"valueQuantity_value" : "",
 	"valueCodeableConcept" : "",
@@ -131,8 +131,8 @@
 	"valuePeriod_start" :"",
 	"valuePeriod_end" :"",
 	"dataAbsentReason" : "",
-	"interpretation" : "Lab Resulting/Test Result",
-	"comments" : "Lab Resulting/Confirmed Disease",
+	"interpretation" : "Lab Results/Test Result",
+	"comments" : "Lab Results/Confirmed Disease",
 	"bodySite" :"",
 	"method" :"",
 	"specimen" :"Lab Request/Specimen ID",
@@ -150,7 +150,7 @@
 	"code":"",
 	"subject":"Unique Case ID",
 	"encounter":"",
-	"effectiveDateTime":"Lab Resulting/Date of Resulting",
+	"effectiveDateTime":"Lab Results/Date of Results",
 	"effectivePeriod_start":"",
 	"effectivePeriod_end":"",
 	"issued":"Lab Request/Date of Lab Request",
@@ -195,6 +195,9 @@
   },
   "authentication":"admin:district",
   "temp_directory":"/home/server-hit/Documents/datalab/source",
+  "resource_temp":"/home/server-hit/Documents/datalab/temp",
+  "treated_directory":"/home/server-hit/Documents/datalab/treated",
+  "errors_directory":"/home/server-hit/Documents/datalab/errors",
   "minimun_dataset_record":3,
   "manifest_generated_at": "Thu Dec 01 2016 10:27:06 GMT+0100 (CET)"
 }

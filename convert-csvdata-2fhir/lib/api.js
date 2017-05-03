@@ -3,6 +3,7 @@
  */
  var btoa = require('btoa')
  var fs = require("fs");
+ var fs_extra = require("fs-extra");
  var path = require("path");
  var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
  var csvWriter = require('csv-write-stream');
@@ -107,6 +108,26 @@ exports.GetOrgUnitId= function GetOrgUnitId(orgUnitNameList,listAssociatedDataRo
 	};
 	
 	request.send();
+	
+}
+exports.postData= function postData(resourceId,jsonData,fileName,callback)
+{
+	var urlRequest=`${serverUrl}/Bundle/${resourceId}`;
+	//console.log(urlRequest);
+	var request = new XMLHttpRequest();
+	request.open('PUT',urlRequest, true);
+	request.setRequestHeader( 'Content-Type','application/fhir+json' );
+	request.setRequestHeader( 'Accept', 'application/json' );
+	//request.setRequestHeader("Authorization", basicAuth); 
+	request.onreadystatechange = function() {
+		if (this.readyState == 4 && (this.status == 200||this.status == 201)) {
+        var myArr = JSON.parse(this.responseText);
+        var modifiedArray=[myArr,fileName];
+        return callback(modifiedArray);
+		}
+	};
+	
+	request.send(jsonData);
 	
 }
 exports.GetAllOrganisationUnitsCallbakListPrograms= function GetAllOrganisationUnitsCallbakListPrograms(listOfPrograms,callback)
@@ -490,6 +511,10 @@ exports.getLocationDataFile = function getLocationDataFile()
 {
 	return manifest.temp_directory;
 }
+exports.getLocationTempResource = function getLocationTempResource()
+{
+	return manifest.resource_temp;
+}
 exports.getMinDataSetRecord = function getMinDataSetRecord()
 {
 	return manifest.minimun_dataset_record;
@@ -511,6 +536,35 @@ function ReadJSONFile(fileName)
 	var jsonContent = JSON.parse(contents);
 	return jsonContent;
 }
+exports.readResourceJSONFile=  function readResourceJSONFile(fileName)
+{
+	var filePath=path.resolve(path.join(manifest.resource_temp, "/", fileName));
+	//console.log(filePath);
+	
+	var contents = fs.readFileSync(filePath);
+	var jsonContent = JSON.parse(contents);
+	return jsonContent;
+}
+exports.writeJSONFile= function writeJSONFile(fileName,oResource)
+{
+	var filePath=path.resolve(path.join(manifest.resource_temp, "/", fileName));
+	if(fs.existsSync(filePath)==true)
+	{
+		var previousContents = fs.readFileSync(filePath);
+		var oBundle = JSON.parse(previousContents);
+		for(var iteratorEntry=0; iteratorEntry<oResource.entry.length;iteratorEntry++)
+		{
+			oBundle.entry.push(oResource.entry[iteratorEntry]);
+		}
+		var contents=JSON.stringify(oBundle);
+		fs.writeFileSync(filePath,contents);
+	}
+	else
+	{
+		var contents=JSON.stringify(oResource);
+		fs.writeFileSync(filePath,contents);
+	}
+}
 exports.readCSVFile=function readCSVFile(_filename,callback)
 {
 	var filename=path.resolve(path.join(manifest.temp_directory, "/", _filename));
@@ -522,6 +576,39 @@ exports.readCSVFile=function readCSVFile(_filename,callback)
 	  return newRow
 	}).then(function(csvData){
   		//console.log(csvData)
+  		//var listCsvData=[];
+  		//listCsvData=[csvData,filename]
   		return callback(csvData);
 	});
+}
+exports.getListOfFiles=function getListOfFiles(filePath,callback)
+{
+	const folder =filePath;
+	var listOfFiles=fs.readdir(folder,(err,files)=>
+	{
+		files.forEach(file => {
+		//console.log(file);
+		//var listModifiedFileRef=[file,listOfResourceTrace];
+		callback(file);
+	  });
+	});
+}
+exports.moveFileToTreated=function moveFileToTreated(fileName)
+{
+	var fileComponents=fileName.split(".");
+	var newPart=new Date().toJSON();
+	var tempResult=newPart.replace(/:/g,"");//replace all occurence of : by ""
+	newPart=tempResult.replace(".","");
+	var newFileName="";
+	newFileName+=fileComponents[0]+newPart;
+	newFileName+="."+fileComponents[1];
+	var source=path.resolve(path.join(manifest.temp_directory, "/", fileName));
+	var destination=path.resolve(path.join(manifest.treated_directory, "/", newFileName));
+	fs_extra.moveSync(source,destination);
+}
+exports.moveFileToErrors=function moveFileToErrors(fileName)
+{
+	var source=path.resolve(path.join(manifest.temp_directory, "/", fileName));
+	var destination=path.resolve(path.join(manifest.errors_directory, "/", fileName));
+	fs_extra.moveSync(source,destination);
 }

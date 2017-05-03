@@ -20,7 +20,8 @@
 		"btoa":"^1.1.2",
 		"xmlhttprequest":"^1.8.0",
 		"csv-write-stream":"^2.0.0",
-		"csv-util":"^0.0.1"
+		"csv-util":"^0.0.1",
+		"fs-extra":"^2.1.2"
     },
     "repository": {
     "type": "git",

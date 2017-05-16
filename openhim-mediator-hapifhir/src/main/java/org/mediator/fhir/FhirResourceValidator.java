@@ -95,9 +95,16 @@ public class FhirResourceValidator  {
 
     List<Observation> listOfValidObservation= new ArrayList<>();
 
+    public List<ListResource> getListOfValidListResource() {
+        return listOfValidListResource;
+    }
+
+    List<ListResource> listOfValidListResource=new ArrayList<>();
+
     public StringBuilder get_jsonResource() {
         return _jsonResource;
     }
+
 
     List<Practitioner> listOfInvalidPractitioners= new ArrayList<Practitioner>();
 
@@ -137,9 +144,16 @@ public class FhirResourceValidator  {
 
     List<Observation> listOfInvalidObservation= new ArrayList<>();
 
+    public List<ListResource> getListOfInvalidListResource() {
+        return listOfInvalidListResource;
+    }
+
+    List<ListResource> listOfInvalidListResource=new ArrayList<>();
+
     public List<Patient> getListOfPatient() {
         return listOfPatient;
     }
+
 
     List<Patient> listOfPatient=new ArrayList<Patient>();
 
@@ -202,6 +216,12 @@ public class FhirResourceValidator  {
     }
 
     List<DiagnosticReport> listOfDiagnosticReport=new ArrayList<DiagnosticReport>();
+
+    public List<ListResource> getListOfListResource() {
+        return listOfListResource;
+    }
+
+    List<ListResource> listOfListResource=new ArrayList<>();
 
     public FhirResourceValidator(StringBuilder jsonResource)
     {
@@ -302,6 +322,7 @@ public class FhirResourceValidator  {
                 listOfDiagnosticOrder=fhirProcessor.getListOfDiagnosticOrder();
                 listOfObservation=fhirProcessor.getListOfObservation();
                 listOfDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
+                listOfListResource=fhirProcessor.getListOfListResource();
 
                 if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
                 {
@@ -320,6 +341,7 @@ public class FhirResourceValidator  {
                     listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
                     listOfObservation.addAll(fhirProcessor.getListOfObservation());
                     listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                    listOfListResource.addAll(fhirProcessor.getListOfListResource());
                     while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
                     {
                         Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
@@ -334,6 +356,7 @@ public class FhirResourceValidator  {
                         listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
                         listOfObservation.addAll(fhirProcessor.getListOfObservation());
                         listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                        listOfListResource.addAll(fhirProcessor.getListOfListResource());
                         //nextPageBundle=subNextBundle.copy();
                         nextPageBundle=CreateBundleCopy(subNextBundle);
                     }
@@ -349,6 +372,7 @@ public class FhirResourceValidator  {
                 resValidation.setListOfDiagnosticOrderToValidate(listOfDiagnosticOrder);
                 resValidation.setListOfDiagnosticReportToValidate(listOfDiagnosticReport);
                 resValidation.setListOfObservationToValidate(listOfObservation);
+                resValidation.setListOfListResourceToValidate(listOfListResource);
 
                 resValidation.startValidation();
                 //Validation results
@@ -360,6 +384,7 @@ public class FhirResourceValidator  {
                 listOfValidDiagnosticOrder=resValidation.getListOfValidDiagnosticOrder();
                 listOfValidDiagnosticReport=resValidation.getListOfValidDiagnosticReport();
                 listOfValidObservation=resValidation.getListOfValidObservation();
+                listOfValidListResource=resValidation.getListOfValidListResource();
                 //
                 listOfInvalidPractitioners=resValidation.getlistOfInvalidePractitioner();
                 listOfInvalidPatient=resValidation.getListOfInvalidPatient();
@@ -369,10 +394,11 @@ public class FhirResourceValidator  {
                 listOfInvalidDiagnosticOrder=resValidation.getListOfInvalidDiagnosticOrder();
                 listOfInvalidDiagnosticReport=resValidation.getListOfInvalidDiagnosticReport();
                 listOfInvalidObservation=resValidation.getListOfInvalidObservation();
+                listOfInvalidListResource=resValidation.getListOfInvalidListResource();
 
                 if(listOfInvalidPractitioners.size()>0 || listOfInvalidPatient.size()>0 || listOfInvalidOrganization.size()>0
                         || listOfInvalidSpecimen.size()>0 || listOfInvalidDiagnosticOrder.size()>0 || listOfInvalidDiagnosticReport.size()>0
-                        || listOfInvalidObservation.size()>0)
+                        || listOfInvalidObservation.size()>0 || listOfInvalidListResource.size()>0)
                 {
                     //Create a new Bundle
                     Bundle invalidResourceBundle=new Bundle();
@@ -1115,6 +1141,12 @@ class FhirResourceProcessor
 
     List<DiagnosticReport> _listOfDiagnosticReport;
 
+    public List<ListResource> getListOfListResource() {
+        return _listOfListResource;
+    }
+
+    public List<ListResource> _listOfListResource;
+
     public List<Bundle> getListOfBundle() {
         return _listOfBundle;
     }
@@ -1244,6 +1276,7 @@ class FhirResourceProcessor
         this._listOfDiagnosticOrder=new ArrayList<>();
         this._listOfDiagnosticReport=new ArrayList<>();
         this._listOfObservation=new ArrayList<>();
+        this._listOfListResource=new ArrayList<>();
         this._listOfBundle=new ArrayList<>();
 
             for (IResource oResource:this._listOfResources){
@@ -1275,6 +1308,9 @@ class FhirResourceProcessor
                         break;
                     case "Observation":
                         this._listOfObservation.add((Observation) oResource);
+                        break;
+                    case "List":
+                        this._listOfListResource.add((ListResource) oResource);
                         break;
                     case "Bundle":
                         this._listOfBundle.add((Bundle) oResource);
@@ -2162,6 +2198,12 @@ class ResourcesValidation
 
     List<Observation> _listOfObservationToValidate;
 
+    public void setListOfListResourceToValidate(List<ListResource> _listOfListResourceToValidate) {
+        this._listOfListResourceToValidate = _listOfListResourceToValidate;
+    }
+
+    List<ListResource> _listOfListResourceToValidate;
+
     public List<Practitioner> getlistOfValidePractitioner() {
         return _listOfValidPractitioner;
     }
@@ -2213,6 +2255,12 @@ class ResourcesValidation
     }
 
     List<Observation> _listOfValidObservation;
+
+    public List<ListResource> getListOfValidListResource() {
+        return _listOfValidListResource;
+    }
+
+    List<ListResource> _listOfValidListResource;
 
     public List<Practitioner> getlistOfInvalidePractitioner() {
         return _listOfInvalidPractitioner;
@@ -2266,6 +2314,12 @@ class ResourcesValidation
 
     List<Observation> _listOfInvalidObservation;
 
+    public List<ListResource> getListOfInvalidListResource() {
+        return _listOfInvalidListResource;
+    }
+
+    List<ListResource> _listOfInvalidListResource;
+
     public ResourcesValidation(FhirValidator validator)
     {
         this._validator=validator;
@@ -2277,6 +2331,7 @@ class ResourcesValidation
         this._listOfDiagnosticOrderToValidate=new ArrayList<>();
         this._listOfDiagnosticReportToValidate=new ArrayList<>();
         this._listOfObservationToValidate=new ArrayList<>();
+        this._listOfListResourceToValidate=new ArrayList<>();
         //
         this._listOfValidPractitioner=new ArrayList<>();
         this._listOfValidPatient=new ArrayList<>();
@@ -2286,6 +2341,7 @@ class ResourcesValidation
         this._listOfValidDiagnosticOrder=new ArrayList<>();
         this._listOfValidDiagnosticReport=new ArrayList<>();
         this._listOfValidObservation=new ArrayList<>();
+        this._listOfValidListResource=new ArrayList<>();
         //
         this._listOfInvalidPractitioner=new ArrayList<>();
         this._listOfInvalidPatient=new ArrayList<>();
@@ -2295,6 +2351,7 @@ class ResourcesValidation
         this._listOfInvalidDiagnosticOrder=new ArrayList<>();
         this._listOfInvalidDiagnosticReport=new ArrayList<>();
         this._listOfInvalidObservation=new ArrayList<>();
+        this._listOfInvalidListResource=new ArrayList<>();
 
     }
 
@@ -2410,6 +2467,19 @@ class ResourcesValidation
             else
             {
                 this._listOfInvalidObservation.add(oObservationToValidate);
+            }
+        }
+        for(ListResource oListResource:this._listOfListResourceToValidate)
+        {
+            ValidationResult res=null;
+            res=this._validator.validateWithResult(oListResource);
+            if(res.isSuccessful())
+            {
+                this._listOfValidListResource.add(oListResource);
+            }
+            else
+            {
+                this._listOfInvalidListResource.add(oListResource);
             }
         }
 

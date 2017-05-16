@@ -443,9 +443,19 @@ public class FhirDHISOrchestrator extends UntypedActor {
                         ServerTargetApp,
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
-                List<TrackerResourceMap> listTrackerResource=this.mediatorConfiguration.getTrackerResource();
+                //List<TrackerResourceMap> listTrackerResource=this.mediatorConfiguration.getTrackerResource();
+                String dataMappingFile=this.mediatorConfiguration.getFhirAttributeMapping();
+                TrackerResourceMap oTrackedProgramInfo=FhirMediatorUtilities.getTrackedProgramInfo(dataMappingFile);
                 List<DataElement> listDataElementMapping= FhirMediatorUtilities.getDataElementMapping(this.mediatorConfiguration.getDataElementMappingFile());
+
+                PatientFhirMapping fhirMappingPatient=FhirMediatorUtilities.getPatientMappingAttributes(dataMappingFile);
+                ConditionFhirMapping fhirMappingCondition=FhirMediatorUtilities.getConditionMappingAttributes(dataMappingFile);
+                DiagnosticReportFhirMapping fhirMappingDiagReport=FhirMediatorUtilities.getDiagnosticReportMappingAttributes(dataMappingFile);
+                SpecimenFhirMapping fhirMappingSpecimen=FhirMediatorUtilities.getSpecimenMappingAttributes(dataMappingFile);
+                ObservationFhirMapping fhirMappingObservation=FhirMediatorUtilities.getObservationMappingAttributes(dataMappingFile);
                 String  resultUpdate=null;
+
+
                 if(this.listOfPatientToUpdate.size()>0)
                 {
 
@@ -503,10 +513,17 @@ public class FhirDHISOrchestrator extends UntypedActor {
                                 baseServerTargetRepoURI,this.mediatorConfiguration.getLogFile()
                         );
 
-
+                        List<DataElement> listEventDataElement=new ArrayList<>();
+                        for(DataElement oDataElement:listDataElementMapping)
+                        {
+                            if(oDataElement.type.equals("element"))
+                            {
+                                listEventDataElement.add(oDataElement);
+                            }
+                        }
                         listOfEventToAdd=FhirMediatorUtilities.constructListOfLabEvents(
                                 oPatient,listAssociatedSpecimen,listAssociatedObservation,
-                                listTrackerResource,listDataElementMapping);
+                                oTrackedProgramInfo,listEventDataElement,fhirMappingObservation,fhirMappingSpecimen);
                         //listOfEventToAdd.addAll(res);
                         String trackedEntityId= this.mediatorConfiguration.getTrackedEntity();
 
@@ -619,9 +636,18 @@ public class FhirDHISOrchestrator extends UntypedActor {
                                         //Condition already tracked, add just event and update lab event
                                         List<Condition> listConditionAssociatedToEntity=new ArrayList<>();
                                         listConditionAssociatedToEntity.add(oConditionAssociated);
+                                        List<DataElement> listAttributeTrackedEntity=new ArrayList<>();
+                                        for(DataElement oDataElement:listDataElementMapping)
+                                        {
+                                            if(oDataElement.type.equals("attribute"))
+                                            {
+                                                listAttributeTrackedEntity.add(oDataElement);
+                                            }
+
+                                        }
                                         List<DhisTrackedEntity> resEntityInstance=FhirMediatorUtilities.constructListOfTrackedEntityInstance(
                                                 oPatient,trackedEntityId,listConditionAssociatedToEntity,listAssociatedDiagnosticReport
-                                        ,listDataElementMapping);
+                                        ,listAttributeTrackedEntity,fhirMappingPatient,fhirMappingCondition,fhirMappingDiagReport);
                                         String trackedEntityJsonString=FhirMediatorUtilities.TransformListTrackedEntityToJson(
                                                 resEntityInstance
                                         );

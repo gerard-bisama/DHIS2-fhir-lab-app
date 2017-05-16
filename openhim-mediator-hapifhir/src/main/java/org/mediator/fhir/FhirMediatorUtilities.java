@@ -18,6 +18,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import scala.util.parsing.combinator.testing.Ident;
 
 import javax.tools.Diagnostic;
@@ -162,6 +163,9 @@ public class FhirMediatorUtilities {
                 break;
             case "DiagnosticReport":
                 buildRequestPath="/DiagnosticReport?_id=";
+                break;
+            case "List":
+                buildRequestPath="/List?_id=";
                 break;
 
         }
@@ -428,8 +432,174 @@ public class FhirMediatorUtilities {
         }
     }
     public static List<DhisEvent> constructListOfLabEvents(Patient patientToProcess,List<Specimen> listAssociatedSpecimen
-    ,List<Observation> listAssociatedObservation,List<TrackerResourceMap> listTrackerResource
-    ,List<DataElement> listDataElementMappingList)
+    ,List<Observation> listAssociatedObservation,TrackerResourceMap trackedProgramInfo
+    ,List<DataElement> listDataElementMappingList,ObservationFhirMapping observationMapping,
+    SpecimenFhirMapping specimenMapping)
+    {
+        String labResultSpecimenIdDataElementId="";
+        String labResultTestResultDataElementId="";
+        String labResultconfirmedDiseaseDataElementId="";
+        String labRequestTestingLabDataElementId="";
+        String labRequestSpecimenTypeDataElementId="";
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        List<DhisEvent> listOfEvent=new ArrayList<>();
+        String trackedEntity="";
+        for(IdentifierDt oIdentifier:patientToProcess.getIdentifier())
+        {
+            if(oIdentifier.getType().getText().equals("Tracker identifier"))
+            {
+                trackedEntity=oIdentifier.getValue();
+            }
+        }
+        for(String stageId:trackedProgramInfo.stages)
+        {
+            List<DataElement> listDataElementStage=new ArrayList<>();
+            for(DataElement oDataElement:listDataElementMappingList) {
+                if(oDataElement.stage.equals(stageId))
+                {
+                    listDataElementStage.add(oDataElement);
+                }
+            }
+            if(listDataElementStage.size()>0)
+            {
+                for(Observation oObservation: listAssociatedObservation)
+                {
+                    DhisEvent oEvent=new DhisEvent();
+                    oEvent.program=trackedProgramInfo.id;
+                    oEvent.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+                    oEvent.trackedEntityInstance=trackedEntity;
+                    oEvent.programStage=stageId;
+
+                    for(DataElement oDataElement:listDataElementStage)
+                    {
+                        String displayName=oDataElement.displayName;
+                        if(observationMapping.effectiveDateTime!="" && observationMapping.effectiveDateTime.equals(displayName))
+                        {
+                            if(oObservation.getEffective()!=null)
+                            {
+                                DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
+                                String builtDate="";
+                                builtDate=oDateTime.getYear().toString()+"-";
+                                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
+                                builtDate+="-";
+                                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                                oEvent.eventDate=builtDate;
+                                continue;
+                            }
+
+                        }
+                        if(observationMapping.issued!="" && observationMapping.issued.equals(displayName))
+                        {
+                            if(oObservation.getIssued()!=null)
+                            {
+                                DateTimeDt oDateTime=new DateTimeDt(oObservation.getIssued());
+                                String builtDate="";
+                                builtDate=oDateTime.getYear().toString()+"-";
+                                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
+                                builtDate+="-";
+                                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                                oEvent.eventDate=builtDate;
+                                continue;
+                            }
+
+                        }
+                        if(observationMapping.specimen!="" && observationMapping.specimen.equals(displayName))
+                        {
+                            if(oObservation.getSpecimen()!=null)
+                            {
+                                String refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
+                                oEvent.addDataValue(oDataElement.id,refSpecimenId);
+                                continue;
+                            }
+
+                        }
+                        if(observationMapping.interpretation!="" && observationMapping.interpretation.equals(displayName))
+                        {
+                            if(oObservation.getInterpretation()!=null)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oObservation.getInterpretation().getText());
+                                continue;
+                            }
+
+                        }
+                        if(observationMapping.comments!="" && observationMapping.comments.equals(displayName))
+                        {
+                            if(oObservation.getComments()!="")
+                            {
+                                oEvent.addDataValue(oDataElement.id,oObservation.getComments());
+                                continue;
+                            }
+
+                        }
+                        if(observationMapping.performer!="" && observationMapping.performer.equals(displayName))
+                        {
+                            if(oObservation.getPerformer().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oObservation.getPerformer().get(0).getReference().getIdPart());
+                                continue;
+                            }
+
+                        }
+                        if(observationMapping.status!="" && observationMapping.status.equals(displayName))
+                        {
+                            if(oObservation.getStatus()!="")
+                            {
+                                oEvent.addDataValue(oDataElement.id,oObservation.getStatus());
+                                continue;
+                            }
+                        }
+                    }
+                    for(Specimen oSpecimen: listAssociatedSpecimen)
+                    {
+                        for(DataElement oDataElement:listDataElementStage) {
+                            String displayName = oDataElement.displayName;
+                            if(specimenMapping.identifier!="" && specimenMapping.identifier.contains(displayName)==true)
+                            {
+                                if (!checkDataElementInEvent(oEvent,oDataElement.id))
+                                {
+                                    oEvent.addDataValue(oDataElement.id,oSpecimen.getId().getIdPart().split("-")[0]);
+                                    continue;
+                                }
+                            }
+                            if(specimenMapping.type!="" && specimenMapping.type.equals(displayName))
+                            {
+                                if (!checkDataElementInEvent(oEvent,oDataElement.id)) {
+                                    oEvent.addDataValue(oDataElement.id, oSpecimen.getId().getIdPart().split("-")[0]);
+                                    continue;
+                                }
+
+                            }
+                            if(specimenMapping.receivedTime!="" && specimenMapping.receivedTime.equals(displayName))
+                            {
+                                if(oSpecimen.getReceivedTime()!=null)
+                                {
+                                    DateTimeDt oDateTime=new DateTimeDt(oSpecimen.getReceivedTime());
+                                    String builtDate="";
+                                    builtDate=oDateTime.getYear().toString()+"-";
+                                    builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
+                                    builtDate+="-";
+                                    builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                                    if (!checkDataElementInEvent(oEvent,oDataElement.id)) {
+                                        oEvent.addDataValue(oDataElement.id, builtDate);
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    listOfEvent.add(oEvent);
+
+                }
+
+
+            }
+        }
+
+        return listOfEvent;
+    }
+    public static List<DhisEvent> constructListOfLabEvents(Patient patientToProcess,List<Specimen> listAssociatedSpecimen
+            ,List<Observation> listAssociatedObservation,TrackerResourceMap trackedProgramInfo
+            ,List<DataElement> listDataElementMappingList)
     {
         String labResultSpecimenIdDataElementId="";
         String labResultTestResultDataElementId="";
@@ -475,7 +645,7 @@ public class FhirMediatorUtilities {
             if(oObservation.getStatus().equals("final"))
             {
                 DhisEvent oEvent=new DhisEvent();
-                oEvent.program=listTrackerResource.get(0).programId;
+                oEvent.program=trackedProgramInfo.id;
                 oEvent.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
                 oEvent.trackedEntityInstance=trackedEntity;
                 oEvent.programStage="aornzRfUbDZ";
@@ -498,7 +668,7 @@ public class FhirMediatorUtilities {
                 //if the current event is the lab result, it means that the request has
                 //been made
                 DhisEvent oEventRequested=new DhisEvent();
-                oEventRequested.program=listTrackerResource.get(0).programId;
+                oEventRequested.program=trackedProgramInfo.id;
                 oEventRequested.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
                 oEventRequested.trackedEntityInstance=trackedEntity;
                 oEventRequested.programStage="YLMRmho6SdY";
@@ -534,7 +704,7 @@ public class FhirMediatorUtilities {
             else if (oObservation.getStatus().equals("registered"))
             {
                 DhisEvent oEventRequested=new DhisEvent();
-                oEventRequested.program=listTrackerResource.get(0).programId;
+                oEventRequested.program=trackedProgramInfo.id;
                 oEventRequested.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
                 oEventRequested.trackedEntityInstance=trackedEntity;
                 oEventRequested.programStage="YLMRmho6SdY";
@@ -617,6 +787,7 @@ public class FhirMediatorUtilities {
         String mainSymptomDataElementId="";
         String classificationDataElementId="";
         String immediateOutcomeDataElementId="";
+
         for(DataElement oDataElement:listDataElementMappingList)
         {
             String displayName=oDataElement.displayName;
@@ -685,8 +856,6 @@ public class FhirMediatorUtilities {
             oTrackedEntity.addAttribute(villageDataElementId, patientToProcess.getAddress().get(0).getText());
         }
 
-
-
         for(Condition oCondition:listAssociatedCondition)
         {
             if(oCondition.getCode().getText()!="")
@@ -721,6 +890,166 @@ public class FhirMediatorUtilities {
             {
                 oTrackedEntity.addAttribute(immediateOutcomeDataElementId,"Alive");
             }
+        }
+        listOfTrackedEntity.add(oTrackedEntity);
+        return listOfTrackedEntity;
+
+    }
+    public static List<DhisTrackedEntity> constructListOfTrackedEntityInstance(Patient patientToProcess,String trackedEntityId,List<Condition> listAssociatedCondition,
+                                                                               List<DiagnosticReport> listAssociatedDiagnosticReport,List<DataElement> listDataElementMappingList,
+                                                                               PatientFhirMapping oPatientMapping,
+                                                                               ConditionFhirMapping oConditionMapping,
+                                                                               DiagnosticReportFhirMapping oDiagnosticReportMapping)
+    {
+        List<DhisTrackedEntity> listOfTrackedEntity=new ArrayList<>();
+        String trackedEntity="";
+        Condition trackedCondition=new Condition();
+        DiagnosticReport trackedDiagReport=new DiagnosticReport();
+        for(IdentifierDt oIdentifier:patientToProcess.getIdentifier())
+        {
+            if(oIdentifier.getType().getText().equals("Tracker identifier"))
+            {
+                trackedEntity=oIdentifier.getValue();
+            }
+        }
+        DhisTrackedEntity oTrackedEntity=new DhisTrackedEntity();
+        oTrackedEntity.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+        if(trackedEntityId!=null) {
+            oTrackedEntity.trackedEntity = trackedEntityId;
+        }
+        String uniqueCaseDataElementId="";
+        String firstNameDataElementId="";
+        String lastNameDataElementId="";
+        String dateOfBirthDataElementId="";
+        String villageDataElementId="";
+        String notifiableDiseaseDataElementId="";
+        String mainSymptomDataElementId="";
+        String classificationDataElementId="";
+        String immediateOutcomeDataElementId="";
+        if(listAssociatedCondition.size()>0)
+        {
+            trackedCondition=listAssociatedCondition.get(0);
+        }
+        if(listAssociatedDiagnosticReport.size()>0)
+        {
+            trackedDiagReport=listAssociatedDiagnosticReport.get(0);
+        }
+        for(DataElement oDataElement:listDataElementMappingList) {
+            String displayName=oDataElement.displayName;
+            if(oPatientMapping.identifier!="" && oPatientMapping.identifier.equals(displayName))
+            {
+                oTrackedEntity.addAttribute(oDataElement.id,patientToProcess.getId().getIdPart()
+                        .split("-")[0]);
+            }
+            else if(oPatientMapping.name_family!="" && oPatientMapping.name_family.equals(displayName))
+            {
+                if(patientToProcess.getName()!=null)
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id,patientToProcess.getName().get(0)
+                            .getFamily().get(0).toString());
+                }
+            }
+            else if(oPatientMapping.name_given!="" && oPatientMapping.name_given.equals(displayName))
+            {
+                if(patientToProcess.getName()!=null)
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id,patientToProcess.getName().get(0)
+                            .getGiven().get(0).toString());
+                }
+            }
+            else if(oPatientMapping.birthDate!="" && oPatientMapping.birthDate.equals(displayName))
+            {
+                if(patientToProcess.getBirthDate()!=null)
+                {
+                    DateTimeDt dateTimeBirth=new DateTimeDt(patientToProcess.getBirthDate());
+                    String builtDate="";
+                    builtDate=dateTimeBirth.getYear().toString()+"-";
+                    builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
+                    builtDate+="-";
+                    builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
+                    Date date= new Date();
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(date);
+                    int currentYear = cal.get(Calendar.YEAR);
+                    int age=currentYear-dateTimeBirth.getYear();
+                    oTrackedEntity.addAttribute(oDataElement.id,""+age);
+
+                }
+            }
+            else if(oPatientMapping.address!="" && oPatientMapping.address.equals(displayName))
+            {
+                if(patientToProcess.getAddress().size()>0)
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getAddress().get(0).getText());
+
+                }
+
+            }
+            else if(oPatientMapping.deceasedBoolean!="" && oPatientMapping.deceasedBoolean.equals(displayName))
+            {
+                IDatatype oDeceased=patientToProcess.getDeceased();
+                if(oDeceased!=null)
+                {
+
+                    if (oDeceased.toString().equals("true"))
+                    {
+                        oTrackedEntity.addAttribute(oDataElement.id,"Dead");
+                    }
+                    else
+                    {
+                        oTrackedEntity.addAttribute(oDataElement.id,"Alive");
+                    }
+                }
+            }
+            else if (oConditionMapping.code!="" && oConditionMapping.code.equals(displayName))
+            {
+                if(trackedCondition.getCode().getText()!="")
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id,trackedCondition.getCode().getText());
+
+                }
+            }
+            else if (oConditionMapping.category!="" && oConditionMapping.category.equals(displayName))
+            {
+                if(trackedCondition.getCategory().getText()!="")
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id,trackedCondition.getCategory().getText());
+
+                }
+            }
+            else if (oConditionMapping.dateRecorded!="" && oConditionMapping.dateRecorded.equals(displayName))
+            {
+                if(trackedCondition.getDateRecorded()!=null)
+                {
+                    DateTimeDt dateTimeBirth=new DateTimeDt(trackedCondition.getDateRecorded());
+                    String builtDate="";
+                    builtDate=dateTimeBirth.getYear().toString()+"-";
+                    builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
+                    builtDate+="-";
+                    builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
+
+                    oTrackedEntity.addAttribute(oDataElement.id,builtDate);
+
+                }
+            }
+            else if (oConditionMapping.onsetDateTime!="" && oConditionMapping.onsetDateTime.equals(displayName))
+            {
+                IDatatype onSetDateTime=trackedCondition.getOnset();
+                if(onSetDateTime!=null)
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id,onSetDateTime.toString());
+                }
+            }
+            else if (oDiagnosticReportMapping.conclusion!="" && oDiagnosticReportMapping.conclusion.equals(displayName))
+            {
+
+                if(trackedDiagReport.getConclusion()!="")
+                {
+                    oTrackedEntity.addAttribute(oDataElement.id,trackedDiagReport.getConclusion());
+                }
+            }
+
+
         }
         listOfTrackedEntity.add(oTrackedEntity);
         return listOfTrackedEntity;
@@ -794,16 +1123,9 @@ public class FhirMediatorUtilities {
         PatientFhirMapping patientAttributeMapping=new PatientFhirMapping();
         Gson gson=new Gson();
         try {
-            JsonArray json=(JsonArray)gson.fromJson(new FileReader(filePath), JsonElement.class);
-            for(int iterator=0;iterator<json.size();iterator++)
-            {
-                JsonElement oElement=json.get(iterator);
-                if(oElement.toString()=="patient_attribute_mapping")
-                {
-                    patientAttributeMapping=gson.fromJson(oElement,PatientFhirMapping.class);
-                }
-
-            }
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonPatientAttributeMappingString=((JsonObject)json).get("patient_attribute_mapping").toString();
+            patientAttributeMapping=gson.fromJson(jsonPatientAttributeMappingString,PatientFhirMapping.class);
             //System.out.print(0);
         }
         catch (Exception exc)
@@ -811,6 +1133,108 @@ public class FhirMediatorUtilities {
             throw new Exception(exc.toString());
         }
         return patientAttributeMapping;
+    }
+    public static ConditionFhirMapping getConditionMappingAttributes (String filePath) throws Exception
+    {
+        ConditionFhirMapping conditionAttributeMapping=new ConditionFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonConditionAttributeMappingString=((JsonObject)json).get("condition_attribute_mapping").toString();
+            conditionAttributeMapping=gson.fromJson(jsonConditionAttributeMappingString,ConditionFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return conditionAttributeMapping;
+    }
+    public static DiagnosticReportFhirMapping getDiagnosticReportMappingAttributes (String filePath) throws Exception
+    {
+        DiagnosticReportFhirMapping diagnosticReportAttributeMapping=new DiagnosticReportFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("diagnosticreport_attribute_mapping").toString();
+            diagnosticReportAttributeMapping=gson.fromJson(jsonAttributeMappingString,DiagnosticReportFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return diagnosticReportAttributeMapping;
+    }
+    public static TrackerResourceMap getTrackedProgramInfo (String filePath) throws Exception
+    {
+        TrackerResourceMap programInfo=new TrackerResourceMap();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("programs_progstages_tracked").getAsJsonArray().
+                    get(0).toString();
+            programInfo=gson.fromJson(jsonAttributeMappingString,TrackerResourceMap.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return programInfo;
+    }
+    public static ObservationFhirMapping getObservationMappingAttributes (String filePath) throws Exception
+    {
+        ObservationFhirMapping observationAttributeMapping=new ObservationFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("observation_attribute_mapping").toString();
+            observationAttributeMapping=gson.fromJson(jsonAttributeMappingString,ObservationFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return observationAttributeMapping;
+    }
+    public static SpecimenFhirMapping getSpecimenMappingAttributes (String filePath) throws Exception
+    {
+        SpecimenFhirMapping specimenAttributeMapping=new SpecimenFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("specimen_attribute_mapping").toString();
+            specimenAttributeMapping=gson.fromJson(jsonAttributeMappingString,SpecimenFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return specimenAttributeMapping;
+    }
+
+    /**
+     * Check if the DataElement exist already in the Event datavalues collection list
+     * True if exist, False if not
+     * @param oEvent
+     * @param _idDataElement
+     * @return
+     */
+    public static boolean checkDataElementInEvent(DhisEvent oEvent,String _idDataElement)
+    {
+        boolean found=false;
+        for(dataValue oDataValue:oEvent.dataValues)
+        {
+            if(oDataValue.dataElement.equals(_idDataElement))
+            {
+                found=true;
+                break;
+            }
+        }
+        return found;
     }
 
 

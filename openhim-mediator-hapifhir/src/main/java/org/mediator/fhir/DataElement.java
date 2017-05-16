@@ -6,4 +6,7 @@ package org.mediator.fhir;
 public class DataElement {
     public String displayName;
     public String id;
+    ///Element for data Element and attribute for attribute of TEI
+    public String type;
+    public String stage;
 }

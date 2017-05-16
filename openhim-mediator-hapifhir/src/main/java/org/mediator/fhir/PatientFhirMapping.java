@@ -16,3 +16,4 @@ public class PatientFhirMapping {
     public String address;
     public String deceasedBoolean;
 }
+

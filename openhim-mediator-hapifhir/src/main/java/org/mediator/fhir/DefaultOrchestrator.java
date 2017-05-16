@@ -40,6 +40,7 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<Organization> listOfValidOrganization;
     private List<DiagnosticOrder> listOfValidDiagnosticOrder;
     private List<Condition> listOfValidCondition;
+    private List<ListResource> listOfValidListResource;
     private List<Observation> listOfValidObservation;
     private List<DiagnosticReport> listOfValidDiagnosticReport;
     private List<Practitioner> listOfPractitionerToUpdate;
@@ -67,6 +68,7 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<String> listIdsOrganizationUsedForSearch;
     private List<String> listIdsSpecimenUsedForSearch;
     private List<String> listIdsConditionUsedForSearch;
+    private List<String> listIdsListResourceUsedForSearch;
     private List<String> listIdsDiagnosticOrderUsedForSearch;
     private List<String> listIdsObservationUsedForSearch;
     private List<String> listIdsDiagnosticReportUsedForSearch;
@@ -85,6 +87,7 @@ public class DefaultOrchestrator extends UntypedActor {
     String responsePractitioner=null;
     String responseOrganization=null;
     String responseSpecimen=null;
+    String responseListResource=null;
     String responseCondition=null;
     String responseDiagnosticOrder=null;
     String responseObservation=null;
@@ -153,6 +156,7 @@ public class DefaultOrchestrator extends UntypedActor {
         listIdsOrganizationUsedForSearch=new ArrayList<>();
         listIdsSpecimenUsedForSearch=new ArrayList<>();
         listIdsConditionUsedForSearch=new ArrayList<>();
+        listIdsListResourceUsedForSearch=new ArrayList<>();
         listIdsDiagnosticOrderUsedForSearch=new ArrayList<>();
         listIdsObservationUsedForSearch=new ArrayList<>();
         listIdsDiagnosticReportUsedForSearch=new ArrayList<>();
@@ -231,6 +235,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 int nbrRetreivedDiagnosticOrder=resourceBundle.getListOfDiagnosticOrder().size();
                 int nbrRetreivedDiagnosticReport=resourceBundle.getListOfDiagnosticReport().size();
                 int nbrRetreivedObservation=resourceBundle.getListOfObservation().size();
+                int nbrRetreivedListResource=resourceBundle.getListOfListResource().size();
 
                 //Valid tracked entities after the bundle processing
                 int nbrValidPractitioner=resourceBundle.getListOfValidePractitioners().size();
@@ -241,6 +246,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 int nbrValidDiagnosticOrder=resourceBundle.getListOfValidDiagnosticOrder().size();
                 int nbrValidDiagnosticReport=resourceBundle.getListOfValidDiagnosticReport().size();
                 int nbrValidPObservation=resourceBundle.getListOfValidObservation().size();
+                int nbrValidListResource=resourceBundle.getListOfValidListResource().size();
 
                 //InValid tracked entities after the bundle processing
                 int nbreInvalidPractitioner=resourceBundle.getListOfInvalidePractitioners().size();
@@ -251,6 +257,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 int nbreInvalidDiagnosticOrder=resourceBundle.getListOfInvalidDiagnosticOrder().size();
                 int nbreInvalidDiagnosticReport=resourceBundle.getListOfInvalidDiagnosticReport().size();
                 int nbreInvalidObservation=resourceBundle.getListOfInvalidObservation().size();
+                int nbreInvalidListResource=resourceBundle.getListOfInvalidListResource().size();
 
                 resultOutPutHeader+="totalPractitionerFound:"+nbrRetreivedPractitioner+","+
                         "totalNbreOfValidPractitioner:"+nbrValidPractitioner+","+
@@ -304,6 +311,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 PatientOrchestratorActor.ResolvePatientRequest patientRequest =null;
                 OrganizationOrchestratorActor.ResolveOrganizationRequest organizationRequest=null;
                 SpecimenOrchestratorActor.ResolveSpecimenRequest specimenRequest=null;
+                ListResourceOrchestratorActor.ResolveListResourceRequest listResourceRequest=null;
                 ConditionOrchestratorActor.ResolveConditionRequest conditionRequest=null;
                 DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest=null;
                 ObservationOrchestratorActor.ResolveObservationRequest observationRequest=null;
@@ -422,6 +430,25 @@ public class DefaultOrchestrator extends UntypedActor {
                 else
                 {
                     responseSpecimen=nullResponse;
+                }
+                if(resourceBundle.getListOfValidListResource().size()>0)
+                {
+                    this.listOfValidListResource=resourceBundle.getListOfValidListResource();
+                    List<String> listOfId=new ArrayList<>();
+                    for(ListResource oListResource:this.listOfValidListResource)
+                    {
+                        listOfId.add(oListResource.getId().getIdPart());
+                    }
+                    listIdsListResourceUsedForSearch=listOfId;
+                    listResourceRequest=new ListResourceOrchestratorActor.ResolveListResourceRequest(
+                            originalRequest.getRequestHandler(),
+                            getSelf(),
+                            listOfId
+                    );
+                }
+                else
+                {
+
                 }
                 if(resourceBundle.getListOfValidCondition().size()>0)
                 {

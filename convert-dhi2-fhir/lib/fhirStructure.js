@@ -392,7 +392,32 @@ var Bundle={
   //// R!  http://www.iana.org/assignments/link-relations/link-relations.xhtml,R!  Reference details for the link
   "entry" : [], // Entry in the bundle - will have a resource, or information,
   "signature" : { } // Signature Digital Signature
-}
+};
+var List={
+  "resourceType" : "List",
+  // from Resource: id, meta, implicitRules, and language
+  // from DomainResource: text, contained, extension, and modifierExtension
+  "id":"",
+  "identifier" : [], // Business identifier
+  "title" : "", //<string> Descriptive name for the list
+  "code" : "", // { CodeableConcept } What the purpose of this list is
+  "subject" : "", //{ Reference(Patient|Group|Device|Location) } If all resources have the same subject
+  "source" : "", // { Reference(Practitioner|Patient|Device) } Who and/or what defined the list contents (aka Author)
+  "encounter" : "", // { Reference(Encounter) } Context in which list created
+  "status" : "", //<code> R!  current | retired | entered-in-error
+  "date" : "", //<dateTime> When the list was prepared
+  "orderedBy" : "", //{ CodeableConcept } What order the list has
+  "mode" : "", // R! <code> working | snapshot | changes
+  "note" : "", //<string> Comments about the list
+  "entry" : [],
+  /*{ // C? Entries in the list
+    "flag" : { CodeableConcept }, // Status/Workflow information about this item
+    "deleted" : <boolean>, // C? If this item is actually marked as deleted
+    "date" : "<dateTime>", // When item added to list
+    "item" : { Reference(Any) } // R!  Actual entry
+  },*/
+  "emptyReason" : "" //{ CodeableConcept } C? Why list is empty
+};
 
 exports.Identifier=Identifier;
 exports.ContactPoint=ContactPoint;
@@ -417,3 +442,4 @@ exports.DiagnosticReport=DiagnosticReport;
 exports.Condition=Condition;
 exports.Bundle=Bundle;
 exports.Entry=Entry;
+exports.List=List;

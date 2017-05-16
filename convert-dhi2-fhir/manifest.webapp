@@ -20,8 +20,10 @@
 	  {
 		"id":"p55TSnIz83Z",
 		"stages":[
-			"YLMRmho6SdY",
-			"aornzRfUbDZ"
+			"E2ncXI7syDw",
+			"dQbCkr2pgyC",
+			"aornzRfUbDZ",
+			"YLMRmho6SdY"
 		]
 	  }
 	],
@@ -35,9 +37,9 @@
   },
   "patient_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"Unique Case ID",
 	"managingOrganization":"Registering Unit",
-	"identifier":"Unique Case ID",
+	"identifier":"Local Case ID",
 	"name_family":"First Name",
 	"name_given":"Last name",
 	"telecom_phone":"",
@@ -45,13 +47,14 @@
 	"gender":"",
 	"birthDate":"Age (Years)",
 	"address":"Village/Domicile",
-	"deceasedBoolean":"Immediate Outcome"
+	"deceasedBoolean":"",
+	"deceasedDateTime":""
   },
   "practitioner_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
-	"name_family":"",
+	"name_family":"Specimen Handling/Name of the handler",
 	"name_given":"",
 	"gender":"",
 	"telecom_phone":"",
@@ -60,14 +63,16 @@
   },
   "specimen_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
-	"identifier":"Lab Request/Specimen ID,Lab Results/Specimen ID",
+	"id":"",
+	"identifier":"Lab Results/Specimen ID,Specimen Handling/Specimen ID",
 	"status":"",
-	"type":"Lab Request/Specimen Type",
+	"type":"Specimen Handling/Specimen Type",
 	"subject":"Unique Case ID",
 	"accession":"",
-	"receivedTime":"Lab Request/Date of Lab Request",
-	"collectedDateTime":"",
+	"receivedTime":"Optional - Case Investigation/Date of Lab Request",
+	"collector":"Specimen Handling/Name of the handler",
+	"collectedDateTime":"Specimen Handling/Date of Specimen Handling",
+	"collection_comment":"Specimen Handling/Specimen handling action",
 	"collection_quantity_unit":"",
 	"collection_quantity_value":"",
 	"collection_method":"",
@@ -76,12 +81,12 @@
 	"container_capacity_unit":"",
 	"container_capacity_value":"",
 	"container_description":"",
-	"traitment_description":"",
+	"traitment_description":"Specimen Handling/Status of the specimen",
 	"traitment_procedure":""
   },
   "order_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"subject":"Unique Case ID",
 	"orderer":"",
@@ -91,7 +96,7 @@
 	"specimen":"",
 	"status":"",
 	"priority":"",
-	"orderEvent_dateTime":"Lab Request/Date of Lab Request",
+	"orderEvent_dateTime":"Optional - Case Investigation/Date of Lab Request",
 	"orderEvent_status":"",
 	"orderEvent_description":"",
 	"item":"",
@@ -99,7 +104,7 @@
   },
   "observation_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"status" : "",
 	"category" :"",
@@ -109,8 +114,8 @@
 	"effectiveDateTime" : "Lab Results/Date of Results",
 	"effectivePeriod_dateSup" : "",
 	"effectivePeriod_dateInf" : "",
-	"issued" : "Lab Request/Date of Lab Request",
-	"performer" : "Lab Results/Testing Laboratory,Lab Request/Testing Laboratory",
+	"issued" : "Optional - Case Investigation/Date of Lab Request",
+	"performer" : "Specimen Handling/Testing or Reference Laboratory",
 	"valueQuantity_unit" : "",
 	"valueQuantity_value" : "",
 	"valueCodeableConcept" : "",
@@ -135,7 +140,7 @@
 	"comments" : "Lab Results/Confirmed Disease",
 	"bodySite" :"",
 	"method" :"",
-	"specimen" :"Lab Request/Specimen ID",
+	"specimen" :"Lab Results/Specimen ID",
 	"device" :"",
 	"referenceRange" :"",
 	"related" : "",
@@ -143,17 +148,17 @@
   },
   "diagnosticreport_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"status":"",
 	"category":"",
 	"code":"",
 	"subject":"Unique Case ID",
 	"encounter":"",
-	"effectiveDateTime":"Lab Results/Date of Results",
+	"effectiveDateTime":"",
 	"effectivePeriod_start":"",
 	"effectivePeriod_end":"",
-	"issued":"Lab Request/Date of Lab Request",
+	"issued":"",
 	"performer":"",
 	"request":"",
 	"specimen":"",
@@ -166,18 +171,18 @@
   },
   "condition_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"patient":"Unique Case ID",
 	"encounter":"",
 	"asserter":"",
-	"dateRecorded":"Lab Request/Date of Lab Request",
+	"dateRecorded":"",
 	"code":"Notifiable Disease/Condition",
 	"category":"Main Symptom",
 	"clinicalStatus":"",
 	"verificationStatus":"",
 	"severity":"",
-	"onsetDateTime":"Lab Request/Date of Lab Request",
+	"onsetDateTime":"",
 	"onsetQuantity":"",
 	"onsetPeriod":"",
 	"onsetRange":"",
@@ -193,7 +198,24 @@
 	"bodySite":"",
 	"notes":""
   },
-  "authentication":"admin:district",
-  "temp_directory":"/home/server-hit/Documents/datalab/",
+  "list_attribute_mapping":
+  {
+	 "id" :"",
+	 "identifier" :"",
+	 "title" : "",
+	 "code" : "",
+	 "subject" : "Unique Case ID",
+	 "source" : "",
+	 "encounter" : "",
+	 "status" : "",
+	 "date" : "Case Monitoring/Date of Report",
+	 "orderedBy" : "",
+	 "mode" : "",
+	 "note" : "Case Monitoring/Case Status",
+	 "entry" :"",
+	 "emptyReason" : ""
+  },
+  "authentication":"gerard:Gerard1234",
+  "temp_directory":"/home/server-hit/Documents/datalab",
   "manifest_generated_at": "Thu Dec 01 2016 10:27:06 GMT+0100 (CET)"
 }

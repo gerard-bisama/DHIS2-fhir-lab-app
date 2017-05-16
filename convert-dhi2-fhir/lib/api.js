@@ -433,7 +433,7 @@ exports.GetPatientAttributesMapping = function GetPatientAttributesMapping()
 {
 	return manifest.patient_attribute_mapping;
 }
-exports.GetPractitionerAttributesMapping = function GetPractitionerAttributesMapping()
+exports.getPractitionerAttributesMapping = function getPractitionerAttributesMapping()
 {
 	return manifest.practitioner_attribute_mapping;
 }
@@ -456,6 +456,10 @@ exports.getConditionAttributesMapping = function getConditionAttributesMapping()
 exports.getDiagnosticReportAttributesMapping = function getDiagnosticReportAttributesMapping()
 {
 	return manifest.diagnosticreport_attribute_mapping;
+}
+exports.getListAttributesMapping = function getListAttributesMapping()
+{
+	return manifest.list_attribute_mapping;
 }
 exports.getProgramsAndStagesToTrack = function getProgramsAndStagesToTrack()
 {
@@ -480,14 +484,14 @@ function ReadJSONFile(fileName)
 }
 exports.writeJSONFile= function writeJSONFile(fileName,jsonContent)
 {
-	var filePath=manifest.temp_directory+fileName+".json";
+	var filePath=manifest.temp_directory+"/"+fileName+".json";
 	var res = fs.writeFileSync(filePath,jsonContent,"utf-8");
 }
 exports.generateCSVFile = function generateCSVFile(listHeader,filename,programName)
 {
 	
 	var writer = csvWriter({ headers: listHeader});
-	writer.pipe(fs.createWriteStream(manifest.temp_directory+filename+'.csv'));
+	writer.pipe(fs.createWriteStream(manifest.temp_directory+"/"+filename+'.csv'));
 	var listContentCSV=[];
 	listContentCSV.push(programName);
 	for(var i=0;i<listHeader.length-1;i++)

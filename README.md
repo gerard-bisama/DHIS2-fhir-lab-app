@@ -30,37 +30,46 @@ gedit manifest.webapp
 In the manifest.webapp, configure the following values:
 ```sh
 href": "http://localhost:8082" # to replace with DHIS2 url and port
+"temp_directory":"/home/user/datalab/" #replace with the directory that will be used to generate csv file and data elements mapping file
+"authentication":"admin:district" # Replace admin with the user and district with the password 
 ```
-Go to the dhis2 ->apps-> maintenance -> program ->tracked entity. Identify the entity used by Programs to track Patient,Provider,Organization,Specimen,Observation,Diagnostic Order and Diagnostic Report, get their ids (in the show details context menu) and map in the following section of manifest.webapp.
+The file maniferst.webapp also contains FHIR data model template to be filled by the corresponding entity tracker attributes and dataelements.Ones needs first to specify the model and stage/Event used to register cases and related laboratory information.
+the steps are:
+a. Go in DHIS2 indentify program ID and stages ID involved in the Lab registration. Then open the manifest.webapp to configure this information. We can add as many stages as they are involved.
 ```sh
-"entities_mapping":{
-	"patient":"fZZDtGHhXT3", # Replace all ids by their correspondants, tracked entity ID in dhis2
-	"provider":"WO3xOdPaJfL",#if the entity is not concerned used "000000" as entity ID and increment by 1 if there is others non tracked entities
-	"specimen":"IJooTQOZbfy",
-	"order":"mob9DySuMOS",
-	"observation":"KEc7eJXhZw3",
-	"diagnosticReport":"Onw0t8l5Dyp"
-  }
+"programs_progstages_tracked":[
+	  {
+		"id":"pxxxxxxxx",
+		"stages":[
+			"Yxxxxxxx",
+			"axxxxxxx"
+		]
+	  }
+	],
 ```
-The ones need to map now entity tracker attributes.  Go to dhis2 ->apps-> Programs/Attribute. This is the place where attributes are linked to the entities. Then identify the program used to track one of the entity. Click on the ProgramName -> Edit -> (Check if the tracke entity field is the one we want) -> Go in the Available Attributes Section and -> Select attributes. Use the attributes to map them with their correspondance in FHIR. The mapping is done in the manifest.webapp file, by changing attributes. if An attribute is not tracked leave the default name. But ensure only that there not name duplication.
-P. exemple the mapping of attributes for the Practitioner Entity is "
+Then follow the installation instruction as explained  at the section installation (1). But instead of execute the link http://localhost:8083/trackedentities use this link http://localhost:8083/trackedentities_csv. This will generate 2 files, the first is a csv file with the name of program tracked and it contains all attributes and data elements used in the concerned program to enter data. The csv file  is used to perform the mapping with Fhir data model. 
+The second file is named "FileMapping.json" and it contains the mapping between names of data elements and their ids, since to configure the data mapping we use displayName instead of ids.
+Each column of the csv file  that must be collected should be mapped with the corresponding FHIR resource model. A bit knowlegde of the FHIR resource and the metadata structure of DHIS2 is necessary.
+
+For example, for patient resource the mapping of csv column names and FHIR resource looks like this:
 ```sh
-"practitioner_attribute_mapping":
+"patient_attribute_mapping":
   {
 	"id":"trackedEntityInstance",
-	"identifier":"Identifier",
-	"name_family":"LastName",
-	"name_given":"FirstName",
-	"gender":"Sex",
-	"telecom_phone":"Telephone",
-	"telecom_email":"Email",
-	"address":"Residence"
+	"managingOrganization":"Registering Unit",
+	"identifier":"Unique Case ID",
+	"name_family":"First Name",
+	"name_given":"Last name",
+	"telecom_phone":"", # When there is no a corresponding value in the csv leave the field empty
+	"telecom_email":"",
+	"gender":"",
+	"birthDate":"Age (Years)",
+	"address":"Village/Domicile",
+	"deceasedBoolean":"Immediate Outcome"
   }
 ```
-Enter authentication by specifying the username:password. 
-```sh
- "authentication":"admin:district" # Replace admin with the user and district with the password
-```
+Do the same for other FHIR resource model.
+
 2. Configuration of the FHIR-mediator
 
 The first step is to allow the mediator to read the configuration file.
@@ -81,6 +90,8 @@ sudo chown -R fhirmediator:yourusergroup /home/fhirmediator/config/
 ```sh 
 sudo gedit /home/mediator/config/fhirmediator.properties
 ```
+Make sure that the fhirmediator user is the owner of files in the fhirmediator directory.(use chown)
+
 In the fhirmediator.properties change the value as shown 
 
 ```sh 
@@ -98,6 +109,20 @@ serverTargetScheme=http # could be https also depending on the server configurat
 serverTargetAppName=hapi-fhir-jpaserver-local
 serverTargetFhirDataModel=baseDstu2
 ```
+The second step is to configure the connection with the openHIM core
+```sh 
+sudo gedit /thelocationofyoursourcecode/openhim-mediator-hapifhir/src/main/resources/mediator.properties
+```
+In the mediator.properties, change the values as shown
+
+```sh
+core.host=localhost
+core.api.port=8080 # the port of openhim-core, configure during the installation of openhim-core. Open the config.json to get it 
+core.api.user=root@openhim.org #Default openhim admin username
+core.api.password=xxxx #password defined during the installation of openhim
+``` 
+Copy also the FileMapping.json file generated by the app  the convert-dhis2-fhir and the configured manifest.webapp in /home/mediator/config.
+
 3. Configuration of the HAPI JPA Server
 To make the JPA server working ones need to create a new mysql database and change the configuration files of JPA local server. 
 To install mysql go to "https://doc.ubuntu-fr.org/mysql"
@@ -132,6 +157,7 @@ The JPA server will run on the port 8084 but if Ones needs to change this value.
 1. dhis2-fhir convertion
 ```sh
 cd convert-dhi2-fhir
+npm install #to instal all dependencies
 npm start
 ```
 the run the app on port 8083 by default. Can check if the up return the bundle of related DHIS2 tracked entities with
@@ -145,6 +171,13 @@ cd  /thelocationofyoursourcecode/openhim-mediator-hapifhir
 mvn install
 java -jar target/fhir-mediator-0.1.0-jar-with-dependencies.jar
 ```
+If you are attempting to start your Java Mediator and you are experiencing a SunCertPathBuilderException error then you will need to follow the instructions on the link to install the self signed certificate.
+
+> http://openhim.readthedocs.io/en/latest/tutorial/3-creating-a-passthrough-mediator.html#suncertpathbuilderexception-unable-to-find-valid-certification-path-to-requested-target
+
+Then navigate to the Mediators section on OpenHIM to see your Mediator and check in the client section if the client "tut" is created. If not create the client manualy as shown in the link below.
+> http://openhim.readthedocs.io/en/latest/tutorial/2-creating-a-channel.html#
+
 - Prerequisites: 
 
 To install the mediator, you have to install OpenHIM
@@ -157,8 +190,8 @@ Install openjdk7 at least. If you experiencing the SunCertPathBuilderException e
 
 3. HAPI JPA server
 
-``sh
-cd /thelocationofyoursourcecode /hapi-fhir-jpaserver-local
+```sh
+cd /thelocationofyoursourcecode/hapi-fhir-jpaserver-local
 mvn install
 mvn jetty:run
 ```

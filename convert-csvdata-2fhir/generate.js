@@ -37,14 +37,21 @@
   var Entry=fhirStructureAPI.Entry;
   var Bundle=fhirStructureAPI.Bundle;
   var dataFileLocation=entityAPI.getLocationDataFile();
+  var sourceFileLocation=entityAPI.getLocationSourceFile();
   var bundleTempLocation=entityAPI.getLocationTempResource();
+ 
   
   //console.log(Identifier);
 	function getListOfPatientAttributeMapping()
 	{
 		var listOfAttribute=[];
 		var oAttribute="";
-		var oAttribute=patientAttributesMapping.managingOrganization!=""?patientAttributesMapping.managingOrganization:"";
+		oAttribute=patientAttributesMapping.id!=""?patientAttributesMapping.id:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute=patientAttributesMapping.managingOrganization!=""?patientAttributesMapping.managingOrganization:"";
 		if(oAttribute!="")
 		{
 			listOfAttribute.push(oAttribute);
@@ -53,59 +60,71 @@
 		var oAttribute=patientAttributesMapping.identifier!=""?patientAttributesMapping.identifier:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			var listAttributes=oAttribute.split(",");
+			if(listAttributes.length>1)
+			{
+				for(var iterator=0;iterator<listAttributes.length;iterator++)
+				{
+					listOfAttribute.push(listAttributes[iterator]);
+				}
+			}
+			else
+			{
+				listOfAttribute.push(oAttribute.trim());
+			}
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.name_family!=""?patientAttributesMapping.name_family:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.name_given!=""?patientAttributesMapping.name_given:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.telecom_phone!=""?patientAttributesMapping.telecom_phone:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.telecom_email!=""?patientAttributesMapping.telecom_email:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.gender!=""?patientAttributesMapping.gender:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.birthDate!=""?patientAttributesMapping.birthDate:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.address!=""?patientAttributesMapping.address:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
-		var oAttribute="";
+		oAttribute="";
 		var oAttribute=patientAttributesMapping.deceasedBoolean!=""?patientAttributesMapping.deceasedBoolean:"";
 		if(oAttribute!="")
 		{
-			listOfAttribute.push(oAttribute);
+			listOfAttribute.push(oAttribute.trim());
 		}
 		return listOfAttribute;
 		//listOfAttribute.pu
 	}
+	
 	function getListOfSpecimenAttributeMapping()
 	{
 		var listOfAttribute=[];
@@ -1180,7 +1199,7 @@
 	  //var listCsvFile= entityAPI.getListOfFiles();
 	  //console.log(listCsvFile);
 	  var listResourceExtracted=[];
-	  var filePath=dataFileLocation;
+	  var filePath=sourceFileLocation;
 		entityAPI.getListOfFiles(filePath,function (resfileName)
 		{
 		  //console.log(fileName);
@@ -1210,6 +1229,7 @@
 							}
 							//console.log(""+itemToSearch+" :"+resultChecking);
 						}
+						console.log("header attribute :"+nbreOfHeaderAttributes+" patient attribute:"+listOfAttributesPatient.length);
 						if(nbreOfHeaderAttributes>=listOfAttributesPatient.length)
 						{
 							var listPatientExtrated=[];
@@ -1248,18 +1268,34 @@
 										if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]!="")
 										{
 											var oAttribute=dataFile[0][listPatientAttributeIndex[iteratorValue]].trim();
+											var identifierListAttributes=patientAttributesMapping.identifier.split(",");
+											var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+											if(resCheck==true)
+											{
+												var orgIdentifier={};
+												oIdentifier=Object.create(Identifier);
+												//assignment of Identifier
+												oIdentifier.use="official";
+												oIdentifier.type={"text":""+oAttribute};
+												oIdentifier.system="http://hl7.org/fhir/";
+												oIdentifier.value=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+												listOfIdentifier.push(oIdentifier);
+												PatientSet=true;
+												continue;
+											}
+											
 											//console.log(oAttribute);
 											switch(oAttribute)
 											{
-												case patientAttributesMapping.identifier:
+												case patientAttributesMapping.id:
+													oPatient.id=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]+"-";;
 													var oIdentifier={};
 													oIdentifier=Object.create(Identifier);
 													//assignment of Identifier
 													oIdentifier.use="official";
-													oIdentifier.type={"text":"Medical Record Number"};
+													oIdentifier.type={"text":""+oAttribute};
 													oIdentifier.system="http://hl7.org/fhir/";
 													oIdentifier.value=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
-													oPatient.id=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]+"-";
 													listOfIdentifier.push(oIdentifier);
 													PatientSet=true;
 													break;
@@ -2565,7 +2601,7 @@
 						}
 						else
 						{
-							console.log("Invalid file format :"+fileName);
+							console.log("Invalid file format on patient headers attributes: "+fileName);
 							//res.send("Invalid file format");
 							entityAPI.moveFileToErrors(fileName);
 						}
@@ -2573,14 +2609,14 @@
 					else
 					{
 						//res.send("Invalid file format");
-						console.log("Invalid file format :"+fileName);
+						console.log("Invalid file format on headers: "+fileName);
 						entityAPI.moveFileToErrors(fileName);
 					}
 				}
 				else
 				{
 					//res.send("Invalid file format");
-					console.log("Invalid file format "+fileName);
+					console.log("Invalid file format on data file length :"+fileName);
 					entityAPI.moveFileToErrors(fileName);
 				}
 				
@@ -2606,8 +2642,25 @@
 			return res.end();	
 		});
 	}
+	downloadcsv=function (req, res)
+	{
+		var filePath=dataFileLocation;
+		console.log(filePath);
+		entityAPI.getListOfFiles(filePath,function (resfileName)
+		{
+			var fileName=resfileName;
+			
+			if(fileName.includes(".csv")==true)
+			{
+				console.log("*************"+dataFileLocation);
+				res.download(dataFileLocation+"/"+fileName);
+			}
+		});
+		
+	}
 
 	app = express();
+	app.use(express.static(entityAPI.resolvePathDirectory(__dirname,'public')));
 
   //app.use(express.json());
 	app.get ("/csv2fhir", function (req,res,next)
@@ -2616,12 +2669,20 @@
 		convertcsv2fhir(req,res,next);
 		//console.log("End of operation");
 	});
-	app.get ("/getfhir", function (req,res,next)
+	app.get ("/getfhir", function (req,res,next)//Useless
 	{
 		console.log("Pulling fhir resource from fhir");
 		getFhirResource(req,res,next);
 		//console.log("End of operation");
 	});
+	app.get ("/uploadfile", function (req,res,next)
+	{
+		res.sendFile(entityAPI.resolvePathDirectory(__dirname,'views/index.html'));
+	});
+	app.post("/upload",entityAPI.processUploadData);
+	app.get('/downloadcsv', function(req, res) {
+		downloadcsv(req, res);
+	}); 
 
   server = app.listen(process.env.PORT || 8085, function() {
     return console.log("Service to convert csv file content to fhir is running on port:" + (server.address().port));

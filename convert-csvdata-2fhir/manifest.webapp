@@ -3,6 +3,9 @@
   "default_locale": "en",
   "activities": {
     "dhis": {
+      "href": ""
+    },
+	"hapi": {
       "href": "http://localhost:8084/hapi-fhir-jpaserver-local/baseDstu2"
     }
   },
@@ -35,9 +38,9 @@
   },
  "patient_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"Unique Case ID",
 	"managingOrganization":"Registering Unit",
-	"identifier":"Unique Case ID",
+	"identifier":"Local Case ID",
 	"name_family":"First Name",
 	"name_given":"Last name",
 	"telecom_phone":"",
@@ -49,7 +52,7 @@
   },
   "practitioner_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"name_family":"",
 	"name_given":"",
@@ -60,13 +63,13 @@
   },
   "specimen_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
-	"identifier":"Lab Request/Specimen ID,Lab Results/Specimen ID",
+	"id":"",
+	"identifier":"Lab Results/Specimen ID",
 	"status":"",
-	"type":"Lab Request/Specimen Type",
+	"type":"",
 	"subject":"Unique Case ID",
 	"accession":"",
-	"receivedTime":"Lab Request/Date of Lab Request",
+	"receivedTime":"Optional - Case Investigation/Date of Lab Request",
 	"collectedDateTime":"",
 	"collection_quantity_unit":"",
 	"collection_quantity_value":"",
@@ -81,7 +84,7 @@
   },
   "order_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"subject":"Unique Case ID",
 	"orderer":"",
@@ -91,7 +94,7 @@
 	"specimen":"",
 	"status":"",
 	"priority":"",
-	"orderEvent_dateTime":"Lab Request/Date of Lab Request",
+	"orderEvent_dateTime":"Optional - Case Investigation/Date of Lab Request",
 	"orderEvent_status":"",
 	"orderEvent_description":"",
 	"item":"",
@@ -99,7 +102,7 @@
   },
   "observation_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"status" : "",
 	"category" :"",
@@ -109,8 +112,8 @@
 	"effectiveDateTime" : "Lab Results/Date of Results",
 	"effectivePeriod_dateSup" : "",
 	"effectivePeriod_dateInf" : "",
-	"issued" : "Lab Request/Date of Lab Request",
-	"performer" : "Lab Results/Testing Laboratory,Lab Request/Testing Laboratory",
+	"issued" : "Optional - Case Investigation/Date of Lab Request",
+	"performer" : "Lab Results/Testing Laboratory",
 	"valueQuantity_unit" : "",
 	"valueQuantity_value" : "",
 	"valueCodeableConcept" : "",
@@ -135,7 +138,7 @@
 	"comments" : "Lab Results/Confirmed Disease",
 	"bodySite" :"",
 	"method" :"",
-	"specimen" :"Lab Request/Specimen ID",
+	"specimen" :"Lab Results/Specimen ID",
 	"device" :"",
 	"referenceRange" :"",
 	"related" : "",
@@ -143,7 +146,7 @@
   },
   "diagnosticreport_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"status":"",
 	"category":"",
@@ -153,7 +156,7 @@
 	"effectiveDateTime":"Lab Results/Date of Results",
 	"effectivePeriod_start":"",
 	"effectivePeriod_end":"",
-	"issued":"Lab Request/Date of Lab Request",
+	"issued":"Optional - Case Investigation/Date of Lab Request",
 	"performer":"",
 	"request":"",
 	"specimen":"",
@@ -166,18 +169,18 @@
   },
   "condition_attribute_mapping":
   {
-	"id":"trackedEntityInstance",
+	"id":"",
 	"identifier":"",
 	"patient":"Unique Case ID",
 	"encounter":"",
 	"asserter":"",
-	"dateRecorded":"Lab Request/Date of Lab Request",
+	"dateRecorded":"Optional - Case Investigation/Date of Lab Request",
 	"code":"Notifiable Disease/Condition",
 	"category":"Main Symptom",
 	"clinicalStatus":"",
 	"verificationStatus":"",
 	"severity":"",
-	"onsetDateTime":"Lab Request/Date of Lab Request",
+	"onsetDateTime":"Optional - Case Investigation/Date of Lab Request",
 	"onsetQuantity":"",
 	"onsetPeriod":"",
 	"onsetRange":"",
@@ -194,7 +197,8 @@
 	"notes":""
   },
   "authentication":"admin:district",
-  "temp_directory":"/home/server-hit/Documents/datalab/source",
+  "temp_directory":"/home/server-hit/Documents/datalab",
+  "source_directory":"/home/server-hit/Documents/datalab/source",
   "resource_temp":"/home/server-hit/Documents/datalab/temp",
   "treated_directory":"/home/server-hit/Documents/datalab/treated",
   "errors_directory":"/home/server-hit/Documents/datalab/errors",

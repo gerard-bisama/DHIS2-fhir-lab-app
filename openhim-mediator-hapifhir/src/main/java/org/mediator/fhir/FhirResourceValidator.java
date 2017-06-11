@@ -49,11 +49,11 @@ public class FhirResourceValidator  {
 
     List<Practitioner> listOfPractitioners=new ArrayList<Practitioner>();
 
-    public List<Practitioner> getListOfInvalidePractitioners() {
+    public List<Practitioner> getListOfInvalidPractitioners() {
         return listOfInvalidPractitioners;
     }
 
-    public List<Practitioner> getListOfValidePractitioners() {
+    public List<Practitioner> getListOfValidPractitioners() {
         return listOfValidPractitioners;
     }
 
@@ -100,6 +100,12 @@ public class FhirResourceValidator  {
     }
 
     List<ListResource> listOfValidListResource=new ArrayList<>();
+
+    public List<Basic> getListOfValidBasic() {
+        return listOfValidBasic;
+    }
+
+    List<Basic> listOfValidBasic=new ArrayList<>();
 
     public StringBuilder get_jsonResource() {
         return _jsonResource;
@@ -149,6 +155,12 @@ public class FhirResourceValidator  {
     }
 
     List<ListResource> listOfInvalidListResource=new ArrayList<>();
+
+    public List<Basic> getListOfInvalidBasic() {
+        return listOfInvalidBasic;
+    }
+
+    List<Basic> listOfInvalidBasic=new ArrayList<>();
 
     public List<Patient> getListOfPatient() {
         return listOfPatient;
@@ -222,6 +234,12 @@ public class FhirResourceValidator  {
     }
 
     List<ListResource> listOfListResource=new ArrayList<>();
+
+    public List<Basic> getListOfBasic() {
+        return listOfBasic;
+    }
+
+    List<Basic> listOfBasic=new ArrayList<>();
 
     public FhirResourceValidator(StringBuilder jsonResource)
     {
@@ -323,6 +341,7 @@ public class FhirResourceValidator  {
                 listOfObservation=fhirProcessor.getListOfObservation();
                 listOfDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
                 listOfListResource=fhirProcessor.getListOfListResource();
+                listOfBasic=fhirProcessor.getListOfBasic();
 
                 if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
                 {
@@ -342,6 +361,7 @@ public class FhirResourceValidator  {
                     listOfObservation.addAll(fhirProcessor.getListOfObservation());
                     listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
                     listOfListResource.addAll(fhirProcessor.getListOfListResource());
+                    listOfBasic.addAll(fhirProcessor.getListOfBasic());
                     while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
                     {
                         Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
@@ -357,6 +377,7 @@ public class FhirResourceValidator  {
                         listOfObservation.addAll(fhirProcessor.getListOfObservation());
                         listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
                         listOfListResource.addAll(fhirProcessor.getListOfListResource());
+                        listOfBasic.addAll(fhirProcessor.getListOfBasic());
                         //nextPageBundle=subNextBundle.copy();
                         nextPageBundle=CreateBundleCopy(subNextBundle);
                     }
@@ -373,6 +394,7 @@ public class FhirResourceValidator  {
                 resValidation.setListOfDiagnosticReportToValidate(listOfDiagnosticReport);
                 resValidation.setListOfObservationToValidate(listOfObservation);
                 resValidation.setListOfListResourceToValidate(listOfListResource);
+                resValidation.setListOfBasicToValidate(listOfBasic);
 
                 resValidation.startValidation();
                 //Validation results
@@ -385,6 +407,8 @@ public class FhirResourceValidator  {
                 listOfValidDiagnosticReport=resValidation.getListOfValidDiagnosticReport();
                 listOfValidObservation=resValidation.getListOfValidObservation();
                 listOfValidListResource=resValidation.getListOfValidListResource();
+                listOfValidBasic=resValidation.getListOfValidBasic();
+
                 //
                 listOfInvalidPractitioners=resValidation.getlistOfInvalidePractitioner();
                 listOfInvalidPatient=resValidation.getListOfInvalidPatient();
@@ -395,10 +419,11 @@ public class FhirResourceValidator  {
                 listOfInvalidDiagnosticReport=resValidation.getListOfInvalidDiagnosticReport();
                 listOfInvalidObservation=resValidation.getListOfInvalidObservation();
                 listOfInvalidListResource=resValidation.getListOfInvalidListResource();
+                listOfInvalidBasic=resValidation.getListOfInvalidBasic();
 
                 if(listOfInvalidPractitioners.size()>0 || listOfInvalidPatient.size()>0 || listOfInvalidOrganization.size()>0
                         || listOfInvalidSpecimen.size()>0 || listOfInvalidDiagnosticOrder.size()>0 || listOfInvalidDiagnosticReport.size()>0
-                        || listOfInvalidObservation.size()>0 || listOfInvalidListResource.size()>0)
+                        || listOfInvalidObservation.size()>0 || listOfInvalidListResource.size()>0 || listOfInvalidBasic.size()>0)
                 {
                     //Create a new Bundle
                     Bundle invalidResourceBundle=new Bundle();
@@ -557,6 +582,7 @@ public class FhirResourceValidator  {
                 listOfDiagnosticOrder=fhirProcessor.getListOfDiagnosticOrder();
                 listOfObservation=fhirProcessor.getListOfObservation();
                 listOfDiagnosticReport=fhirProcessor.getListOfDiagnosticReport();
+                listOfListResource=fhirProcessor.getListOfListResource();
 
                 if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
                 {
@@ -575,6 +601,7 @@ public class FhirResourceValidator  {
                     listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
                     listOfObservation.addAll(fhirProcessor.getListOfObservation());
                     listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                    listOfListResource.addAll(fhirProcessor.getListOfListResource());
                     while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
                     {
                         Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
@@ -589,6 +616,7 @@ public class FhirResourceValidator  {
                         listOfDiagnosticOrder.addAll(fhirProcessor.getListOfDiagnosticOrder());
                         listOfObservation.addAll(fhirProcessor.getListOfObservation());
                         listOfDiagnosticReport.addAll(fhirProcessor.getListOfDiagnosticReport());
+                        listOfListResource.addAll(fhirProcessor.getListOfListResource());
                         //nextPageBundle=subNextBundle.copy();
                         nextPageBundle=CreateBundleCopy(subNextBundle);
                     }
@@ -602,6 +630,7 @@ public class FhirResourceValidator  {
                 listOfValidDiagnosticOrder.addAll(listOfDiagnosticOrder);
                 listOfValidObservation.addAll(listOfObservation);
                 listOfValidDiagnosticReport.addAll(listOfDiagnosticReport);
+                listOfValidListResource.addAll(listOfListResource);
                 isProcessed=true;
             }
         }
@@ -800,6 +829,90 @@ public class FhirResourceValidator  {
 
 
         return extractedPatient;
+    }
+    public List<ListResource> extractListResourceFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
+    {
+        List<ListResource> extractedListResource=new ArrayList<>();
+        if(bundleJsonString.length()<2)
+        {
+            throw new Exception("Invalide  Json resource");
+        }
+        Bundle oBundle=_parser.parseResource(Bundle.class,bundleJsonString.toString());
+        if(oBundle!=null ) {
+            if (oBundle.getEntry().size() == 0) {
+                return extractedListResource;
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                extractedListResource=fhirProcessor.getListOfListResource();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedListResource.addAll(fhirProcessor.getListOfListResource());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedListResource.addAll(fhirProcessor.getListOfListResource());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
+            }
+
+        }
+
+
+        return extractedListResource;
+    }
+    public List<Basic> extractBasicFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
+    {
+        List<Basic> extractedBasic=new ArrayList<>();
+        if(bundleJsonString.length()<2)
+        {
+            throw new Exception("Invalide  Json resource");
+        }
+        Bundle oBundle=_parser.parseResource(Bundle.class,bundleJsonString.toString());
+        if(oBundle!=null ) {
+            if (oBundle.getEntry().size() == 0) {
+                return extractedBasic;
+            }
+            else if (oBundle.getEntry().size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                extractedBasic=fhirProcessor.getListOfBasic();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedBasic.addAll(fhirProcessor.getListOfBasic());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedBasic.addAll(fhirProcessor.getListOfBasic());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
+            }
+
+        }
+
+
+        return extractedBasic;
     }
     public List<Organization> extractOrganizationFromBundleString(String bundleJsonString,String sourceServerURI ) throws Exception
     {
@@ -1147,6 +1260,12 @@ class FhirResourceProcessor
 
     public List<ListResource> _listOfListResource;
 
+    public List<Basic> getListOfBasic() {
+        return _listOfBasic;
+    }
+
+    public List<Basic> _listOfBasic;
+
     public List<Bundle> getListOfBundle() {
         return _listOfBundle;
     }
@@ -1277,6 +1396,7 @@ class FhirResourceProcessor
         this._listOfDiagnosticReport=new ArrayList<>();
         this._listOfObservation=new ArrayList<>();
         this._listOfListResource=new ArrayList<>();
+        this._listOfBasic=new ArrayList<>();
         this._listOfBundle=new ArrayList<>();
 
             for (IResource oResource:this._listOfResources){
@@ -1311,6 +1431,9 @@ class FhirResourceProcessor
                         break;
                     case "List":
                         this._listOfListResource.add((ListResource) oResource);
+                        break;
+                    case "Basic":
+                        this._listOfBasic.add((Basic) oResource);
                         break;
                     case "Bundle":
                         this._listOfBundle.add((Bundle) oResource);
@@ -1476,6 +1599,128 @@ class FhirResourceProcessor
             stringTransactionResult="total:"+total+"," +
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
+        return  stringTransactionResult;
+    }
+    public static String createListResource(FhirContext oContext,List<ListResource> listOfListResource,String serverUrl
+            ,String logFileName) throws Exception
+    {
+        MethodOutcome respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+
+        IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+
+        int compter=0;
+        int nbreResourceCreated=0;
+        int total=listOfListResource.size();
+
+        for(ListResource oListResource: listOfListResource)
+        {
+            try {
+                //specimenToTrace = oSpecimen;
+                respOutcome = client.update()
+                        .resource(oListResource)
+                        .prettyPrint()
+                        .encodedJson()
+                        .execute();
+                if(respOutcome.getCreated())
+                {
+                    nbreResourceCreated++;
+                }
+            }
+            catch (Exception exc)
+            {
+                FhirMediatorUtilities.writeInLogFile(logFileName,
+                        oListResource.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+                continue;
+
+                //throw new Exception(exc.getMessage());
+            }
+        }
+        int success=nbreResourceCreated;
+        int failed=total-success;
+        stringTransactionResult="total:"+total+"," +
+                "succes:"+success+"," +
+                "failed:"+failed+"}";
+        return  stringTransactionResult;
+    }
+    public static String createBasic(FhirContext oContext,List<Basic> listOfBasic,String serverUrl
+            ,String logFileName) throws Exception
+    {
+        MethodOutcome respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+
+        IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+
+        int compter=0;
+        int nbreResourceCreated=0;
+        int total=listOfBasic.size();
+
+        for(Basic oBasic: listOfBasic)
+        {
+            try {
+                //specimenToTrace = oSpecimen;
+                respOutcome = client.update()
+                        .resource(oBasic)
+                        .prettyPrint()
+                        .encodedJson()
+                        .execute();
+                if(respOutcome.getCreated())
+                {
+                    nbreResourceCreated++;
+                }
+            }
+            catch (Exception exc)
+            {
+                FhirMediatorUtilities.writeInLogFile(logFileName,
+                        oBasic.toString()+" Creation resource operation failed! "+exc.getMessage(),"Error");
+                continue;
+
+                //throw new Exception(exc.getMessage());
+            }
+        }
+        int success=nbreResourceCreated;
+        int failed=total-success;
+        stringTransactionResult="total:"+total+"," +
+                "succes:"+success+"," +
+                "failed:"+failed+"}";
+        return  stringTransactionResult;
+    }
+    public static String createListResourceInTransaction(FhirContext oContext,List<ListResource> listOfListResource,String serverUrl
+            ,String logFileName) throws Exception
+    {
+        Bundle respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+
+            Bundle resourceBundle=new Bundle();
+            resourceBundle.setType(BundleTypeEnum.TRANSACTION);
+            int compter=0;
+            for(ListResource oListResource: listOfListResource)
+            {
+
+                Entry oBundleEntry= new Entry().setResource(oListResource);
+                oBundleEntry.getRequest().setMethod(HTTPVerbEnum.PUT);
+                resourceBundle.addEntry(oBundleEntry);
+                compter++;
+                //if(compter==5) break;
+            }
+            //String filePath1="/home/server-hit/Desktop/"+"Bundle.json";
+            //ManageJsonFile.saveResourceInJSONFile(resourceBundle,oContext,filePath1);
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            String resJSONFormat=oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resourceBundle);
+            respOutcome=client.transaction().withBundle(resourceBundle).execute();
+            //System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respOutcome));
+            if(respOutcome!=null)
+            {
+                stringTransactionResult=FhirResourceProcessor.extractResponseStaticsFromBundleTransactionRespons(respOutcome,1);
+            }
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
         return  stringTransactionResult;
     }
     public static String createOrganization(FhirContext oContext,List<Organization> listOfOrganization,String serverUrl) throws Exception
@@ -1822,6 +2067,90 @@ class FhirResourceProcessor
                 searchPattern+="_id="+oPatient.getId().getValueAsString();
                 Entry oBundleEntry= new Entry().setResource(oPatient);
                 oBundleEntry.setFullUrl(oPatient.getId());
+                oBundleEntry.getRequest().setUrl(searchPattern).setMethod(HTTPVerbEnum.PUT);
+                resourceBundle.addEntry(oBundleEntry);
+            }
+            //ManageJsonFile.saveResourceInJSONFile(resourceBundle,oContext,filePath1);
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            //System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resourceBundle));
+            respOutcome=client.transaction().withBundle(resourceBundle).execute();
+            System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respOutcome));
+            if(respOutcome!=null)
+            {
+                stringTransactionResult=FhirResourceProcessor.extractResponseStaticsFromBundleTransactionRespons(respOutcome,2);
+            }
+
+            //respOutcome.gere
+
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
+        return stringTransactionResult;
+    }
+    public static String updateListResourceInTransaction(FhirContext oContext,List<ListResource> listOfListResource, String serverUrl) throws Exception
+    {
+        Bundle respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+
+            Bundle resourceBundle=new Bundle();
+            resourceBundle.setType(BundleTypeEnum.TRANSACTION);
+            int compter=0;
+
+            for (ListResource oListResource:listOfListResource)
+            {
+                String searchPattern="List?";
+                String key=null;
+                //getKey
+                searchPattern+="_id="+oListResource.getId().getValueAsString();
+                Entry oBundleEntry= new Entry().setResource(oListResource);
+                oBundleEntry.setFullUrl(oListResource.getId());
+                oBundleEntry.getRequest().setUrl(searchPattern).setMethod(HTTPVerbEnum.PUT);
+                resourceBundle.addEntry(oBundleEntry);
+            }
+            //ManageJsonFile.saveResourceInJSONFile(resourceBundle,oContext,filePath1);
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            //System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resourceBundle));
+            respOutcome=client.transaction().withBundle(resourceBundle).execute();
+            System.out.print(oContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respOutcome));
+            if(respOutcome!=null)
+            {
+                stringTransactionResult=FhirResourceProcessor.extractResponseStaticsFromBundleTransactionRespons(respOutcome,2);
+            }
+
+            //respOutcome.gere
+
+
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.getMessage());
+        }
+        return stringTransactionResult;
+    }
+    public static String updateBasicInTransaction(FhirContext oContext,List<Basic> listOfBasic, String serverUrl) throws Exception
+    {
+        Bundle respOutcome=null;
+        String stringTransactionResult="{TransactionResultStatus:no}";
+        try
+        {
+
+            Bundle resourceBundle=new Bundle();
+            resourceBundle.setType(BundleTypeEnum.TRANSACTION);
+            int compter=0;
+
+            for (Basic oBasic:listOfBasic)
+            {
+                String searchPattern="Basic?";
+                String key=null;
+                //getKey
+                searchPattern+="_id="+oBasic.getId().getValueAsString();
+                Entry oBundleEntry= new Entry().setResource(oBasic);
+                oBundleEntry.setFullUrl(oBasic.getId());
                 oBundleEntry.getRequest().setUrl(searchPattern).setMethod(HTTPVerbEnum.PUT);
                 resourceBundle.addEntry(oBundleEntry);
             }
@@ -2204,6 +2533,13 @@ class ResourcesValidation
 
     List<ListResource> _listOfListResourceToValidate;
 
+    public void setListOfBasicToValidate(List<Basic> _listOfBasicToValidate) {
+        this._listOfBasicToValidate = _listOfBasicToValidate;
+    }
+
+    List<Basic> _listOfBasicToValidate;
+
+
     public List<Practitioner> getlistOfValidePractitioner() {
         return _listOfValidPractitioner;
     }
@@ -2261,6 +2597,12 @@ class ResourcesValidation
     }
 
     List<ListResource> _listOfValidListResource;
+
+    public List<Basic> getListOfValidBasic() {
+        return _listOfValidBasic;
+    }
+
+    List<Basic> _listOfValidBasic;
 
     public List<Practitioner> getlistOfInvalidePractitioner() {
         return _listOfInvalidPractitioner;
@@ -2320,6 +2662,12 @@ class ResourcesValidation
 
     List<ListResource> _listOfInvalidListResource;
 
+    public List<Basic> getListOfInvalidBasic() {
+        return _listOfInvalidBasic;
+    }
+
+    List<Basic> _listOfInvalidBasic;
+
     public ResourcesValidation(FhirValidator validator)
     {
         this._validator=validator;
@@ -2332,6 +2680,7 @@ class ResourcesValidation
         this._listOfDiagnosticReportToValidate=new ArrayList<>();
         this._listOfObservationToValidate=new ArrayList<>();
         this._listOfListResourceToValidate=new ArrayList<>();
+        this._listOfBasicToValidate=new ArrayList<>();
         //
         this._listOfValidPractitioner=new ArrayList<>();
         this._listOfValidPatient=new ArrayList<>();
@@ -2342,6 +2691,7 @@ class ResourcesValidation
         this._listOfValidDiagnosticReport=new ArrayList<>();
         this._listOfValidObservation=new ArrayList<>();
         this._listOfValidListResource=new ArrayList<>();
+        this._listOfValidBasic=new ArrayList<>();
         //
         this._listOfInvalidPractitioner=new ArrayList<>();
         this._listOfInvalidPatient=new ArrayList<>();
@@ -2352,6 +2702,7 @@ class ResourcesValidation
         this._listOfInvalidDiagnosticReport=new ArrayList<>();
         this._listOfInvalidObservation=new ArrayList<>();
         this._listOfInvalidListResource=new ArrayList<>();
+        this._listOfInvalidBasic=new ArrayList<>();
 
     }
 
@@ -2480,6 +2831,19 @@ class ResourcesValidation
             else
             {
                 this._listOfInvalidListResource.add(oListResource);
+            }
+        }
+        for(Basic oBasic:this._listOfBasicToValidate)
+        {
+            ValidationResult res=null;
+            res=this._validator.validateWithResult(oBasic);
+            if(res.isSuccessful())
+            {
+                this._listOfValidBasic.add(oBasic);
+            }
+            else
+            {
+                this._listOfInvalidBasic.add(oBasic);
             }
         }
 

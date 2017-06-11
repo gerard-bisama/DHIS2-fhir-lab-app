@@ -11,7 +11,9 @@ public class SpecimenFhirMapping {
     public String subject;
     public String accession;
     public String receivedTime;
+    public String collector;
     public String collectedDateTime;
+    public String collection_comment;
     public String collection_quantity_unit;
     public String collection_quantity_value;
     public String collection_method;

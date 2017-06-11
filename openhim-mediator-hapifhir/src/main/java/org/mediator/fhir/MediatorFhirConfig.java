@@ -661,6 +661,46 @@ public class MediatorFhirConfig {
 
     String trackedEntity;
 
+    public String getAllowCaseUpdate() {
+        this.allowCaseUpdate=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            allowCaseUpdate= prop.getProperty("allowCaseUpdate");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return allowCaseUpdate;
+    }
+
+    String allowCaseUpdate;
+    public String getAllowAddNewCase() {
+        this.allowAddNewCase=null;
+        try
+        {
+            prop.load(new FileInputStream(this.propFilePath));
+            allowAddNewCase= prop.getProperty("allowAddNewCase");
+        }
+        catch (IOException exc)
+        {
+            return null;
+        }
+        catch (Exception exc)
+        {
+            return null;
+        }
+        return allowAddNewCase;
+    }
+
+    String allowAddNewCase;
+
+
     public String getResourceTempLocation() {
         this.resourceTempLocation=null;
         try

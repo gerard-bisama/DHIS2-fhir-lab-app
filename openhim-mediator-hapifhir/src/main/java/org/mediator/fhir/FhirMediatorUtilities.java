@@ -3,15 +3,8 @@ package org.mediator.fhir;
 //import org.hl7.fhir.dstu3.model.Identifier;
 //import org.hl7.fhir.dstu3.model.Practitioner;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.dstu2.resource.Practitioner;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Specimen;
-import ca.uhn.fhir.model.dstu2.resource.Condition;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
+import ca.uhn.fhir.model.dstu2.resource.*;
 
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -166,6 +159,9 @@ public class FhirMediatorUtilities {
                 break;
             case "List":
                 buildRequestPath="/List?_id=";
+                break;
+            case "Basic":
+                buildRequestPath="/Basic?_id=";
                 break;
 
         }
@@ -431,10 +427,17 @@ public class FhirMediatorUtilities {
             }
         }
     }
-    public static List<DhisEvent> constructListOfLabEvents(Patient patientToProcess,List<Specimen> listAssociatedSpecimen
-    ,List<Observation> listAssociatedObservation,TrackerResourceMap trackedProgramInfo
-    ,List<DataElement> listDataElementMappingList,ObservationFhirMapping observationMapping,
-    SpecimenFhirMapping specimenMapping)
+    public static List<DhisEvent> constructListOfLabEvents(Patient patientToProcess,List<Practitioner> listAssociatedPractitioner,
+    List<Practitioner> listAssociatedPractitionerSpecimenHandler,
+    List<Specimen> listAssociatedSpecimen,List<Condition> listAssociatedCondition,List<DiagnosticOrder> listAssociatedDiagnosticOrder
+    ,List<Observation> listAssociatedObservation,List<DiagnosticReport> listAssociatedDiagnosticReport,
+    List<ListResource>    listAssociatedListResource,TrackerResourceMap trackedProgramInfo
+    ,List<DataElement> listDataElementMappingList,PractitionerFhirMapping practitionerMapping,PractitionerFhirMapping practitionerSpecimenHandlerMapping,
+    SpecimenFhirMapping specimenMapping, ConditionFhirMapping conditionMapping,
+    DiagnosticOrderFhirMapping diagnosticOrderMapping,ObservationFhirMapping observationMapping,
+    DiagnosticReportFhirMapping diagnosticReportMapping,boolean specimenIdIsFormattedWithHyphen
+
+    )
     {
         String labResultSpecimenIdDataElementId="";
         String labResultTestResultDataElementId="";
@@ -462,138 +465,460 @@ public class FhirMediatorUtilities {
             }
             if(listDataElementStage.size()>0)
             {
-                for(Observation oObservation: listAssociatedObservation)
-                {
-                    DhisEvent oEvent=new DhisEvent();
-                    oEvent.program=trackedProgramInfo.id;
-                    oEvent.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
-                    oEvent.trackedEntityInstance=trackedEntity;
-                    oEvent.programStage=stageId;
+                DhisEvent oEvent=new DhisEvent();
+                oEvent.program=trackedProgramInfo.id;
+                oEvent.orgUnit=patientToProcess.getManagingOrganization().getReference().getIdPart();
+                oEvent.trackedEntityInstance=trackedEntity;
+                oEvent.programStage=stageId;
 
+                //Extract Practitioner DataElements
+                for(Practitioner oPractitioner:listAssociatedPractitioner)
+                {
                     for(DataElement oDataElement:listDataElementStage)
                     {
                         String displayName=oDataElement.displayName;
-                        if(observationMapping.effectiveDateTime!="" && observationMapping.effectiveDateTime.equals(displayName))
+                        if(oPractitioner.getName().getGiven()!=null && practitionerMapping.name_given.equals(displayName))
                         {
-                            if(oObservation.getEffective()!=null)
+                            if(oPractitioner.getName().getGiven().size()>0)
                             {
-                                DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
-                                String builtDate="";
-                                builtDate=oDateTime.getYear().toString()+"-";
-                                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
-                                builtDate+="-";
-                                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
-                                oEvent.eventDate=builtDate;
-                                continue;
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getName().getGiven().get(0).getValue());
                             }
+                            continue;
+                        }
+                        if (oPractitioner.getName().getFamily()!=null && practitionerMapping.name_family.equals(displayName))
+                        {
+                            if(oPractitioner.getName().getFamily().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getName().getFamily().get(0).getValue());
+                            }
+                            continue;
 
                         }
-                        if(observationMapping.issued!="" && observationMapping.issued.equals(displayName))
+                        if (oPractitioner.getGender()!=null && practitionerMapping.gender.equals(displayName))
                         {
-                            if(oObservation.getIssued()!=null)
-                            {
-                                DateTimeDt oDateTime=new DateTimeDt(oObservation.getIssued());
-                                String builtDate="";
-                                builtDate=oDateTime.getYear().toString()+"-";
-                                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
-                                builtDate+="-";
-                                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
-                                oEvent.eventDate=builtDate;
-                                continue;
-                            }
-
+                            oEvent.addDataValue(oDataElement.id,oPractitioner.getGender());
+                            continue;
                         }
-                        if(observationMapping.specimen!="" && observationMapping.specimen.equals(displayName))
+                        if (oPractitioner.getTelecom()!=null && practitionerMapping.telecom_phone.equals(displayName))
                         {
-                            if(oObservation.getSpecimen()!=null)
+                            if(oPractitioner.getTelecom().size()>0)
                             {
-                                String refSpecimenId=oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
-                                oEvent.addDataValue(oDataElement.id,refSpecimenId);
-                                continue;
-                            }
-
-                        }
-                        if(observationMapping.interpretation!="" && observationMapping.interpretation.equals(displayName))
-                        {
-                            if(oObservation.getInterpretation()!=null)
-                            {
-                                oEvent.addDataValue(oDataElement.id,oObservation.getInterpretation().getText());
-                                continue;
-                            }
-
-                        }
-                        if(observationMapping.comments!="" && observationMapping.comments.equals(displayName))
-                        {
-                            if(oObservation.getComments()!="")
-                            {
-                                oEvent.addDataValue(oDataElement.id,oObservation.getComments());
-                                continue;
-                            }
-
-                        }
-                        if(observationMapping.performer!="" && observationMapping.performer.equals(displayName))
-                        {
-                            if(oObservation.getPerformer().size()>0)
-                            {
-                                oEvent.addDataValue(oDataElement.id,oObservation.getPerformer().get(0).getReference().getIdPart());
-                                continue;
-                            }
-
-                        }
-                        if(observationMapping.status!="" && observationMapping.status.equals(displayName))
-                        {
-                            if(oObservation.getStatus()!="")
-                            {
-                                oEvent.addDataValue(oDataElement.id,oObservation.getStatus());
-                                continue;
-                            }
-                        }
-                    }
-                    for(Specimen oSpecimen: listAssociatedSpecimen)
-                    {
-                        for(DataElement oDataElement:listDataElementStage) {
-                            String displayName = oDataElement.displayName;
-                            if(specimenMapping.identifier!="" && specimenMapping.identifier.contains(displayName)==true)
-                            {
-                                if (!checkDataElementInEvent(oEvent,oDataElement.id))
+                                for(ContactPointDt oContactPoint:oPractitioner.getTelecom())
                                 {
-                                    oEvent.addDataValue(oDataElement.id,oSpecimen.getId().getIdPart().split("-")[0]);
-                                    continue;
-                                }
-                            }
-                            if(specimenMapping.type!="" && specimenMapping.type.equals(displayName))
-                            {
-                                if (!checkDataElementInEvent(oEvent,oDataElement.id)) {
-                                    oEvent.addDataValue(oDataElement.id, oSpecimen.getId().getIdPart().split("-")[0]);
-                                    continue;
-                                }
-
-                            }
-                            if(specimenMapping.receivedTime!="" && specimenMapping.receivedTime.equals(displayName))
-                            {
-                                if(oSpecimen.getReceivedTime()!=null)
-                                {
-                                    DateTimeDt oDateTime=new DateTimeDt(oSpecimen.getReceivedTime());
-                                    String builtDate="";
-                                    builtDate=oDateTime.getYear().toString()+"-";
-                                    builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
-                                    builtDate+="-";
-                                    builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
-                                    if (!checkDataElementInEvent(oEvent,oDataElement.id)) {
-                                        oEvent.addDataValue(oDataElement.id, builtDate);
+                                    if(oContactPoint.getSystem().equals("phone"))
+                                    {
+                                        oEvent.addDataValue(oDataElement.id,oContactPoint.getValue());
                                     }
-                                    continue;
                                 }
+                            }
+                            continue;
+
+                        }
+                        if (oPractitioner.getTelecom()!=null && practitionerMapping.telecom_email.equals(displayName))
+                        {
+                            if(oPractitioner.getTelecom().size()>0)
+                            {
+                                for(ContactPointDt oContactPoint:oPractitioner.getTelecom())
+                                {
+                                    if(oContactPoint.getSystem().equals("email"))
+                                    {
+                                        oEvent.addDataValue(oDataElement.id,oContactPoint.getValue());
+                                    }
+                                }
+                            }
+                            continue;
+
+                        }
+                        if (oPractitioner.getAddress()!=null && practitionerMapping.address.equals(displayName))
+                        {
+                            if(oPractitioner.getAddress().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getAddress().get(0).getText());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getPractitionerRole()!=null && practitionerMapping.practitionerRole_managingOrganization.equals(displayName))
+                        {
+                            if(oPractitioner.getPractitionerRole().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getPractitionerRole().get(0).getManagingOrganization().getReference().getIdPart());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getPractitionerRole()!=null && practitionerMapping.practitionerRole_role.equals(displayName))
+                        {
+                            if(oPractitioner.getPractitionerRole().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getPractitionerRole().get(0).getRole().getText());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getPractitionerRole()!=null && practitionerMapping.practitionerRole_specialty.equals(displayName))
+                        {
+                            if(oPractitioner.getPractitionerRole().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getPractitionerRole().get(0).getSpecialty().get(0).getText());
+                            }
+                            continue;
+                        }
+
+                    }//End For DataElement
+
+                }//End for Practitioner
+                //Extract Practitioner DataElements SpecimenHandler
+                for(Practitioner oPractitioner:listAssociatedPractitionerSpecimenHandler)
+                {
+                    for(DataElement oDataElement:listDataElementStage)
+                    {
+                        String displayName=oDataElement.displayName;
+                        if(oPractitioner.getName().getGiven()!=null && practitionerSpecimenHandlerMapping.name_given.equals(displayName))
+                        {
+                            if(oPractitioner.getName().getGiven().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getName().getGiven().get(0).getValue());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getName().getFamily()!=null && practitionerSpecimenHandlerMapping.name_family.equals(displayName))
+                        {
+                            if(oPractitioner.getName().getFamily().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getName().getFamily().get(0).getValue());
+                            }
+                            continue;
+
+                        }
+                        if (oPractitioner.getGender()!=null && practitionerSpecimenHandlerMapping.gender.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oPractitioner.getGender());
+                            continue;
+                        }
+                        if (oPractitioner.getTelecom()!=null && practitionerSpecimenHandlerMapping.telecom_phone.equals(displayName))
+                        {
+                            if(oPractitioner.getTelecom().size()>0)
+                            {
+                                for(ContactPointDt oContactPoint:oPractitioner.getTelecom())
+                                {
+                                    if(oContactPoint.getSystem().equals("phone"))
+                                    {
+                                        oEvent.addDataValue(oDataElement.id,oContactPoint.getValue());
+                                    }
+                                }
+                            }
+                            continue;
+
+                        }
+                        if (oPractitioner.getTelecom()!=null && practitionerSpecimenHandlerMapping.telecom_email.equals(displayName))
+                        {
+                            if(oPractitioner.getTelecom().size()>0)
+                            {
+                                for(ContactPointDt oContactPoint:oPractitioner.getTelecom())
+                                {
+                                    if(oContactPoint.getSystem().equals("email"))
+                                    {
+                                        oEvent.addDataValue(oDataElement.id,oContactPoint.getValue());
+                                    }
+                                }
+                            }
+                            continue;
+
+                        }
+                        if (oPractitioner.getAddress()!=null && practitionerSpecimenHandlerMapping.address.equals(displayName))
+                        {
+                            if(oPractitioner.getAddress().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getAddress().get(0).getText());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getPractitionerRole()!=null && practitionerSpecimenHandlerMapping.practitionerRole_managingOrganization.equals(displayName))
+                        {
+                            if(oPractitioner.getPractitionerRole().size()>0)
+                            {
+                                    oEvent.addDataValue(oDataElement.id,oPractitioner.getPractitionerRole().get(0).getManagingOrganization().getReference().getIdPart());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getPractitionerRole()!=null && practitionerSpecimenHandlerMapping.practitionerRole_role.equals(displayName))
+                        {
+                            if(oPractitioner.getPractitionerRole().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getPractitionerRole().get(0).getRole().getText());
+                            }
+                            continue;
+                        }
+                        if (oPractitioner.getPractitionerRole()!=null && practitionerSpecimenHandlerMapping.practitionerRole_specialty.equals(displayName))
+                        {
+                            if(oPractitioner.getPractitionerRole().size()>0)
+                            {
+                                oEvent.addDataValue(oDataElement.id,oPractitioner.getPractitionerRole().get(0).getSpecialty().get(0).getText());
+                            }
+                            continue;
+                        }
+
+                    }//End For DataElement
+
+                }//End for Practitioner Specimen Handler
+                for(Specimen oSpecimen: listAssociatedSpecimen) {
+                    for (DataElement oDataElement : listDataElementStage) {
+                        String displayName = oDataElement.displayName;
+                        if (oSpecimen.getIdentifier().size() > 0 && specimenMapping.identifier.contains(displayName) == true) {
+                            if (!checkDataElementInEvent(oEvent, oDataElement.id)) {
+                                if (specimenIdIsFormattedWithHyphen) {
+                                    oEvent.addDataValue(oDataElement.id, oSpecimen.getId().getIdPart().split("-")[0]);
+                                } else {
+                                    oEvent.addDataValue(oDataElement.id, oSpecimen.getId().getIdPart());
+                                }
+                            }
+                            continue;
+                        }
+                        if (oSpecimen.getId() != null && specimenMapping.id.equals(displayName)) {
+                            oEvent.addDataValue(oDataElement.id, oSpecimen.getId().getIdPart());
+                            continue;
+                        }
+                        if (oSpecimen.getStatus() != null && specimenMapping.status.equals(displayName)) {
+                            oEvent.addDataValue(oDataElement.id, oSpecimen.getStatus());
+                            continue;
+                        }
+                        if (oSpecimen.getType() != null && specimenMapping.type.equals(displayName)) {
+                            oEvent.addDataValue(oDataElement.id, oSpecimen.getType().getText());
+                            continue;
+                        }
+                        if (oSpecimen.getAccessionIdentifier() != null && specimenMapping.accession.equals(displayName)) {
+                            oEvent.addDataValue(oDataElement.id, oSpecimen.getAccessionIdentifier().getValue());
+                            continue;
+                        }
+                        if (oSpecimen.getReceivedTime() != null && specimenMapping.receivedTime.equals(displayName)) {
+                            DateTimeDt oDateTime = new DateTimeDt(oSpecimen.getReceivedTime());
+                            String builtDate = "";
+                            builtDate = oDateTime.getYear().toString() + "-";
+                            builtDate += oDateTime.getMonth().toString().length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                            builtDate += "-";
+                            builtDate += oDateTime.getDay().toString().length() > 1 ? oDateTime.getDay().toString() : "0" + oDateTime.getDay().toString();
+                            oEvent.addDataValue(oDataElement.id, builtDate);
+                            continue;
+
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collector.equals(displayName)) {
+                            if (oSpecimen.getCollection().getCollector() != null) {
+                                oEvent.addDataValue(oDataElement.id, oSpecimen.getCollection().getCollector().getReference().getIdPart());
+                                continue;
+                            }
+
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collectedDateTime.equals(displayName)) {
+                            if (oSpecimen.getCollection().getCollected() != null) {
+                                DateTimeDt oDateTime = (DateTimeDt) oSpecimen.getCollection().getCollected();
+                                String builtDate = "";
+                                builtDate = oDateTime.getYear().toString() + "-";
+                                builtDate += oDateTime.getMonth().toString().length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                                builtDate += "-";
+                                builtDate += oDateTime.getDay().toString().length() > 1 ? oDateTime.getDay().toString() : "0" + oDateTime.getDay().toString();
+                                oEvent.addDataValue(oDataElement.id, builtDate);
+                            }
+
+                            continue;
+
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collection_comment.equals(displayName)) {
+                            if (oSpecimen.getCollection().getComment().size() > 0) {
+                                oEvent.addDataValue(oDataElement.id, oSpecimen.getCollection().getComment().get(0).getValue());
+                            }
+                            continue;
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collection_quantity_unit.equals(displayName)) {
+                            if (oSpecimen.getCollection().getQuantity() != null) {
+                                oEvent.addDataValue(oDataElement.id, oSpecimen.getCollection().getQuantity().getUnit());
+                            }
+                            continue;
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collection_quantity_value.equals(displayName)) {
+                            if (oSpecimen.getCollection().getQuantity() != null) {
+                                oEvent.addDataValue(oDataElement.id, oSpecimen.getCollection().getQuantity().getValue().toString());
+                            }
+                            continue;
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collection_method.equals(displayName)) {
+                            if (oSpecimen.getCollection().getMethod() != null) {
+                                oEvent.addDataValue(oDataElement.id, oSpecimen.getCollection().getMethod().getText());
+                            }
+                            continue;
+                        }
+                        if (oSpecimen.getCollection() != null && specimenMapping.collection_bodySite.equals(displayName)) {
+                            if (oSpecimen.getCollection().getBodySite() != null) {
+                                oEvent.addDataValue(oDataElement.id, oSpecimen.getCollection().getBodySite().getText());
+                            }
+                            continue;
+
+                        }
+                        if (oSpecimen.getTreatment().size() > 0 && specimenMapping.traitment_description.equals(displayName)) {
+                            oEvent.addDataValue(oDataElement.id, oSpecimen.getTreatment().get(0).getDescription());
+                            continue;
+                        }
+                        if (oSpecimen.getTreatment().size() > 0 && specimenMapping.traitment_procedure.equals(displayName)) {
+                            oEvent.addDataValue(oDataElement.id, oSpecimen.getTreatment().get(0).getProcedure().getText());
+                            continue;
+                        }
+
+                    }//End For dataElement
+                }//End for Specimen
+                for(Observation oObservation: listAssociatedObservation)
+                {
+                    for(DataElement oDataElement:listDataElementStage)
+                    {
+                        String displayName=oDataElement.displayName;
+                        if(oObservation.getId()!=null && observationMapping.id.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oObservation.getId().getIdPart());
+                            continue;
+                        }
+                        if(oObservation.getIdentifier().size()>0 && observationMapping.identifier.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oObservation.getIdentifier().get(0).getValue());
+                            continue;
+                        }
+                        if(oObservation.getStatus()!=null && observationMapping.status.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oObservation.getStatus());
+                            continue;
+                        }
+                        if(oObservation.getCategory()!=null && observationMapping.category.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oObservation.getCategory().getText());
+                            continue;
+                        }
+                        if(oObservation.getCode()!=null && observationMapping.code.equals(displayName))
+                        {
+                            if(oObservation.getCode().getText()!=null) {
+                                oEvent.addDataValue(oDataElement.id, oObservation.getCode().getText());
+                            }
+                            continue;
+                        }
+                        if(oObservation.getEffective()!=null && observationMapping.effectiveDateTime.equals(displayName))
+                        {
+                            DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
+                            String builtDate="";
+                            builtDate=oDateTime.getYear().toString()+"-";
+                            builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                            builtDate+="-";
+                            builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                            if(oDataElement.id.equals("eventDate"))
+                            {
+                                oEvent.eventDate=builtDate;
+                            }
+                            else
+                            {
+                                oEvent.addDataValue(oDataElement.id,builtDate);
+                            }
+                            continue;
+                        }
+                        if(oObservation.getIssued()!=null && observationMapping.issued.equals(displayName))
+                        {
+                            DateTimeDt oDateTime=new DateTimeDt(oObservation.getIssued());
+                            String builtDate="";
+                            builtDate=oDateTime.getYear().toString()+"-";
+                            builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                            builtDate+="-";
+                            builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                            //oEvent.eventDate=builtDate;
+                            if(oDataElement.id.equals("eventDate"))
+                            {
+                                oEvent.eventDate=builtDate;
+                            }
+                            else
+                            {
+                                oEvent.addDataValue(oDataElement.id,builtDate);
+                            }
+                            continue;
+                        }
+                        if(oObservation.getPerformer()!=null && observationMapping.performer.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oObservation.getPerformer().get(0).getReference().getIdPart());
+                            continue;
+                        }
+                        if(oObservation.getValue()!=null && observationMapping.valueQuantity_value.equals(displayName))
+                        {
+                            IDatatype dataValue=oObservation.getValue();
+                            oEvent.addDataValue(oDataElement.id,dataValue.toString());
+                            continue;
+                        }
+                        if(oObservation.getSpecimen()!=null && observationMapping.specimen.equals(displayName))
+                        {
+                            if(oObservation.getSpecimen().getReference()!=null) {
+                                if (specimenIdIsFormattedWithHyphen) {
+                                    if(oObservation.getSpecimen().getReference().getIdPart()!=null)
+                                    {
+                                        String refSpecimenId = oObservation.getSpecimen().getReference().getIdPart().split("-")[0];
+                                        oEvent.addDataValue(oDataElement.id, refSpecimenId);
+
+                                    }
+
+                                } else {
+                                    if(oObservation.getSpecimen().getReference().getIdPart()!=null) {
+                                        String refSpecimenId = oObservation.getSpecimen().getReference().getIdPart();
+                                        oEvent.addDataValue(oDataElement.id, refSpecimenId);
+                                    }
+                                }
+                            }
+                            continue;
+                        }
+                        if(oObservation.getInterpretation()!=null && observationMapping.interpretation.equals(displayName))
+                        {
+                            if(oObservation.getInterpretation().getText()!=null) {
+                                oEvent.addDataValue(oDataElement.id, oObservation.getInterpretation().getText());
+                            }
+                            continue;
+
+                        }
+                        if(oObservation.getComments()!=null && observationMapping.comments.equals(displayName))
+                        {
+                            if(oObservation.getComments()!="") {
+                                oEvent.addDataValue(oDataElement.id, oObservation.getComments());
+                            }
+                            continue;
+
+                        }
+                        if(oObservation.getMethod()!=null && observationMapping.method.equals(displayName))
+                        {
+                            oEvent.addDataValue(oDataElement.id,oObservation.getMethod().getText()  );
+                            continue;
+
+                        }
+
+                    }
+
+                    //listOfEvent.add(oEvent);
+
+                }//End for Observation
+                for(ListResource oListResource:listAssociatedListResource)
+                {
+
+                    for(DataElement oDataElement:listDataElementStage) {
+                        String displayName = oDataElement.displayName;
+                        if(oListResource.getTitle().equals(displayName))
+                        {
+                            if(oDataElement.id.equals("eventDate"))
+                            {
+                                DateTimeDt oDateTime=new DateTimeDt(oListResource.getNote());
+                                String builtDate="";
+                                builtDate=oDateTime.getYear().toString()+"-";
+                                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                                builtDate+="-";
+                                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+
+                                oEvent.eventDate=builtDate;
+                            }
+                            else {
+                                oEvent.addDataValue(oDataElement.id, oListResource.getNote());
                             }
                         }
                     }
+                }//End for resource
+                if(oEvent.dataValues.size()>0) {
                     listOfEvent.add(oEvent);
-
                 }
-
-
-            }
-        }
+            }//End if listDataElementStage
+        }//End for StageId
 
         return listOfEvent;
     }
@@ -652,7 +977,7 @@ public class FhirMediatorUtilities {
                 DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
                 String builtDate="";
                 builtDate=oDateTime.getYear().toString()+"-";
-                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:""+oDateTime.getMonth()+1;
+                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
                 builtDate+="-";
                 builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
 
@@ -740,13 +1065,17 @@ public class FhirMediatorUtilities {
         }
         return listOfEvent;
     }
-    public static String TransformListEventToJson(List<DhisEvent> listEvents)
+    public static String TransformListEventToJson(List<DhisEvent> listEvents,String trackedEntityInstance)
     {
         Gson gson=new Gson();
         String jsonString="{\"events\":[";
         int compter=0;
         for(DhisEvent oEvent : listEvents)
         {
+            if(trackedEntityInstance!=null)
+            {
+                oEvent.trackedEntityInstance=trackedEntityInstance;
+            }
             String res=gson.toJson(oEvent);
             if(compter==0)
             {
@@ -895,11 +1224,14 @@ public class FhirMediatorUtilities {
         return listOfTrackedEntity;
 
     }
+    private static String capitalize(final String line) {
+        return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+    }
     public static List<DhisTrackedEntity> constructListOfTrackedEntityInstance(Patient patientToProcess,String trackedEntityId,List<Condition> listAssociatedCondition,
                                                                                List<DiagnosticReport> listAssociatedDiagnosticReport,List<DataElement> listDataElementMappingList,
                                                                                PatientFhirMapping oPatientMapping,
                                                                                ConditionFhirMapping oConditionMapping,
-                                                                               DiagnosticReportFhirMapping oDiagnosticReportMapping)
+                                                                               DiagnosticReportFhirMapping oDiagnosticReportMapping,boolean patientIdIsFormattedWithHyphen)
     {
         List<DhisTrackedEntity> listOfTrackedEntity=new ArrayList<>();
         String trackedEntity="";
@@ -934,119 +1266,181 @@ public class FhirMediatorUtilities {
         {
             trackedDiagReport=listAssociatedDiagnosticReport.get(0);
         }
+        //Extract Patient attribute information
         for(DataElement oDataElement:listDataElementMappingList) {
-            String displayName=oDataElement.displayName;
-            if(oPatientMapping.identifier!="" && oPatientMapping.identifier.equals(displayName))
+            String displayName = oDataElement.displayName;
+            if(patientToProcess.getId()!=null && oPatientMapping.id.equals(displayName))
             {
-                oTrackedEntity.addAttribute(oDataElement.id,patientToProcess.getId().getIdPart()
-                        .split("-")[0]);
+                if (patientIdIsFormattedWithHyphen) {
+                    oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getId().getIdPart()
+                            .split("-")[0]);
+                } else {
+                    oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getId().getIdPart());
+                }
             }
-            else if(oPatientMapping.name_family!="" && oPatientMapping.name_family.equals(displayName))
-            {
-                if(patientToProcess.getName()!=null)
-                {
-                    oTrackedEntity.addAttribute(oDataElement.id,patientToProcess.getName().get(0)
+            else if (patientToProcess.getIdentifier().size() > 0 && oPatientMapping.identifier.equals(displayName)) {
+                for (IdentifierDt oIdentifier : patientToProcess.getIdentifier()) {
+                    if (oIdentifier.getType().getText().equals(displayName)) {
+                        oTrackedEntity.addAttribute(oDataElement.id, oIdentifier.getValue());
+
+                    }
+                }
+            } else if (patientToProcess.getName() != null && oPatientMapping.name_family.equals(displayName)) {
+                if (patientToProcess.getName().get(0).getFamily().get(0) != null) {
+                    oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getName().get(0)
                             .getFamily().get(0).toString());
                 }
-            }
-            else if(oPatientMapping.name_given!="" && oPatientMapping.name_given.equals(displayName))
-            {
-                if(patientToProcess.getName()!=null)
-                {
-                    oTrackedEntity.addAttribute(oDataElement.id,patientToProcess.getName().get(0)
+            } else if (patientToProcess.getName() != null && oPatientMapping.name_given.equals(displayName)) {
+                if (patientToProcess.getName().get(0).getGiven().get(0) != null) {
+                    oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getName().get(0)
                             .getGiven().get(0).toString());
                 }
-            }
-            else if(oPatientMapping.birthDate!="" && oPatientMapping.birthDate.equals(displayName))
-            {
-                if(patientToProcess.getBirthDate()!=null)
-                {
-                    DateTimeDt dateTimeBirth=new DateTimeDt(patientToProcess.getBirthDate());
-                    String builtDate="";
-                    builtDate=dateTimeBirth.getYear().toString()+"-";
-                    builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
-                    builtDate+="-";
-                    builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
-                    Date date= new Date();
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(date);
-                    int currentYear = cal.get(Calendar.YEAR);
-                    int age=currentYear-dateTimeBirth.getYear();
-                    oTrackedEntity.addAttribute(oDataElement.id,""+age);
+            } else if (patientToProcess.getBirthDate() != null && oPatientMapping.birthDate.equals(displayName)) {
 
-                }
-            }
-            else if(oPatientMapping.address!="" && oPatientMapping.address.equals(displayName))
-            {
-                if(patientToProcess.getAddress().size()>0)
-                {
+                DateTimeDt dateTimeBirth = new DateTimeDt(patientToProcess.getBirthDate());
+                String builtDate = "";
+                builtDate = dateTimeBirth.getYear().toString() + "-";
+                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+                builtDate += "-";
+                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                /*
+                Date date= new Date();
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                int currentYear = cal.get(Calendar.YEAR);
+                int age=currentYear-dateTimeBirth.getYear();
+                 */
+                oTrackedEntity.addAttribute(oDataElement.id, builtDate);
+            } else if (patientToProcess.getAddress() != null && oPatientMapping.address_text.equals(displayName)) {
+                if (patientToProcess.getAddress().size() > 0) {
                     oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getAddress().get(0).getText());
 
                 }
 
-            }
-            else if(oPatientMapping.deceasedBoolean!="" && oPatientMapping.deceasedBoolean.equals(displayName))
-            {
-                IDatatype oDeceased=patientToProcess.getDeceased();
-                if(oDeceased!=null)
-                {
+            } else if (patientToProcess.getAddress() != null && oPatientMapping.address_city.equals(displayName)) {
+                if (patientToProcess.getAddress().size() > 0) {
+                    oTrackedEntity.addAttribute(oDataElement.id, patientToProcess.getAddress().get(0).getCity());
 
-                    if (oDeceased.toString().equals("true"))
-                    {
-                        oTrackedEntity.addAttribute(oDataElement.id,"Dead");
+                }
+
+            } else if (patientToProcess.getDeceased() != null && oPatientMapping.deceasedBoolean.equals(displayName)) {
+                IDatatype oDeceased = patientToProcess.getDeceased();
+                if (oDeceased != null) {
+
+                    if (oDeceased.toString().equals("true")) {
+                        oTrackedEntity.addAttribute(oDataElement.id, "99");
+                    } else {
+                        oTrackedEntity.addAttribute(oDataElement.id, "1");
                     }
-                    else
+                }
+            }
+            else if (patientToProcess.getGender()!=null && oPatientMapping.gender.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, capitalize(patientToProcess.getGender()));
+            }
+            else if(patientToProcess.getTelecom().size()>0 && oPatientMapping.telecom_phone.equals(displayName))
+            {
+
+                for(ContactPointDt oContactPoint:patientToProcess.getTelecom())
+                {
+                    if(oContactPoint.getSystem().equals("phone"))
                     {
-                        oTrackedEntity.addAttribute(oDataElement.id,"Alive");
+                        oTrackedEntity.addAttribute(oDataElement.id, oContactPoint.getValue());
                     }
                 }
             }
-            else if (oConditionMapping.code!="" && oConditionMapping.code.equals(displayName))
+            else if(patientToProcess.getTelecom().size()>0 && oPatientMapping.telecom_email.equals(displayName))
             {
-                if(trackedCondition.getCode().getText()!="")
-                {
-                    oTrackedEntity.addAttribute(oDataElement.id,trackedCondition.getCode().getText());
 
+                for(ContactPointDt oContactPoint:patientToProcess.getTelecom())
+                {
+                    if(oContactPoint.getSystem().equals("email"))
+                    {
+                        oTrackedEntity.addAttribute(oDataElement.id, oContactPoint.getValue());
+                    }
                 }
             }
-            else if (oConditionMapping.category!="" && oConditionMapping.category.equals(displayName))
-            {
-                if(trackedCondition.getCategory().getText()!="")
-                {
-                    oTrackedEntity.addAttribute(oDataElement.id,trackedCondition.getCategory().getText());
+        }
+        for(DataElement oDataElement:listDataElementMappingList) {
 
-                }
+            String displayName = oDataElement.displayName;
+            if (trackedCondition.getId() != null && oConditionMapping.id.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getId().getIdPart());
+            } else if (trackedCondition.getIdentifier().size() > 0 && oConditionMapping.identifier.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getIdentifier().get(0).getValue());
+            } else if (trackedCondition.getDateRecorded() != null && oConditionMapping.dateRecorded.equals(displayName)) {
+                DateTimeDt dateTimeBirth = new DateTimeDt(trackedCondition.getDateRecorded());
+                String builtDate = "";
+                builtDate = dateTimeBirth.getYear().toString() + "-";
+                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += "-";
+                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                oTrackedEntity.addAttribute(oDataElement.id, builtDate);
+
+            } else if (trackedCondition.getCode() != null && oConditionMapping.code.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getCode().getText());
+            } else if (trackedCondition.getCategory() != null && oConditionMapping.category.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getCategory().getText());
+            } else if (trackedCondition.getClinicalStatus() != null && oConditionMapping.clinicalStatus.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getClinicalStatus());
+            } else if (trackedCondition.getVerificationStatus() != null && oConditionMapping.verificationStatus.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getVerificationStatus());
+            } else if (trackedCondition.getSeverity() != null && oConditionMapping.severity.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getSeverity().getText());
+            } else if (trackedCondition.getOnset() != null && oConditionMapping.onsetDateTime.equals(displayName)) {
+                DateTimeDt dateTimeBirth = (DateTimeDt) trackedCondition.getOnset();
+                String builtDate = "";
+                builtDate = dateTimeBirth.getYear().toString() + "-";
+                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += "-";
+                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                oTrackedEntity.addAttribute(oDataElement.id, builtDate);
+            } else if (trackedCondition.getNotes() != null && oConditionMapping.notes.equals(displayName)) {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getNotes());
             }
-            else if (oConditionMapping.dateRecorded!="" && oConditionMapping.dateRecorded.equals(displayName))
+        }
+
+        for(DataElement oDataElement:listDataElementMappingList) {
+
+            String displayName = oDataElement.displayName;
+            if ((trackedDiagReport.getId()!=null && oDiagnosticReportMapping.id.equals(displayName)))
             {
-                if(trackedCondition.getDateRecorded()!=null)
-                {
-                    DateTimeDt dateTimeBirth=new DateTimeDt(trackedCondition.getDateRecorded());
-                    String builtDate="";
-                    builtDate=dateTimeBirth.getYear().toString()+"-";
-                    builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
-                    builtDate+="-";
-                    builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
-
-                    oTrackedEntity.addAttribute(oDataElement.id,builtDate);
-
-                }
+                oTrackedEntity.addAttribute(oDataElement.id,trackedDiagReport.getId().getIdPart());
             }
-            else if (oConditionMapping.onsetDateTime!="" && oConditionMapping.onsetDateTime.equals(displayName))
+            else if ((trackedDiagReport.getStatus()!="" && oDiagnosticReportMapping.status.equals(displayName)))
             {
-                IDatatype onSetDateTime=trackedCondition.getOnset();
-                if(onSetDateTime!=null)
-                {
-                    oTrackedEntity.addAttribute(oDataElement.id,onSetDateTime.toString());
-                }
+                oTrackedEntity.addAttribute(oDataElement.id,trackedDiagReport.getStatus());
             }
-            else if (oDiagnosticReportMapping.conclusion!="" && oDiagnosticReportMapping.conclusion.equals(displayName))
+            else if ((trackedDiagReport.getCategory()!=null && oDiagnosticReportMapping.category.equals(displayName)))
             {
-
-                if(trackedDiagReport.getConclusion()!="")
-                {
-                    oTrackedEntity.addAttribute(oDataElement.id,trackedDiagReport.getConclusion());
-                }
+                oTrackedEntity.addAttribute(oDataElement.id,trackedDiagReport.getCategory().getText());
+            }
+            else if ((trackedDiagReport.getCode()!=null && oDiagnosticReportMapping.code.equals(displayName)))
+            {
+                oTrackedEntity.addAttribute(oDataElement.id,trackedDiagReport.getCode().getText());
+            }
+            else if ((trackedDiagReport.getEffective()!=null && oDiagnosticReportMapping.effectiveDateTime.equals(displayName)))
+            {
+                DateTimeDt dateTimeBirth = (DateTimeDt) trackedDiagReport.getEffective();
+                String builtDate = "";
+                builtDate = dateTimeBirth.getYear().toString() + "-";
+                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += "-";
+                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                oTrackedEntity.addAttribute(oDataElement.id, builtDate);
+            }
+            else if ((trackedDiagReport.getIssued()!=null && oDiagnosticReportMapping.issued.equals(displayName)))
+            {
+                DateTimeDt dateTimeBirth = new DateTimeDt(trackedDiagReport.getIssued());
+                String builtDate = "";
+                builtDate = dateTimeBirth.getYear().toString() + "-";
+                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += "-";
+                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                oTrackedEntity.addAttribute(oDataElement.id, builtDate);
+            }
+            else if ((trackedDiagReport.getConclusion()!=null && oDiagnosticReportMapping.conclusion.equals(displayName)))
+            {
+                oTrackedEntity.addAttribute(oDataElement.id, trackedDiagReport.getConclusion());
             }
 
 
@@ -1066,6 +1460,7 @@ public class FhirMediatorUtilities {
         }
         return jsonString;
     }
+    //public static String
     public static List<String> getListOfFile(String directoryName)
     {
         List<String> listOfFile=new ArrayList<>();
@@ -1134,6 +1529,38 @@ public class FhirMediatorUtilities {
         }
         return patientAttributeMapping;
     }
+    public static PractitionerFhirMapping getPractitionerMappingAttributes (String filePath) throws Exception
+    {
+        PractitionerFhirMapping practitionerAttributeMapping=new PractitionerFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("practitioner_attribute_mapping").toString();
+            practitionerAttributeMapping=gson.fromJson(jsonAttributeMappingString,PractitionerFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return practitionerAttributeMapping;
+    }
+    public static PractitionerFhirMapping getPractitionerSpecimenHandlerMappingAttributes (String filePath) throws Exception
+    {
+        PractitionerFhirMapping practitionerAttributeMapping=new PractitionerFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("practitioner_specimen_handling_attribute_mapping").toString();
+            practitionerAttributeMapping=gson.fromJson(jsonAttributeMappingString,PractitionerFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return practitionerAttributeMapping;
+    }
     public static ConditionFhirMapping getConditionMappingAttributes (String filePath) throws Exception
     {
         ConditionFhirMapping conditionAttributeMapping=new ConditionFhirMapping();
@@ -1149,6 +1576,22 @@ public class FhirMediatorUtilities {
             throw new Exception(exc.toString());
         }
         return conditionAttributeMapping;
+    }
+    public static DiagnosticOrderFhirMapping getDiagnosticOrderMappingAttributes (String filePath) throws Exception
+    {
+        DiagnosticOrderFhirMapping diagnosticOrderAttributeMapping=new DiagnosticOrderFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("order_attribute_mapping").toString();
+            diagnosticOrderAttributeMapping=gson.fromJson(jsonAttributeMappingString,DiagnosticOrderFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return diagnosticOrderAttributeMapping;
     }
     public static DiagnosticReportFhirMapping getDiagnosticReportMappingAttributes (String filePath) throws Exception
     {
@@ -1215,6 +1658,61 @@ public class FhirMediatorUtilities {
         }
         return specimenAttributeMapping;
     }
+    public static ListResourceFhirMapping getListResourceMappingAttributes (String filePath) throws Exception
+    {
+        ListResourceFhirMapping listResourceAttributeMapping=new ListResourceFhirMapping();
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("list_attribute_mapping").toString();
+            listResourceAttributeMapping=gson.fromJson(jsonAttributeMappingString,ListResourceFhirMapping.class);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return listResourceAttributeMapping;
+    }
+
+    /**
+     * Check if PatientIdIsFormatted with hyphen
+     * @param filePath
+     * @return
+     * @throws Exception
+     */
+    public static boolean checkPatientIdFormatWithHyphen (String filePath) throws Exception
+    {
+        boolean res;
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("format_patientid_hyphen").toString();
+            res=Boolean.parseBoolean(jsonAttributeMappingString);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return res;
+    }
+    public static boolean checkSpecimenIdFormatWithHyphen (String filePath) throws Exception
+    {
+        boolean res;
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(new FileReader(filePath), JsonElement.class);
+            String jsonAttributeMappingString=((JsonObject)json).get("format_specimenid_hyphen").toString();
+            res=Boolean.parseBoolean(jsonAttributeMappingString);
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return res;
+    }
 
     /**
      * Check if the DataElement exist already in the Event datavalues collection list
@@ -1235,6 +1733,25 @@ public class FhirMediatorUtilities {
             }
         }
         return found;
+    }
+    public static String getIdReferenceFromPOSTResonse (String response) throws Exception
+    {
+        String res=null;
+        Gson gson=new Gson();
+        try {
+            JsonElement json=gson.fromJson(response, JsonElement.class);
+            String jsonAttributeString=((JsonObject)json).get("httpStatus").toString();
+            if(jsonAttributeString.equals("\"OK\""))
+            {
+                res=((JsonObject)gson.fromJson(response, JsonElement.class)).get("response").getAsJsonObject().get("importSummaries").getAsJsonArray().get(0).getAsJsonObject().get("reference").toString();
+            }
+            //System.out.print(0);
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(exc.toString());
+        }
+        return res;
     }
 
 

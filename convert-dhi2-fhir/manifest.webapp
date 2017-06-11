@@ -3,7 +3,10 @@
   "default_locale": "en",
   "activities": {
     "dhis": {
-      "href": "https://idsr-dev.dhis2.org/dhis"
+      "href": "https://cbs-lab.dhis2.org/dhis"
+    },
+    "hapi": {
+      "href": "http://localhost:8084/hapi-fhir-jpaserver-local/baseDstu2"
     }
   },
   "appType": "APP",
@@ -18,14 +21,27 @@
   },
   "programs_progstages_tracked":[
 	  {
-		"id":"p55TSnIz83Z",
+		"id":"Dy5AZEKVUqp",
 		"stages":[
-			"E2ncXI7syDw",
-			"dQbCkr2pgyC",
-			"aornzRfUbDZ",
-			"YLMRmho6SdY"
+			"xLrkAXIgi9f",
+			"Kw3lcbfPPc7",
+			"So8a5zN2viS"
 		]
 	  }
+	],
+	"practitioner_stage_nature":[
+		{
+			"stage":"Initial investigation and diagnosis",
+			"nature":"care_provider"
+		},
+		{
+			"stage":"Specimen Handling",
+			"nature":"specimen_collector"
+		},
+		{
+			"stage":"Lab Results",
+			"nature":"observation_performer"
+		}
 	],
   "entities_mapping":{
 	"patient":"",
@@ -42,37 +58,72 @@
 	"identifier":"Local Case ID",
 	"name_family":"First Name",
 	"name_given":"Last name",
-	"telecom_phone":"",
+	"telecom_phone":"Phone Number",
 	"telecom_email":"",
-	"gender":"",
-	"birthDate":"Age (Years)",
-	"address":"Village/Domicile",
-	"deceasedBoolean":"",
-	"deceasedDateTime":""
+	"gender":"Sex",
+	"birthDate":"Age",
+	"address_text":"Home Address",
+	"address_city":"Village/Domicile",
+	"deceasedBoolean":"Initial investigation and diagnosis|Patient vital status",
+	"deceasedDateTime":"Initial investigation and diagnosis|Patient date of death",
+	"list_reference":""
   },
   "practitioner_attribute_mapping":
   {
 	"id":"",
+	"meta_lastUpdated":"Initial investigation and diagnosis|Date seen & diagnosed",
 	"identifier":"",
-	"name_family":"Specimen Handling/Name of the handler",
+	"name_family":"Initial investigation and diagnosis|Notifier's First name",
+	"name_given":"Initial investigation and diagnosis|Notifier's Surname",
+	"gender":"",
+	"telecom_phone":"Initial investigation and diagnosis|Notifier's Contact number",
+	"telecom_email":"Initial investigation and diagnosis|Notifier's Email address",
+	"address":"",
+	"practitionerRole_managingOrganization":"",
+	"practitionerRole_role":"Initial investigation and diagnosis|Notifier's Designation",
+	"practitionerRole_specialty":"",
+	"list_reference":"Initial investigation and diagnosis|Date seen & diagnosed,Initial investigation and diagnosis|Date of notification"
+  },
+  "practitioner_observation_performer_attribute_mapping":
+  {
+	"id":"",
+	"identifier":"",
+	"name_family":"",
 	"name_given":"",
 	"gender":"",
 	"telecom_phone":"",
 	"telecom_email":"",
-	"address":""
+	"address":"",
+	"practitionerRole_managingOrganization":"",
+	"practitionerRole_role":"",
+	"practitionerRole_specialty":""
+  },
+  "practitioner_specimen_handling_attribute_mapping":
+  {
+	"id":"",
+	"identifier":"",
+	"name_family":"",
+	"name_given":"",
+	"gender":"",
+	"telecom_phone":"",
+	"telecom_email":"",
+	"address":"",
+	"practitionerRole_managingOrganization":"Specimen Handling|Spx Testing or Reference Laboratory",
+	"practitionerRole_role":"",
+	"practitionerRole_specialty":""
   },
   "specimen_attribute_mapping":
   {
-	"id":"",
-	"identifier":"Lab Results/Specimen ID,Specimen Handling/Specimen ID",
+	"id":"Specimen Handling|Spx Specimen ID",
+	"identifier":"",
 	"status":"",
-	"type":"Specimen Handling/Specimen Type",
+	"type":"Specimen Handling|Spx Type of specimen",
 	"subject":"Unique Case ID",
 	"accession":"",
-	"receivedTime":"Optional - Case Investigation/Date of Lab Request",
-	"collector":"Specimen Handling/Name of the handler",
-	"collectedDateTime":"Specimen Handling/Date of Specimen Handling",
-	"collection_comment":"Specimen Handling/Specimen handling action",
+	"receivedTime":"Specimen Handling|Spx Date Specimen received at Lab",
+	"collector":"",
+	"collectedDateTime":"Specimen Handling|Spx Date Specimen Collected",
+	"collection_comment":"Specimen Handling|Spx Status of the specimen",
 	"collection_quantity_unit":"",
 	"collection_quantity_value":"",
 	"collection_method":"",
@@ -81,8 +132,9 @@
 	"container_capacity_unit":"",
 	"container_capacity_value":"",
 	"container_description":"",
-	"traitment_description":"Specimen Handling/Status of the specimen",
-	"traitment_procedure":""
+	"traitment_description":"",
+	"traitment_procedure":"",
+	"list_reference":"Specimen Handling|Spx Date Specimen Sent to Laboratory,Specimen Handling|Date of Specimen Handling"
   },
   "order_attribute_mapping":
   {
@@ -96,11 +148,12 @@
 	"specimen":"",
 	"status":"",
 	"priority":"",
-	"orderEvent_dateTime":"Optional - Case Investigation/Date of Lab Request",
+	"orderEvent_dateTime":"",
 	"orderEvent_status":"",
 	"orderEvent_description":"",
 	"item":"",
-	"note":""
+	"note":"",
+	"list_reference":""
   },
   "observation_attribute_mapping":
   {
@@ -108,14 +161,14 @@
 	"identifier":"",
 	"status" : "",
 	"category" :"",
-	"code" : "",
+	"code" : "Lab Results|Spx Type of Test",
 	"subject" :"Unique Case ID",
 	"encounter" : "",
-	"effectiveDateTime" : "Lab Results/Date of Results",
+	"effectiveDateTime" : "Lab Results|Date of Results",
 	"effectivePeriod_dateSup" : "",
 	"effectivePeriod_dateInf" : "",
-	"issued" : "Optional - Case Investigation/Date of Lab Request",
-	"performer" : "Specimen Handling/Testing or Reference Laboratory",
+	"issued" : "",
+	"performer" : "",
 	"valueQuantity_unit" : "",
 	"valueQuantity_value" : "",
 	"valueCodeableConcept" : "",
@@ -136,15 +189,16 @@
 	"valuePeriod_start" :"",
 	"valuePeriod_end" :"",
 	"dataAbsentReason" : "",
-	"interpretation" : "Lab Results/Test Result",
-	"comments" : "Lab Results/Confirmed Disease",
+	"interpretation" : "Lab Results|Lab Test Result",
+	"comments" : "Lab Results|Lab confirmed diagnosis",
 	"bodySite" :"",
 	"method" :"",
-	"specimen" :"Lab Results/Specimen ID",
+	"specimen" :"Lab Results|Spx Specimen ID",
 	"device" :"",
 	"referenceRange" :"",
-	"related" : "",
-	"component" : ""
+	"related" :"",
+	"component" :"",
+	"list_reference":""
   },
   "diagnosticreport_attribute_mapping":
   {
@@ -167,7 +221,8 @@
 	"image":"",
 	"conclusion":"Classification of disease/event",
 	"codedDiagnosis":"",
-	"presentedForm":""
+	"presentedForm":"",
+	"list_reference":""
   },
   "condition_attribute_mapping":
   {
@@ -177,8 +232,8 @@
 	"encounter":"",
 	"asserter":"",
 	"dateRecorded":"",
-	"code":"Notifiable Disease/Condition",
-	"category":"Main Symptom",
+	"code":"Notifiable Medical Condition",
+	"category":"Main Disease Symptom",
 	"clinicalStatus":"",
 	"verificationStatus":"",
 	"severity":"",
@@ -196,7 +251,8 @@
 	"stage":"",
 	"evidence":"",
 	"bodySite":"",
-	"notes":""
+	"notes":"",
+	"list_reference":""
   },
   "list_attribute_mapping":
   {
@@ -204,18 +260,47 @@
 	 "identifier" :"",
 	 "title" : "",
 	 "code" : "",
-	 "subject" : "Unique Case ID",
+	 "subject" : "",
 	 "source" : "",
 	 "encounter" : "",
 	 "status" : "",
-	 "date" : "Case Monitoring/Date of Report",
+	 "date" : "",
 	 "orderedBy" : "",
 	 "mode" : "",
-	 "note" : "Case Monitoring/Case Status",
-	 "entry" :"",
+	 "note" : "",
+	 "entry_flag" :"", 
+	 "entry_deleted" :"",
+	 "entry_item" :"",
 	 "emptyReason" : ""
   },
-  "authentication":"gerard:Gerard1234",
+  "vital_status":
+  {
+	"alive":"Alive",
+	"dead":"Dead"
+  },
+  "attribute_with_optionset_value":
+  [
+	{
+		"id":"RFAltXrNQFz",
+		"type":"attribute"
+	},
+	{
+		"id":"jgzIvlUYNYy",
+		"type":"element"
+	},
+	{
+		"id":"V0kd0qAakgC",
+		"type":"element"
+	}
+  ],
+  "format_patientid_hyphen":true,
+  "format_specimenid_hyphen":false,
+  "authentication":"admin:district",
   "temp_directory":"/home/server-hit/Documents/datalab",
+  "source_directory":"/home/server-hit/Documents/datalab/source",
+  "resource_temp":"/home/server-hit/Documents/datalab/temp",
+  "treated_directory":"/home/server-hit/Documents/datalab/treated",
+  "errors_directory":"/home/server-hit/Documents/datalab/errors",
+  "minimun_dataset_record":3,
   "manifest_generated_at": "Thu Dec 01 2016 10:27:06 GMT+0100 (CET)"
 }

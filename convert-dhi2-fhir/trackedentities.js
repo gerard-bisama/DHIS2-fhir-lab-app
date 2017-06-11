@@ -6,6 +6,8 @@
   var entityAPI =require ("./lib/api");
   var fhirStructureAPI =require ("./lib/fhirStructure");
   var entitieTrackedMapping= entityAPI.GetTrackedEntitiesMapping();
+  var practitionerObservationPerformerAttributesMapping= entityAPI.getPractitionerObservationPerformerAttributesMapping();
+  var practitionerSpecimenHandlingAttributesMapping= entityAPI.getPractitionerSpecimenHandlingAttributesMapping();
   var practitionerAttributesMapping= entityAPI.getPractitionerAttributesMapping();
   var patientAttributesMapping= entityAPI.GetPatientAttributesMapping();
   var specimenAttributesMapping= entityAPI.GetSpecimenAttributesMapping();
@@ -23,6 +25,7 @@
   var HumanName=fhirStructureAPI.HumanName;
   var ContactPoint=fhirStructureAPI.ContactPoint;
   var Practitioner=fhirStructureAPI.Practitioner;
+  var PractitionerRole=fhirStructureAPI.PractitionerRole;
   var Specimen=fhirStructureAPI.Specimen;
   var OrderEvent=fhirStructureAPI.OrderEvent;
   var Collection=fhirStructureAPI.Collection;
@@ -37,10 +40,20 @@
   var DiagnosticReport=fhirStructureAPI.DiagnosticReport;
   var Condition=fhirStructureAPI.Condition;
   var List=fhirStructureAPI.List;
+  var Basic=fhirStructureAPI.Basic;
   var Entry=fhirStructureAPI.Entry;
   var Bundle=fhirStructureAPI.Bundle;
+  var dataFileLocation=entityAPI.getLocationDataFile();
+  var sourceFileLocation=entityAPI.getLocationSourceFile();
+  var bundleTempLocation=entityAPI.getLocationTempResource();
+  var vitalStatus=entityAPI.getVitalStatus();
+  var practitionerStageNatureList=entityAPI.getPractitionerStageNature();
+  var formatPatientId=entityAPI.getFormatPatientId();
+  var formatSpecimenId=entityAPI.getFormatSpecimenId();
+  var listAttributeWithOptionSetValues=entityAPI.getAttributeWithOptionSetValue();
   //console.log(Identifier);
 	//Check if the mapping has been done between trackers attributes and fhir attributes
+	
 	function checkMappingExist()
 	{
 		var mappingPatientDone=false;
@@ -469,6 +482,23 @@
 		else if(_genderValue.toLowerCase()=="f"|| _genderValue.toLowerCase()=="female")
 		{
 			valueSet="female";
+		}
+		else if(_genderValue!="")
+		{
+			valueSet="other";
+		}
+		return valueSet;
+	}
+	function getAssociatedVitalStatusValueSet(_vitalStatusValue)
+	{
+		var valueSet=false;
+		if(_vitalStatusValue.toLowerCase()=="alive")
+		{
+			valueSet=false;
+		}
+		else if(_vitalStatusValue.toLowerCase()=="dead")
+		{
+			valueSet=true;
 		}
 		return valueSet;
 	}
@@ -1180,8 +1210,191 @@
 		{
 			listOfAttribute.push(oAttribute.trim());
 		}
+		oAttribute="";
+		oAttribute=practitionerAttributesMapping.practitionerRole_managingOrganization!=""?practitionerAttributesMapping.practitionerRole_managingOrganization:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerAttributesMapping.practitionerRole_role!=""?practitionerAttributesMapping.practitionerRole_role:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerAttributesMapping.practitionerRole_specialty!=""?practitionerAttributesMapping.practitionerRole_specialty:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
 		return listOfAttribute;
 	}
+	function getListOfPractitionerObservationPerformerAttributeMapping()
+	{
+		var listOfAttribute=[];
+		var oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.id!=""?practitionerObservationPerformerAttributesMapping.id:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.identifier!=""?practitionerObservationPerformerAttributesMapping.identifier:"";
+		if(oAttribute!="")
+		{
+			var listAttributes=oAttribute.split(",");
+			if(listAttributes.length>1)
+			{
+				for(var iterator=0;iterator<listAttributes.length;iterator++)
+				{
+					listOfAttribute.push(listAttributes[iterator].trim());
+				}
+			}
+			else
+			{
+				listOfAttribute.push(oAttribute.trim());
+			}
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.name_family!=""?practitionerObservationPerformerAttributesMapping.name_family:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.name_given!=""?practitionerObservationPerformerAttributesMapping.name_given:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.gender!=""?practitionerObservationPerformerAttributesMapping.gender:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.telecom_phone!=""?practitionerObservationPerformerAttributesMapping.telecom_phone:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.telecom_email!=""?practitionerObservationPerformerAttributesMapping.telecom_email:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.address!=""?practitionerObservationPerformerAttributesMapping.address:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.practitionerRole_managingOrganization!=""?practitionerObservationPerformerAttributesMapping.practitionerRole_managingOrganization:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.practitionerRole_role!=""?practitionerObservationPerformerAttributesMapping.practitionerRole_role:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerObservationPerformerAttributesMapping.practitionerRole_specialty!=""?practitionerObservationPerformerAttributesMapping.practitionerRole_specialty:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		return listOfAttribute;
+	}
+	function getListOfPractitionerSpecimenHandlingAttributeMapping()
+	{
+		var listOfAttribute=[];
+		var oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.id!=""?practitionerSpecimenHandlingAttributesMapping.id:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.identifier!=""?practitionerSpecimenHandlingAttributesMapping.identifier:"";
+		if(oAttribute!="")
+		{
+			var listAttributes=oAttribute.split(",");
+			if(listAttributes.length>1)
+			{
+				for(var iterator=0;iterator<listAttributes.length;iterator++)
+				{
+					listOfAttribute.push(listAttributes[iterator].trim());
+				}
+			}
+			else
+			{
+				listOfAttribute.push(oAttribute.trim());
+			}
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.name_family!=""?practitionerSpecimenHandlingAttributesMapping.name_family:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.name_given!=""?practitionerSpecimenHandlingAttributesMapping.name_given:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.gender!=""?practitionerSpecimenHandlingAttributesMapping.gender:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.telecom_phone!=""?practitionerSpecimenHandlingAttributesMapping.telecom_phone:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.telecom_email!=""?practitionerSpecimenHandlingAttributesMapping.telecom_email:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.address!=""?practitionerSpecimenHandlingAttributesMapping.address:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.practitionerRole_managingOrganization!=""?practitionerSpecimenHandlingAttributesMapping.practitionerRole_managingOrganization:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.practitionerRole_role!=""?practitionerSpecimenHandlingAttributesMapping.practitionerRole_role:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=practitionerSpecimenHandlingAttributesMapping.practitionerRole_specialty!=""?practitionerSpecimenHandlingAttributesMapping.practitionerRole_specialty:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		return listOfAttribute;
+	}
+	
 	function getListOfPatientAttributeMapping()
 	{
 		var listOfAttribute=[];
@@ -1250,7 +1463,13 @@
 			listOfAttribute.push(oAttribute.trim());
 		}
 		oAttribute="";
-		var oAttribute=patientAttributesMapping.address!=""?patientAttributesMapping.address:"";
+		var oAttribute=patientAttributesMapping.address_text!=""?patientAttributesMapping.address_text:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		var oAttribute=patientAttributesMapping.address_city!=""?patientAttributesMapping.address_city:"";
 		if(oAttribute!="")
 		{
 			listOfAttribute.push(oAttribute.trim());
@@ -1295,6 +1514,12 @@
 		}
 		oAttribute="";
 		var oAttribute=specimenAttributesMapping.status!=""?specimenAttributesMapping.status:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute);
+		}
+		oAttribute="";
+		var oAttribute=specimenAttributesMapping.id!=""?specimenAttributesMapping.id:"";
 		if(oAttribute!="")
 		{
 			listOfAttribute.push(oAttribute);
@@ -2008,7 +2233,7 @@
 		}
 		return listOfAttribute;
 	}
-	function getlistResourceAttributeMapping()
+	function getListOfListResourceAttributeMapping()
 	{
 		var listOfAttribute=[];
 		var oAttribute="";
@@ -2084,7 +2309,19 @@
 			listOfAttribute.push(oAttribute.trim());
 		}
 		oAttribute="";
-		oAttribute=listAttributesMapping.entry!=""?listAttributesMapping.entry:"";
+		oAttribute=listAttributesMapping.entry_flag!=""?listAttributesMapping.entry_flag:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=listAttributesMapping.entry_deleted!=""?listAttributesMapping.entry_deleted:"";
+		if(oAttribute!="")
+		{
+			listOfAttribute.push(oAttribute.trim());
+		}
+		oAttribute="";
+		oAttribute=listAttributesMapping.entry_item!=""?listAttributesMapping.entry_item:"";
 		if(oAttribute!="")
 		{
 			listOfAttribute.push(oAttribute.trim());
@@ -2111,7 +2348,34 @@
 		}
 		return found;
 	}
+	function checkIfIdentifierExist(_listOfIdentifier,_value,_type)
+	{
+		var exist=false;
+		for(var iterator=0;iterator< _listOfIdentifier.length;iterator++)
+		{
+			if(_listOfIdentifier[iterator].type.text==_type && _listOfIdentifier[iterator].value==_value)
+			{
+				exist=true;
+				break;
+			}
+		}
+		return exist;
+	}
 	
+	function getPractitionerNature(stageName)
+	{
+		var nature="";
+		for(var i=0;i<practitionerStageNatureList.length;i++)
+		{
+			var oStageNature=practitionerStageNatureList[i];
+			if (oStageNature.stage==stageName)
+			{
+				nature=oStageNature.nature;
+				break;
+			}
+		}
+		return nature;
+	}
 	function GetAssociatedFhirResourceFromMapping(oTrackedEntity)
 	{
 		//const entityCode=oTrackedEntity.trackedEntity;
@@ -2790,12 +3054,11 @@
 		oName.resourceType="HumanName";
 		oName.use="official";
 		//
-		var oContact={};
-		oContact= Object.create(ContactPoint);
-		oContact.resourceType="ContactPoint";
 		var oAddress={};
 		oAddress= Object.create(Address);
 		oAddress.resourceType="Address";
+		oPatient.careProvider=[];
+		oPatient.telecom=[];
 		var PatientSet=false;
 		var listOfIdentifier=[];
 		//Populate with entityTracker attribute
@@ -2839,7 +3102,15 @@
 					switch(oAttribute)
 					{
 						case patientAttributesMapping.id:
-							oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value.trim()+"-";
+							if(formatPatientId==true)
+							{
+								oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value.trim()+"-";
+							}
+							else if (formatPatientId==false)
+							{
+								oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value.trim();
+							}
+							
 							var orgIdentifier={};
 							oIdentifier=Object.create(Identifier);
 							//assignment of Identifier
@@ -2858,30 +3129,36 @@
 						case patientAttributesMapping.name_given:
 							oName.given=oTrackedEntity.attributes[iteratorAttribute].value;
 							oName.text+=oTrackedEntity.attributes[iteratorAttribute].value+" ";
-							PatientSet=true;;
+							PatientSet=true;
 						break;
 						case patientAttributesMapping.telecom_phone:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
 							oContact.system="phone";
 							oContact.value=oTrackedEntity.attributes[iteratorAttribute].value;
 							oContact.use="home";
 							oContact.rank="1";
-							oPatient.telecom=[oContact];
-							PatientSet=true;;
+							oPatient.telecom.push(oContact);
+							PatientSet=true;
 						break;
 						case patientAttributesMapping.telecom_email:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
 							oContact.system="email";
 							oContact.value=oTrackedEntity.attributes[iteratorAttribute].value;
 							oContact.use="home";
 							oContact.rank="2";
-							oPatient.telecom=[oContact];
-							PatientSet=true;;
+							oPatient.telecom.push(oContact);
+							PatientSet=true;
 						break;
 						case patientAttributesMapping.gender:
 							if(getAssociatedGenderValueSet(oTrackedEntity.attributes[iteratorAttribute].value)!="")
 							{
 								oPatient.gender=getAssociatedGenderValueSet(oTrackedEntity.attributes[iteratorAttribute].value);
 							}
-							PatientSet=true;;
+							PatientSet=true;
 						break;
 						case patientAttributesMapping.birthDate:
 							if(oTrackedEntity.attributes[iteratorAttribute].value!="" && oTrackedEntity.attributes[iteratorAttribute].value.includes("-")==false)
@@ -2897,12 +3174,14 @@
 							}
 							else if(oTrackedEntity.attributes[iteratorAttribute].value!="" && oTrackedEntity.attributes[iteratorAttribute].value.includes("-")==true)
 							{
+								//console.log(oTrackedEntity.attributes[iteratorAttribute].value);
 								oPatient.birthDate=oTrackedEntity.attributes[iteratorAttribute].value;
 								PatientSet=true;
 							}
 							
 						case patientAttributesMapping.deceasedBoolean:
-							if(oTrackedEntity.attributes[iteratorAttribute].value=="Alive")
+							//var displayNameOption=getDisplayNameFromListOptionSet(oTrackedEntity.attributes[iteratorAttribute].value,listOptionSets)
+							if(oTrackedEntity.attributes[iteratorAttribute].value==vitalStatus.alive)
 							{
 								oPatient.deceasedBoolean=false;
 							}
@@ -2910,13 +3189,18 @@
 							{
 								oPatient.deceasedBoolean=true;
 							}
-							PatientSet=true;;
+							PatientSet=true;
 							//oTrackedEntity.attributes[i].value;
 						break;
-						case patientAttributesMapping.address:
+						case patientAttributesMapping.address_text:
 							oAddress.text=oTrackedEntity.attributes[iteratorAttribute].value;
-							oPatient.address=[oAddress];
-							PatientSet=true;;
+							//oPatient.address=[oAddress];
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.address_city:
+							oAddress.city=oTrackedEntity.attributes[iteratorAttribute].value;
+							//oPatient.address=[oAddress];
+							PatientSet=true;
 						break;
 						case patientAttributesMapping.deceasedDateTime:
 							if(oTrackedEntity.attributes[iteratorAttribute].value!="")
@@ -2929,26 +3213,9 @@
 			
 				}
 				
-			
 			}
 			break;
 		}//fin for iterator entity
-		if(PatientSet==true)
-		{
-			oPatient.name=[oName];
-			var instanceIdentifier={};
-			instanceIdentifier=Object.create(Identifier);
-			//assignment of Identifier
-			instanceIdentifier.use="official";
-			instanceIdentifier.type={"text":"Tracker identifier"};
-			instanceIdentifier.system="http://hl7.org/fhir/";
-			instanceIdentifier.value=oTrackedEntity.trackedEntityInstance;
-			listOfIdentifier.push(instanceIdentifier);
-			oPatient.identifier=listOfIdentifier;
-			//entityPatient=oPatient;
-			listPatientExtrated.push(oPatient);
-		}
-		
 		//Special loop for adding extra patient attribute from event
 		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
 		{
@@ -2965,19 +3232,25 @@
 					switch(oAttribute)
 					{
 						case patientAttributesMapping.telecom_phone:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
 							oContact.system="phone";
 							oContact.value=oEvent.dataValues[iteratorDataValues].value;
 							oContact.use="home";
 							oContact.rank="1";
-							oPatient.telecom=[oContact];
+							oPatient.telecom.push(oContact);
 							PatientSet=true;;
 						break;
 						case patientAttributesMapping.telecom_email:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
 							oContact.system="email";
 							oContact.value=oEvent.dataValues[iteratorDataValues].value;
 							oContact.use="home";
 							oContact.rank="2";
-							oPatient.telecom=[oContact];
+							oPatient.telecom.push(oContact);
 							PatientSet=true;
 						break;
 						case patientAttributesMapping.gender:
@@ -2988,7 +3261,7 @@
 							PatientSet=true;
 						break;
 						case patientAttributesMapping.deceasedBoolean:
-							if(oEvent.dataValues[iteratorDataValues].value=="Alive")
+							if(oEvent.dataValues[iteratorDataValues].value==vitalStatus.alive)
 							{
 								oPatient.deceasedBoolean=false;
 							}
@@ -3006,9 +3279,14 @@
 								oPatient.deceasedDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
 							}
 						break;
-						case patientAttributesMapping.address:
+						case patientAttributesMapping.address_text:
 							oAddress.text=oEvent.dataValues[iteratorDataValues].value;
-							oPatient.address=[oAddress];
+							//oPatient.address=[oAddress];
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.address_city:
+							oAddress.city=oEvent.dataValues[iteratorDataValues].value;
+							//oPatient.address=[oAddress];
 							PatientSet=true;
 						break;
 					}//end Switch
@@ -3017,10 +3295,28 @@
 			}//End for iteratorDataValues
 		}//End for iteratorEvent
 		
+		if(PatientSet==true)
+		{
+			oPatient.name=[oName];
+			var instanceIdentifier={};
+			instanceIdentifier=Object.create(Identifier);
+			//assignment of Identifier
+			instanceIdentifier.use="official";
+			instanceIdentifier.type={"text":"Tracker identifier"};
+			instanceIdentifier.system="http://hl7.org/fhir/";
+			instanceIdentifier.value=oTrackedEntity.trackedEntityInstance;
+			listOfIdentifier.push(instanceIdentifier);
+			oPatient.identifier=listOfIdentifier;
+			oPatient.address=[oAddress];
+			//entityPatient=oPatient;
+			listPatientExtrated.push(oPatient);
+		}
+		
 		//Populate with Event attribute
 		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
 		{
 			var oEvent=listOfEvents[iteratorEvent];
+			//console.log(oEvent);
 			//Specimen initialization
 			var oSpecimen={};
 			oSpecimen= Object.create(Specimen);
@@ -3097,22 +3393,19 @@
 			oName= Object.create(HumanName);
 			oName.resourceType="HumanName";
 			oName.use="official";
-			var oContact={};
-			oContact= Object.create(ContactPoint);
-			oContact.resourceType="ContactPoint";
 			var oAddress={};
 			oAddress= Object.create(Address);
 			oAddress.resourceType="Address";
 			oPractitioner.telecom=[];
+			oPractitioner.practitionerRole=[];
+			var oPractitionerRole={};
+			oPractitionerRole= Object.create(PractitionerRole);
 			var practitionerSet=false;
 			var listOfPractitionerIdentifier=[];
 			
-			//List initialization;
-			var oList= Object.create(List);
-			oList.resourceType="List";
-			var listIsSet=false;
-			var listResourceIdentifier=[];
+			var practitionerNature=getPractitionerNature(oEvent.programStageName);
 			
+			//console.log(oEvent.dataValues[1]);
 			for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
 			{
 				var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
@@ -3137,13 +3430,32 @@
 						oIdentifier.type={"text":"Specimen Identification"};
 						oIdentifier.system="http://hl7.org/fhir/";
 						oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
-						oSpecimen.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
 						listOfSpecimenIdentifier.push(oIdentifier);
 						specimenIsSet=true;
 						continue;
 					}
 					switch(oAttribute)
 					{
+						case specimenAttributesMapping.id:
+							if(formatSpecimenId==true)
+							{
+								oSpecimen.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+							}
+							else
+							{
+								oSpecimen.id=oEvent.dataValues[iteratorDataValues].value.trim();
+							}
+							
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Specimen Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfSpecimenIdentifier.push(oIdentifier);
+							specimenIsSet=true;
+							break;
 						case specimenAttributesMapping.status:
 							oSpecimen.status=oEvent.dataValues[iteratorDataValues].value;
 							//oSpecimen.status="available";
@@ -3269,8 +3581,8 @@
 							//conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.encounter:
-							oCondition.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
-							conditionIsSet=true;
+							//oCondition.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+							//conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.dateRecorded:
 							//oCondition.dateRecorded=extractDateFromDateTime(oEvent.dataValues[iteratorDataValues].value);
@@ -3309,8 +3621,8 @@
 							conditionIsSet=true;
 							break;
 						case conditionAttributesMapping.onsetDateTime:
-							//oCondition.onsetDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
-							//conditionIsSet=true;
+							oCondition.onsetDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							conditionIsSet=true;
 							break;
 					}//End of switch
 					
@@ -3322,6 +3634,7 @@
 				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
 				if(inTheList==true)
 				{
+					/*
 					var identifierListAttributes=observationAttributesMapping.performer.split(",");
 					var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
 					if(resCheck==true)
@@ -3330,7 +3643,7 @@
 						oObservation.performer.push(oPerformerRef);
 						observationIsSet=true;
 						continue;
-					}
+					}*/
 					switch(oAttribute)
 					{
 						case observationAttributesMapping.identifier:
@@ -3367,10 +3680,11 @@
 							//observationIsSet=true;
 							break;
 						case observationAttributesMapping.encounter:
-							oObservation.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
-							observationIsSet=true;
+							//oObservation.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
 							break;
 						case observationAttributesMapping.effectiveDateTime:
+							//console.log(oEvent.dataValues[iteratorDataValues]);
 							oObservation.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
 							observationIsSet=true;
 							break;
@@ -3510,8 +3824,8 @@
 							observationIsSet=true;
 							break;
 						case observationAttributesMapping.specimen:
-							//oObservation.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value};
-							//observationIsSet=true;
+							oObservation.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value+"-"};
+							observationIsSet=true;
 							break;
 						case observationAttributesMapping.device:
 							//oObservation.device={"reference":"Device/"+oEvent.dataValues[iteratorDataValues].value};
@@ -3531,159 +3845,336 @@
 				}//End of inthe List Observation
 				inTheList=false;
 				itemListAttributesMapping=[];
-				itemListAttributesMapping=getListOfPractitionerAttributeMapping();
+				if(practitionerNature=="care_provider")
+				{
+					itemListAttributesMapping=getListOfPractitionerAttributeMapping();
+				}
+				else if (practitionerNature=="specimen_collector")
+				{
+					itemListAttributesMapping=getListOfPractitionerSpecimenHandlingAttributeMapping();
+				}
+				else if (practitionerNature=="observation_performer")
+				{
+					itemListAttributesMapping=getListOfPractitionerObservationPerformerAttributeMapping();
+				}
+				
 				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
 				if(inTheList==true)
 				{
-					var identifierListAttributes=practitionerAttributesMapping.identifier.split(",");
-					var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
-					if(resCheck==true)
+					if(practitionerNature=="care_provider")
+					{
+						var identifierListAttributes=practitionerAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfPractitionerIdentifier.push(oIdentifier);
+							practitionerSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case practitionerAttributesMapping.id:
+								oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+								var orgIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":""+oAttribute};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
+								listOfPractitionerIdentifier.push(oIdentifier);
+								practitionerSet=true;
+								break;
+							case practitionerAttributesMapping.name_family:
+								oName.family=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.name_given:
+								oName.given=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;;
+							break;
+							case practitionerAttributesMapping.telecom_phone:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="phone";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="1";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;;
+							break;
+							case practitionerAttributesMapping.telecom_email:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="email";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="2";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.gender:
+								if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+								{
+									oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+								}
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.address:
+								oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+								oPractitioner.address=[oAddress];
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.practitionerRole_managingOrganization:
+								oPractitionerRole.managingOrganization={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.practitionerRole_role:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
+								oPractitionerRole.role=oConcept;
+								practitionerSet=true;
+							break;
+						}
+					
+					}
+					if(practitionerNature=="specimen_collector")
+					{
+						var identifierListAttributes=practitionerSpecimenHandlingAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfPractitionerIdentifier.push(oIdentifier);
+							practitionerSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case practitionerSpecimenHandlingAttributesMapping.id:
+								oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+								var orgIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":""+oAttribute};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
+								listOfPractitionerIdentifier.push(oIdentifier);
+								practitionerSet=true;
+								break;
+							case practitionerSpecimenHandlingAttributesMapping.name_family:
+								oName.family=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.name_given:
+								oName.given=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.telecom_phone:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="phone";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="1";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.telecom_email:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="email";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="2";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.gender:
+								if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+								{
+									oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+								}
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.address:
+								oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+								oPractitioner.address=[oAddress];
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.practitionerRole_managingOrganization:
+								oPractitionerRole.managingOrganization={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.practitionerRole_role:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
+								oPractitionerRole.role=oConcept;
+								practitionerSet=true;
+							break;
+						}
+					
+					}
+					if(practitionerNature=="observation_performer")
+					{
+						var identifierListAttributes=practitionerObservationPerformerAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfPractitionerIdentifier.push(oIdentifier);
+							practitionerSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case practitionerObservationPerformerAttributesMapping.id:
+								oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+								var orgIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":""+oAttribute};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
+								listOfPractitionerIdentifier.push(oIdentifier);
+								practitionerSet=true;
+								break;
+							case practitionerObservationPerformerAttributesMapping.name_family:
+								oName.family=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.name_given:
+								oName.given=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;;
+							break;
+							case practitionerObservationPerformerAttributesMapping.telecom_phone:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="phone";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="1";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;;
+							break;
+							case practitionerObservationPerformerAttributesMapping.telecom_email:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="email";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="2";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.gender:
+								if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+								{
+									oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+								}
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.address:
+								oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+								oPractitioner.address=[oAddress];
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.practitionerRole_managingOrganization:
+								oPractitionerRole.managingOrganization={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.practitionerRole_role:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
+								oPractitionerRole.role=oConcept;
+								practitionerSet=true;
+							break;
+						}
+					
+					}
+					
+				}//End If inTheList PractitionerAttributeMapping
+				
+				
+			}//End for iteratorDataValues
+			if(practitionerSet==true)
+			{
+				if(oPractitioner.id=="")
+				{
+					oPractitioner.id=oEvent.id;
+					if(listOfPractitionerIdentifier.length==0)
 					{
 						var orgIdentifier={};
 						oIdentifier=Object.create(Identifier);
 						//assignment of Identifier
 						oIdentifier.use="official";
-						oIdentifier.type={"text":""+oAttribute};
+						oIdentifier.type={"text":"Practitioner Identifier"};
 						oIdentifier.system="http://hl7.org/fhir/";
-						oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+						oIdentifier.value=oEvent.id;
 						listOfPractitionerIdentifier.push(oIdentifier);
-						practitionerSet=true;
-						continue;
 					}
-					switch(oAttribute)
-					{
-						case practitionerAttributesMapping.id:
-							oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
-							var orgIdentifier={};
-							oIdentifier=Object.create(Identifier);
-							//assignment of Identifier
-							oIdentifier.use="official";
-							oIdentifier.type={"text":""+oAttribute};
-							oIdentifier.system="http://hl7.org/fhir/";
-							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
-							listOfPractitionerIdentifier.push(oIdentifier);
-							practitionerSet=true;
-							break;
-						case practitionerAttributesMapping.name_family:
-							oName.family=oEvent.dataValues[iteratorDataValues].value;
-							oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
-							practitionerSet=true;
-						break;
-						case practitionerAttributesMapping.name_given:
-							oName.given=oEvent.dataValues[iteratorDataValues].value;
-							oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
-							practitionerSet=true;;
-						break;
-						case practitionerAttributesMapping.telecom_phone:
-							oContact.system="phone";
-							oContact.value=oEvent.dataValues[iteratorDataValues].value;
-							oContact.use="home";
-							oContact.rank="1";
-							oPractitioner.telecom.push(oContact);
-							practitionerSet=true;;
-						break;
-						case practitionerAttributesMapping.telecom_email:
-							oContact.system="email";
-							oContact.value=oEvent.dataValues[iteratorDataValues].value;
-							oContact.use="home";
-							oContact.rank="2";
-							oPractitioner.telecom.push(oContact);
-							practitionerSet=true;
-						break;
-						case practitionerAttributesMapping.gender:
-							if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
-							{
-								oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
-							}
-							practitionerSet=true;
-						break;
-						case practitionerAttributesMapping.address:
-							oAddress.text=oEvent.dataValues[iteratorDataValues].value;
-							oPractitioner.address=[oAddress];
-							practitionerSet=true;
-						break;
-					}
-				}//End If inTheList PractitionerAttributeMapping
-				
-				inTheList=false;
-				itemListAttributesMapping=[];
-				itemListAttributesMapping=getlistResourceAttributeMapping();
-				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
-				if(inTheList==true)
-				{
-					switch(oAttribute)
-					{
-						case listAttributesMapping.id:
-							oList.id=oEvent.dataValues[iteratorDataValues].value.trim();
-							var orgIdentifier={};
-							oIdentifier=Object.create(Identifier);
-							//assignment of Identifier
-							oIdentifier.use="official";
-							oIdentifier.type={"text":""+oAttribute};
-							oIdentifier.system="http://hl7.org/fhir/";
-							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
-							listResourceIdentifier.push(oIdentifier);
-							listIsSet=true;
-							break;
-						case listAttributesMapping.identifier:
-							var orgIdentifier={};
-							oIdentifier=Object.create(Identifier);
-							//assignment of Identifier
-							oIdentifier.use="official";
-							oIdentifier.type={"text":""+oAttribute};
-							oIdentifier.system="http://hl7.org/fhir/";
-							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
-							listResourceIdentifier.push(oIdentifier);
-							listIsSet=true;
-							break;
-						case listAttributesMapping.title:
-							oList.title=oEvent.dataValues[iteratorDataValues].value.trim();
-							listIsSet=true;
-							break;
-						case listAttributesMapping.code:
-							var  oConcept={};
-							oConcept= Object.create(CodeableConcept);
-							oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
-							oList.code=oConcept;
-							listIsSet=true;
-							break;
-						case listAttributesMapping.subject:
-							break;
-						case listAttributesMapping.source:
-							break;
-						case listAttributesMapping.encounter:
-							break;
-						case listAttributesMapping.status:
-							var  oConcept={};
-							oConcept= Object.create(CodeableConcept);
-							oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
-							oList.status=oConcept;
-							listIsSet=true;
-							break;
-						case listAttributesMapping.date:
-							oList.date=formatDateInZform(oEvent.dataValues[iteratorDataValues].value.trim());
-							listIsSet=true;
-							break;
-						case listAttributesMapping.mode:
-							var  oConcept={};
-							oConcept= Object.create(CodeableConcept);
-							oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
-							oList.mode=oConcept;
-							listIsSet=true;
-							break;
-						case listAttributesMapping.note:
-							oList.note=oEvent.dataValues[iteratorDataValues].value.trim();
-							listIsSet=true;
-							break;
-					}
-					
 				}
+				if(oPractitionerRole.managingOrganization=="")
+				{
+					oPractitionerRole.managingOrganization=oPatient.managingOrganization;
+				}
+				/*
+				if(oPractitionerRole.managingOrganization!="" || oPractitionerRole.role!="")
+				{
+					oPractitioner.practitionerRole.push(oPractitionerRole);
+				}*/
+				oPractitioner.practitionerRole.push(oPractitionerRole);
+				oPractitioner.name=[oName];
+				oPractitioner.identifier=listOfPractitionerIdentifier;
+				//console.log(oSpecimen);
+				if(practitionerNature=="care_provider")
+				{
+					var oRef= {"reference":"Practitioner/"+oPractitioner.id};
+					oPatient.careProvider.push(oRef);
+				}
+				listPractitionerExtrated.push(oPractitioner);
 				
-			}//End for iteratorDataValues
+			}
 			
 			if(specimenIsSet==true)
 			{
-				
+				//console.log(oSpecimen);
 				if(getIndexOfFhirResourceById(listSpecimenExtracted,oSpecimen.id)==-1 && oSpecimen.id!="")
 				{
 					var associatedEntityIdentifier={};
@@ -3719,88 +4210,139 @@
 					//entitySpecimen=oSpecimen;
 					
 					//listEntityObject.push(entitySpecimen);
+					if(practitionerSet==true)
+					{
+						if(practitionerNature=="specimen_collector")
+						{
+							oSpecimen.collection.collector={"reference":"Practitioner/"+oPractitioner.id};
+						}
+					}
 					listSpecimenExtracted.push(oSpecimen);
+					//Then check if there is refence list Elements 
+					for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+					{
+						var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
+						var inTheRefList=false;
+						itemRefListAttributesMapping=[];
+						itemRefListAttributesMapping=specimenAttributesMapping.list_reference.split(",");
+						inTheRefList=checkAttributeInList(itemRefListAttributesMapping,oAttribute);
+						if(inTheRefList==true)
+						{
+							//List initialization;
+							var oList= Object.create(List);
+							oList.resourceType="List";
+							oList.entry=[];
+							var listIsSet=false;
+							var listResourceIdentifier=[];
+							oList.id=oSpecimen.id+""+oEvent.dataValues[iteratorDataValues].dataElementId;
+							oList.status="current";
+							oList.mode="working";
+							oList.title=oAttribute;
+							oList.note=oEvent.dataValues[iteratorDataValues].value.trim();
+							oList.entry.push({"deleted":false,"item":{"reference":"Specimen/"+oSpecimen.id}});
+							listResourceListExtracted.push(oList);
+							
+						}
+						
+					}
+					
 				}
+				
 				//console.log(oSpecimen);
-			}
+				
+				
+			}//End if specimenIsSet
 			if(observationIsSet==true)
 			{
+				//console.log(oSpecimen);
+				if(oObservation.code!="")
+				{
+					oObservation.id=oEvent.id;
+					oSampledData.origin=oOriginQuantity;
+					//oObservation.identifier=listOfObservationIdentifier;
+					if(hasValueSampledDataInfo==true)
+					{
+						oObservation.valueSampledData=oSampledData;
+					}
+					if(hasEffectivePeriodInfo==true)
+					{
+						oObservation.effectivePeriod=oPeriodEffective;
+					}
+					if(hasValueQuantityInfo==true)
+					{
+						oObservation.valueQuantity=oValueQuantity;
+					}
+					if(hasValueRangeInfo==true)
+					{
+						oObservation.valueRange=oObservationRange;
+					}
+					//checkIfAsProperties(oObservationRange);
+					if(hasValueRatioInfo==true)
+					{
+						oObservation.valueRatio=oObservationRatio;
+					}
+					if(hasValuePeriodInfo==true)
+					{
+						oObservation.valuePeriod=oPeriodResult;
+					}
+					
+					//
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
+					listOfObservationIdentifier.push(associatedEntityIdentifier);
+					oObservation.identifier=listOfObservationIdentifier;
+					//Add additional information for validation
+					
+					if(oObservation.interpretation=="")
+					{
+						oObservation.status="registered";
+					}
+					else
+					{
+						oObservation.status="final";
+					}
+					
+					//By Default used Microscopy observation as code
+					if(oObservation.code=="")
+					{
+						var oConcept={};
+						oConcept= Object.create(CodeableConcept);
+						oConcept.text="Microscopic Observation";
+						oConcept.code=[{"code":"10355-6"}];
+						oObservation.code=oConcept;
+					}
+					if (PatientSet==true)
+					{
+						oObservation.subject={"reference":"Patient/"+oPatient.id};
+					}
+					if (specimenIsSet==true && oSpecimen.id!="")
+					{
+						//console.log("Observation specimen setted :"+oSpecimen.id);
+						oObservation.specimen={"reference":"Specimen/"+oSpecimen.id};
+					}
+					//Check if there is not performer info to add orgUnit
+					if(oObservation.performer.length==0)
+					{
+						if(practitionerSet==true && practitionerNature=="observation_performer")
+						{
+							var oPerformerRef={"reference":"Practitioner/"+oPractitioner.id};
+							oObservation.performer.push(oPerformerRef);
+						}
+						else
+						{
+							var oPerformerRef={"reference":"Organization/"+oEvent.orgUnit};
+							oObservation.performer.push(oPerformerRef);
+						}
+						
+					}
+					listObservationExtracted.push(oObservation);
+				}
 				
-				oObservation.id=oEvent.id;
-				//
-				
-				oSampledData.origin=oOriginQuantity;
-				//oObservation.identifier=listOfObservationIdentifier;
-				if(hasValueSampledDataInfo==true)
-				{
-					oObservation.valueSampledData=oSampledData;
-				}
-				if(hasEffectivePeriodInfo==true)
-				{
-					oObservation.effectivePeriod=oPeriodEffective;
-				}
-				if(hasValueQuantityInfo==true)
-				{
-					oObservation.valueQuantity=oValueQuantity;
-				}
-				if(hasValueRangeInfo==true)
-				{
-					oObservation.valueRange=oObservationRange;
-				}
-				//checkIfAsProperties(oObservationRange);
-				if(hasValueRatioInfo==true)
-				{
-					oObservation.valueRatio=oObservationRatio;
-				}
-				if(hasValuePeriodInfo==true)
-				{
-					oObservation.valuePeriod=oPeriodResult;
-				}
-				
-				//
-				var associatedEntityIdentifier={};
-				associatedEntityIdentifier=Object.create(Identifier);
-				//assignment of Identifier
-				associatedEntityIdentifier.use="secondary";
-				associatedEntityIdentifier.type={"text":"Associated TEI"};
-				associatedEntityIdentifier.system="http://hl7.org/fhir/";
-				associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
-				listOfObservationIdentifier.push(associatedEntityIdentifier);
-				oObservation.identifier=listOfObservationIdentifier;
-				//Add additional information for validation
-				
-				if(oObservation.interpretation=="")
-				{
-					oObservation.status="registered";
-				}
-				else
-				{
-					oObservation.status="final";
-				}
-				
-				//By Default used Microscopy observation as code
-				var oConcept={};
-				oConcept= Object.create(CodeableConcept);
-				oConcept.text="Microscopic Observation";
-				oConcept.code=[{"code":"10355-6"}];
-				oObservation.code=oConcept;
-				
-				if (PatientSet==true)
-				{
-					oObservation.subject={"reference":"Patient/"+oPatient.id};
-				}
-				if (specimenIsSet==true && oSpecimen.id!="")
-				{
-					//console.log("Observation specimen setted :"+oSpecimen.id);
-					oObservation.specimen={"reference":"Specimen/"+oSpecimen.id};
-				}
-				//Check if there is not performer info to add orgUnit
-				if(oObservation.performer.length==0)
-				{
-					var oPerformerRef={"reference":"Organization/"+oEvent.orgUnit};
-					oObservation.performer.push(oPerformerRef);
-				}
-				listObservationExtracted.push(oObservation);
 				
 			}
 			if(conditionIsSet==true)
@@ -3839,63 +4381,11 @@
 				}
 				listConditionExtracted.push(oCondition);
 			}
-			if(practitionerSet==true)
-			{
-				if(oPractitioner.id=="")
-				{
-					oPractitioner.id=oEvent.id;
-					if(listOfPractitionerIdentifier.length==0)
-					{
-						var orgIdentifier={};
-						oIdentifier=Object.create(Identifier);
-						//assignment of Identifier
-						oIdentifier.use="official";
-						oIdentifier.type={"text":"Practitioner Identifier"};
-						oIdentifier.system="http://hl7.org/fhir/";
-						oIdentifier.value=oEvent.id;
-						listOfPractitionerIdentifier.push(oIdentifier);
-					}
-				}
-				oPractitioner.name=[oName];
-				oPractitioner.identifier=listOfPractitionerIdentifier;
-				if(specimenIsSet==true && oSpecimen.id!="")
-				{
-					oSpecimen.collection.collector={"reference":"Practitioner/"+oPractitioner.id};
-				}
-				//console.log(oSpecimen);
-				listPractitionerExtrated.push(oPractitioner);
-				
-			}
-			if(listIsSet==true)
-			{
-				if(oList.id=="")
-				{
-					oList.id=oEvent.id;
-				}
-				if(oList.date=="")
-				{
-					oList.date=oEvent.eventDate;
-				}
-				oList.identifier=listResourceIdentifier;
-				oList.subject={"reference":"Patient/"+oPatient.id};
-				if(oList.title=="")
-				{
-					oList.title="Patient medical history records";
-				}
-				if(oList.status=="")
-				{
-					oList.status="current";
-				}
-				if(oList.mode=="")
-				{
-					oList.mode="working";
-				}
-				listResourceListExtracted.push(oList);
-			}
-		
+			
 		}//end iteratorEvent
 		//console.log(listDiagnosticOrderExtracted);
 		//Special loop for DiagnosticReport
+		//console.log(listSpecimenExtracted);
 		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
 		{
 			//DiagnosticReport initialization
@@ -3956,8 +4446,8 @@
 							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.encounter:
-							oDiagnosticReport.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.effectiveDateTime:
 							//oDiagnosticReport.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
@@ -3976,20 +4466,20 @@
 							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.performer:
-							oDiagnosticReport.performer={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.performer={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.request:
-							oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oEvent.dataValues[iteratorDataValues].value}];
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oEvent.dataValues[iteratorDataValues].value}];
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.specimen:
-							oDiagnosticReport.specimen=[{"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value}];
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.specimen=[{"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value}];
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.result:
-							oDiagnosticReport.result=[{"reference":"Observation/"+oEvent.dataValues[iteratorDataValues].value}];
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.result=[{"reference":"Observation/"+oEvent.dataValues[iteratorDataValues].value}];
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.imagingStudy:
 							oDiagnosticReport.imagingStudy=[];
@@ -4063,6 +4553,7 @@
 				}
 				if(listSpecimenExtracted.length>=1)
 				{
+					//console.log(listSpecimenExtracted);
 					var listSpecimenAssociated=[];
 					listSpecimenAssociated=getListEntityInstanceAssociatedSpecimens(listSpecimenExtracted,oEvent.trackedEntityInstance,'Associated TEI');
 					for(var i=0;i<listSpecimenAssociated.length;i++)
@@ -4491,7 +4982,7 @@
 			indexIdCondition=getIndexOfFhirResourceByIdentification(listConditionExtracted,idConditionToSearch);
 			if(indexIdCondition>=0)
 			{
-				console.log("Entered in condition statement!!")
+				//console.log("Entered in condition statement!!")
 				var listOfConditionIdentifier=[];
 				if(listConditionExtracted[indexIdCondition].identifier.length>0)
 				{
@@ -4616,8 +5107,8 @@
 								conditionIsSet=true;
 								break;
 							case conditionAttributesMapping.encounter:
-								oCondition.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
-								conditionIsSet=true;
+								//oCondition.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//conditionIsSet=true;
 								break;
 							case conditionAttributesMapping.dateRecorded:
 								oCondition.dateRecorded=extractDateFromDateTime(oTrackedEntity.attributes[iteratorAttribute].value);
@@ -4671,7 +5162,7 @@
 					
 					}
 				}
-				if(conditionIsSet==true && oCondition.code!="" && oCondition.category!="")
+				if(conditionIsSet==true && oCondition.code!="")
 				{
 					
 					oCondition.id=oTrackedEntity.trackedEntityInstance;
@@ -5706,6 +6197,8 @@
 			else
 			{
 				//Observation initialization
+				
+				
 				var oDiagnosticReport={};
 				oDiagnosticReport= Object.create(DiagnosticReport);
 				oDiagnosticReport.resourceType="DiagnosticReport";
@@ -5718,7 +6211,7 @@
 				var diagnosticReportIsSet=false;
 				var effectivePeriodIsSet=false;
 				var listOfDateCreatedAttribute=[];
-				
+				//console.log(listSpecimenExtracted);
 				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
 				{
 					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
@@ -5787,20 +6280,20 @@
 							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.performer:
-							oDiagnosticReport.performer={"reference":"Organization/"+oTrackedEntity.attributes[iteratorAttribute].value};
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.performer={"reference":"Organization/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.request:
-							oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oTrackedEntity.attributes[iteratorAttribute].value}];
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.specimen:
-							oDiagnosticReport.specimen=[{"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value}];
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.specimen=[{"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.result:
-							oDiagnosticReport.result=[{"reference":"Observation/"+oTrackedEntity.attributes[iteratorAttribute].value}];
-							diagnosticReportIsSet=true;
+							//oDiagnosticReport.result=[{"reference":"Observation/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							//diagnosticReportIsSet=true;
 							break;
 						case diagnosticReportAttributesMapping.imagingStudy:
 							oDiagnosticReport.imagingStudy=[];
@@ -5831,6 +6324,7 @@
 				}
 				if(diagnosticReportIsSet==true)
 				{
+					//console.log(listSpecimenExtracted);
 					oDiagnosticReport.id=oTrackedEntity.trackedEntityInstance;
 					var associatedEntityIdentifier={};
 					associatedEntityIdentifier=Object.create(Identifier);
@@ -5879,6 +6373,7 @@
 					}
 					if(listSpecimenExtracted.length>=1)
 					{
+						//console.log(listSpecimenExtracted);
 						var listSpecimenAssociated=[];
 						listSpecimenAssociated=getListEntityInstanceAssociatedSpecimens(listSpecimenExtracted,oTrackedEntity.trackedEntityInstance,'Associated TEI');
 						for(var i=0;i<listSpecimenAssociated.length;i++)
@@ -5998,20 +6493,3587 @@
 		{
 			listEntityObject.push(listResourceListExtracted[i]);
 		}
-		//console.log(listPatientExtrated);
+		//console.log(listSpecimenExtracted);
+		//console.log("#######################################################################");
+		return listEntityObject;
+	}
+	function getDisplayNameFromListOptionSet(code,listOptionSets)
+	{
+		var displayName="";
+		for(var iterator=0;iterator<listOptionSets.length;iterator++)
+		{
+			if (listOptionSets[iterator].code==code)
+			{
+				displayName=listOptionSets[iterator].displayName;
+				break;
+			}
+			
+			
+		}
+		return displayName;
+	}
+	function getCodeFromDisplayNameInListOptionSet(itemDisplayName,listOptionSets)
+	{
+		var code="";
+		for(var iterator=0;iterator<listOptionSets.length;iterator++)
+		{
+			//console.log(listOptionSets[iterator].displayName.toLowerCase()+"=="+itemDisplayName.toLowerCase());
+			if (listOptionSets[iterator].displayName.toLowerCase().includes(itemDisplayName.toLowerCase())==true)
+			{
+				code=listOptionSets[iterator].code;
+				break;
+			}
+			
+			
+		}
+		return code;
+	}
+	function checkAttributeMarkedAsOptionSet(attributeId)
+	{
+		var itemFound=false;
+		for(var iterator=0;iterator<listAttributeWithOptionSetValues.length;iterator++)
+		{
+			if(listAttributeWithOptionSetValues[iterator].id==attributeId)
+			{
+				itemFound=true;
+				break;
+			}
+		}
+		return itemFound;
+	}
+	function getAssociatedFhirResourceFromOptionSets(listOptionSets)
+	{
+		var listBasicExtracted=[];
+		for(var iteratorOptionSet=0;iteratorOptionSet<listOptionSets.length;iteratorOptionSet++)
+		{
+			var oBasic={};
+			oBasic= Object.create(Basic);
+			oBasic.resourceType="Basic";
+			var  oConcept={};
+			oConcept= Object.create(CodeableConcept);
+			oBasic.id=listOptionSets[iteratorOptionSet].id;
+			oConcept.coding=[{"code":listOptionSets[iteratorOptionSet].code}];
+			oConcept.text=listOptionSets[iteratorOptionSet].displayName;
+			oBasic.code=oConcept;
+			listBasicExtracted.push(oBasic);
+		}
+		return listBasicExtracted;
+	}
+	function GetAssociatedFhirResourceFromMappingAndEventAndOptionSet(listofTrackedEntity,listOfEvents,listOptionSets)
+	{
+		//const entityCode=oTrackedEntity.trackedEntity;
+		//console.log(getListOfPatientAttributeMapping());
+		listEntityObject=[];
+		var entityPatient=null;
+		var entitySpecimen=null;
+		var entityOrder=null;
+		var listPatientExtrated=[];
+		var listPractitionerExtrated=[];
+		var listSpecimenExtracted=[];
+		var listDiagnosticOrderExtracted=[];
+		var listObservationExtracted=[];
+		var listConditionExtracted=[];
+		var listDiagnosticReportExtracted=[];
+		var listResourceListExtracted=[];
+		
+		//Patient Initialization
+		
+		var oPatient={};
+		oPatient= Object.create(Patient);
+		oPatient.resourceType="Patient";
+		//if(oTrackedEntity)
+		
+		var oName={};
+		oName= Object.create(HumanName);
+		oName.resourceType="HumanName";
+		oName.use="official";
+		//
+		var oAddress={};
+		oAddress= Object.create(Address);
+		oAddress.resourceType="Address";
+		oPatient.careProvider=[];
+		oPatient.telecom=[];
+		var PatientSet=false;
+		var listOfIdentifier=[];
+		//Populate with entityTracker attribute
+		//First populate the trackerEntity
+		for(var iteratorEntity=0;iteratorEntity<listofTrackedEntity.length;iteratorEntity++)
+		{
+			var oTrackedEntity=listofTrackedEntity[iteratorEntity];
+			//oPatient.id=oTrackedEntity.trackedEntityInstance;
+			//oPatient.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
+			oPatient.managingOrganization={"reference":"Organization/"+oTrackedEntity.orgUnit}
+			oPatient.active=true;
+			
+			for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+			{
+				var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName.trim();
+				var inTheList=false;
+				//inTheList=checkAttributeInList
+				var itemListAttributesMapping=[];
+				itemListAttributesMapping=getListOfPatientAttributeMapping();
+				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+				if(inTheList==true)
+				{
+					var identifierListAttributes=patientAttributesMapping.identifier.split(",");
+					//console.log(identifierListAttributes);
+					//console.log("----------------------------------------------");
+					var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+					if(resCheck==true)
+					{
+						var orgIdentifier={};
+						oIdentifier=Object.create(Identifier);
+						//assignment of Identifier
+						oIdentifier.use="official";
+						oIdentifier.type={"text":""+oAttribute};
+						oIdentifier.system="http://hl7.org/fhir/";
+						oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+						listOfIdentifier.push(oIdentifier);
+						PatientSet=true;
+						continue;
+					}
+					
+					switch(oAttribute)
+					{
+						case patientAttributesMapping.id:
+							if(formatPatientId==true)
+							{
+								oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value.trim()+"-";
+							}
+							else if (formatPatientId==false)
+							{
+								oPatient.id=oTrackedEntity.attributes[iteratorAttribute].value.trim();
+							}
+							
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value.trim();
+							listOfIdentifier.push(oIdentifier);
+							PatientSet=true;
+							break;
+						case patientAttributesMapping.name_family:
+							oName.family=oTrackedEntity.attributes[iteratorAttribute].value;
+							oName.text+=oTrackedEntity.attributes[iteratorAttribute].value+" ";
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.name_given:
+							oName.given=oTrackedEntity.attributes[iteratorAttribute].value;
+							oName.text+=oTrackedEntity.attributes[iteratorAttribute].value+" ";
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.telecom_phone:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
+							oContact.system="phone";
+							oContact.value=oTrackedEntity.attributes[iteratorAttribute].value;
+							oContact.use="home";
+							oContact.rank="1";
+							oPatient.telecom.push(oContact);
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.telecom_email:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
+							oContact.system="email";
+							oContact.value=oTrackedEntity.attributes[iteratorAttribute].value;
+							oContact.use="home";
+							oContact.rank="2";
+							oPatient.telecom.push(oContact);
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.gender:
+							if(getAssociatedGenderValueSet(oTrackedEntity.attributes[iteratorAttribute].value)!="")
+							{
+								oPatient.gender=getAssociatedGenderValueSet(oTrackedEntity.attributes[iteratorAttribute].value);
+							}
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.birthDate:
+							if(oTrackedEntity.attributes[iteratorAttribute].value!="" && oTrackedEntity.attributes[iteratorAttribute].value.includes("-")==false)
+							{
+								var currentYear=new Date().getFullYear();
+								var ageOfPatient=parseInt(oTrackedEntity.attributes[iteratorAttribute].value);
+								var yearOfBirth=currentYear-ageOfPatient;
+								//console.log(yearOfBirth);
+								var dateOfBirth=""+yearOfBirth+"-01-01";
+								oPatient.birthDate=dateOfBirth;
+								PatientSet=true;
+								//console.log(new Date().getFullYear()-patientAttributesMapping.birthDate);
+							}
+							else if(oTrackedEntity.attributes[iteratorAttribute].value!="" && oTrackedEntity.attributes[iteratorAttribute].value.includes("-")==true)
+							{
+								//console.log(oTrackedEntity.attributes[iteratorAttribute].value);
+								oPatient.birthDate=oTrackedEntity.attributes[iteratorAttribute].value;
+								PatientSet=true;
+							}
+							
+						case patientAttributesMapping.deceasedBoolean:
+							var displayNameOption=getDisplayNameFromListOptionSet(oTrackedEntity.attributes[iteratorAttribute].value,listOptionSets);
+							var res=getAssociatedVitalStatusValueSet(displayNameOption);
+							oPatient.deceasedBoolean=res;
+							PatientSet=true;
+							//oTrackedEntity.attributes[i].value;
+						break;
+						case patientAttributesMapping.address_text:
+							oAddress.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							//oPatient.address=[oAddress];
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.address_city:
+							oAddress.city=oTrackedEntity.attributes[iteratorAttribute].value;
+							//oPatient.address=[oAddress];
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.deceasedDateTime:
+							if(oTrackedEntity.attributes[iteratorAttribute].value!="")
+							{
+								oPatient.deceasedDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							}
+						break;
+						
+					}
+			
+				}
+				
+			}
+			break;
+		}//fin for iterator entity
+		//Special loop for adding extra patient attribute from event
+		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
+		{
+			var oEvent=listOfEvents[iteratorEvent];
+			for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+			{
+				var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
+				var inTheList=false;
+				inTheList=false;
+				itemListAttributesMapping=[];
+				itemListAttributesMapping=getListOfPatientAttributeMapping();
+				if(inTheList==true)
+				{
+					switch(oAttribute)
+					{
+						case patientAttributesMapping.telecom_phone:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
+							oContact.system="phone";
+							oContact.value=oEvent.dataValues[iteratorDataValues].value;
+							oContact.use="home";
+							oContact.rank="1";
+							oPatient.telecom.push(oContact);
+							PatientSet=true;;
+						break;
+						case patientAttributesMapping.telecom_email:
+							var oContact={};
+							oContact= Object.create(ContactPoint);
+							oContact.resourceType="ContactPoint";
+							oContact.system="email";
+							oContact.value=oEvent.dataValues[iteratorDataValues].value;
+							oContact.use="home";
+							oContact.rank="2";
+							oPatient.telecom.push(oContact);
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.gender:
+							if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+							{
+								oPatient.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+							}
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.deceasedBoolean:
+							var displayNameOption=getDisplayNameFromListOptionSet(oEvent.dataValues[iteratorDataValues].value,listOptionSets);
+							var res=getAssociatedVitalStatusValueSet(displayNameOption);
+							oPatient.deceasedBoolean=res;
+							//oPatient.deceasedDateTime=formatDateInZform(oEvent.eventDate);
+							PatientSet=true;
+							//oTrackedEntity.attributes[i].value;
+						break;
+						case patientAttributesMapping.deceasedDateTime:
+							if(oEvent.dataValues[iteratorDataValues].value!="")
+							{
+								oPatient.deceasedDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							}
+						break;
+						case patientAttributesMapping.address_text:
+							oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+							//oPatient.address=[oAddress];
+							PatientSet=true;
+						break;
+						case patientAttributesMapping.address_city:
+							oAddress.city=oEvent.dataValues[iteratorDataValues].value;
+							//oPatient.address=[oAddress];
+							PatientSet=true;
+						break;
+					}//end Switch
+				}//end if inTheList
+				
+			}//End for iteratorDataValues
+		}//End for iteratorEvent
+		
+		if(PatientSet==true)
+		{
+			oPatient.name=[oName];
+			var instanceIdentifier={};
+			instanceIdentifier=Object.create(Identifier);
+			//assignment of Identifier
+			instanceIdentifier.use="official";
+			instanceIdentifier.type={"text":"Tracker identifier"};
+			instanceIdentifier.system="http://hl7.org/fhir/";
+			instanceIdentifier.value=oTrackedEntity.trackedEntityInstance;
+			listOfIdentifier.push(instanceIdentifier);
+			oPatient.identifier=listOfIdentifier;
+			oPatient.address=[oAddress];
+			//entityPatient=oPatient;
+			listPatientExtrated.push(oPatient);
+		}
+		
+		//Populate with Event attribute
+		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
+		{
+			var oEvent=listOfEvents[iteratorEvent];
+			
+			//console.log(oEvent);
+			//Specimen initialization
+			var oSpecimen={};
+			oSpecimen= Object.create(Specimen);
+			oSpecimen.resourceType="Specimen";
+			//oSpecimen.id=oTrackedEntity.trackedEntityInstance;
+			//oSpecimen.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
+			oSpecimen.active=true;
+			var listOfSpecimenIdentifier=[];
+			var listOfTraitment=[];
+			var oConceptProcedure={};
+			oConceptProcedure= Object.create(CodeableConcept);
+			var oConceptCollectionMethod={};
+			oConceptCollectionMethod= Object.create(CodeableConcept);
+			var oConceptBodySite={};
+			oConceptBodySite= Object.create(CodeableConcept);
+			//oConceptProcedure.
+			var oTraitment={
+				"description":"",
+				"procedure":{}
+				};
+			var oCollection={};
+			oCollection= Object.create(Collection);
+			var oContainer={};
+			oContainer= Object.create(Container);
+			var specimenIsSet=false;
+			var hasCollectionInfo=false;
+			var hasTraitementInfo=false;
+			var hasContainerInfo=false;
+			
+			//Condition Initialization
+			var oCondition={};
+			oCondition= Object.create(Condition);
+			oCondition.resourceType="Condition";
+			var listOfConditionIdentifier=[];
+			var conditionIsSet=false;
+			
+			//Observation initialization
+			var oObservation={};
+			oObservation= Object.create(Observation);
+			oObservation.resourceType="Observation";
+			oObservation.performer=[];
+			var listOfObservationIdentifier=[];
+			var oSampledData={};
+			oSampledData= Object.create(SampledData);
+			var oPeriodEffective={};
+			oPeriodEffective= Object.create(Period);
+			var oPeriodResult={};
+			oPeriodResult= Object.create(Period);
+			var oValueQuantity={};
+			oValueQuantity= Object.create(Quantity);
+			var oOriginQuantity={};
+			oOriginQuantity= Object.create(Quantity);
+			var oObservationRange={};
+			oObservationRange=Object.create(Range);
+			var oObservationRatio={};
+			oObservationRatio=Object.create(Ratio);
+			var oBodySiteConcept={};
+			oBodySiteConcept=Object.create(CodeableConcept);
+			var oAbsentRaisonConcept={};
+			oAbsentRaisonConcept=Object.create(CodeableConcept);
+			var observationIsSet=false;
+			var hasValueSampledDataInfo=false;
+			var hasEffectivePeriodInfo=false;
+			var hasValueQuantityInfo=false;
+			var hasValueRangeInfo=false;
+			var hasValueRatioInfo=false;
+			var hasValuePeriodInfo=false;
+			
+			//Practitioner Initialization
+			var oPractitioner={};
+			oPractitioner= Object.create(Practitioner);
+			oPractitioner.resourceType="Practitioner";
+			var oName={};
+			oName= Object.create(HumanName);
+			oName.resourceType="HumanName";
+			oName.use="official";
+			var oAddress={};
+			oAddress= Object.create(Address);
+			oAddress.resourceType="Address";
+			oPractitioner.telecom=[];
+			oPractitioner.practitionerRole=[];
+			var oPractitionerRole={};
+			oPractitionerRole= Object.create(PractitionerRole);
+			var practitionerSet=false;
+			var listOfPractitionerIdentifier=[];
+			
+			var practitionerNature=getPractitionerNature(oEvent.programStageName);
+			
+			//console.log(oEvent.dataValues[1]);
+			for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+			{
+				var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
+				var inTheList=false;
+				inTheList=false;
+				itemListAttributesMapping=[];
+				itemListAttributesMapping=getListOfSpecimenAttributeMapping();
+				//console.log(itemListAttributesMapping);
+				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+				if(inTheList==true)
+				{
+					//if(specimenIsSet)
+					//console.log(oEvent.dataValues[iteratorDataValues].displayName+":"+oEvent.dataValues[iteratorDataValues].value);
+					var identifierListAttributes=specimenAttributesMapping.identifier.split(",");
+					var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+					if(resCheck==true)
+					{
+						var orgIdentifier={};
+						oIdentifier=Object.create(Identifier);
+						//assignment of Identifier
+						oIdentifier.use="official";
+						oIdentifier.type={"text":"Specimen Identification"};
+						oIdentifier.system="http://hl7.org/fhir/";
+						oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+						listOfSpecimenIdentifier.push(oIdentifier);
+						specimenIsSet=true;
+						continue;
+					}
+					switch(oAttribute)
+					{
+						case specimenAttributesMapping.id:
+							if(formatSpecimenId==true)
+							{
+								oSpecimen.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+							}
+							else
+							{
+								oSpecimen.id=oEvent.dataValues[iteratorDataValues].value.trim();
+							}
+							
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Specimen Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfSpecimenIdentifier.push(oIdentifier);
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.status:
+							oSpecimen.status=oEvent.dataValues[iteratorDataValues].value;
+							//oSpecimen.status="available";
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.type:
+							var oConceptSpecimenType={};
+							oConceptSpecimenType= Object.create(oConceptSpecimenType);
+							oConceptSpecimenType.text=oEvent.dataValues[iteratorDataValues].value;
+							oSpecimen.type=oConceptSpecimenType;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.accession:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Lab Identification"};
+							oIdentifier.system="http://hl7.org/fhir";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							oSpecimen.accession=oIdentifier;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.receivedTime:
+							oSpecimen.receivedTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							break;
+						case specimenAttributesMapping.collector:
+							//oCollection.collector=oEvent.dataValues[iteratorDataValues].value;
+							//specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.collection_comment:
+							oCollection.comment=oEvent.dataValues[iteratorDataValues].value;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.collectedDateTime:
+							oCollection.collectedDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							hasCollectionInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.collection_quantity_unit:
+							oCollection.quantity.unit=oEvent.dataValues[iteratorDataValues].value;
+							hasCollectionInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.collection_quantity_value:
+							oCollection.quantity.value=oEvent.dataValues[iteratorDataValues].value;
+							hasCollectionInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.collection_method:
+							oConceptCollectionMethod.text=oEvent.dataValues[iteratorDataValues].value;
+							oCollection.method=oConceptCollectionMethod;
+							hasCollectionInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.collection_bodySite:
+							oConceptBodySite.text=oEvent.dataValues[iteratorDataValues].value;
+							oCollection.bodySite=oConceptBodySite;
+							hasCollectionInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.container_capacity_unit:
+							oContainer.capacity.unit=oEvent.dataValues[iteratorDataValues].value;
+							hasContainerInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.container_capacity_value:
+							oContainer.capacity.value=oEvent.dataValues[iteratorDataValues].value;
+							hasContainerInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.container_description:
+							oContainer.description=oEvent.dataValues[iteratorDataValues].value;
+							hasContainerInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.traitment_description:
+							oTraitment.description=oEvent.dataValues[iteratorDataValues].value;
+							hasTraitementInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.traitment_procedure:
+							oConceptProcedure.text=oEvent.dataValues[iteratorDataValues].value;
+							oTraitment.procedure=oConceptProcedure;
+							hasTraitementInfo=true;
+							specimenIsSet=true;
+							break;
+						case specimenAttributesMapping.container_identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Container Identification"};
+							oIdentifier.system="http://hl7.org/fhir";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							oContainer.Identifier=[oIdentifier];
+							specimenIsSet=true;
+							break;
+					}
+					
+				}
+				
+				inTheList=false;
+				itemListAttributesMapping=[];
+				itemListAttributesMapping=getListOfConditionAttributeMapping();
+				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+				if(inTheList==true)
+				{
+					switch(oAttribute)
+					{
+						case conditionAttributesMapping.identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Condition Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfConditionIdentifier.push(oIdentifier);
+							conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.patient:
+							//oCondition.patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							//conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.encounter:
+							//oCondition.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+							//conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.dateRecorded:
+							//oCondition.dateRecorded=extractDateFromDateTime(oEvent.dataValues[iteratorDataValues].value);
+							//conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.code:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oCondition.code=oConcept;
+							conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.category:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oCondition.category=oConcept;
+							conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.clinicalStatus:
+							oCondition.clinicalStatus=oEvent.dataValues[iteratorDataValues].value;
+							//active
+							conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.verificationStatus:
+							oCondition.verificationStatus=oEvent.dataValues[iteratorDataValues].value;
+							//provisional
+							conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.severity:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oCondition.severity=oConcept;
+							//provisional
+							conditionIsSet=true;
+							break;
+						case conditionAttributesMapping.onsetDateTime:
+							oCondition.onsetDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							conditionIsSet=true;
+							break;
+					}//End of switch
+					
+				}
+				
+				inTheList=false;
+				itemListAttributesMapping=[];
+				itemListAttributesMapping=getListOfObservationAttributeMapping();
+				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+				if(inTheList==true)
+				{
+					/*
+					var identifierListAttributes=observationAttributesMapping.performer.split(",");
+					var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+					if(resCheck==true)
+					{
+						var oPerformerRef={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value}
+						oObservation.performer.push(oPerformerRef);
+						observationIsSet=true;
+						continue;
+					}*/
+					switch(oAttribute)
+					{
+						case observationAttributesMapping.identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Observation Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfObservationIdentifier.push(oIdentifier);
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.status:
+							oObservation.status=oEvent.dataValues[iteratorDataValues].value;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.category:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.category=oConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.code:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.code=oConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.subject:
+							//oObservation.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
+							break;
+						case observationAttributesMapping.encounter:
+							//oObservation.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
+							break;
+						case observationAttributesMapping.effectiveDateTime:
+							//console.log(oEvent.dataValues[iteratorDataValues]);
+							oObservation.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.effectivePeriod_dateSup:
+							oPeriodEffective.end= formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							hasEffectivePeriodInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.effectivePeriod_dateInf:
+							oPeriodEffective.start=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							hasEffectivePeriodInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.issued:
+							oObservation.issued=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueQuantity_unit:
+							oValueQuantity.unit=oEvent.dataValues[iteratorDataValues].value;
+							hasValueQuantityInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueQuantity_value:
+							oValueQuantity.value=oEvent.dataValues[iteratorDataValues].value;
+							hasValueQuantityInfo=true;
+							break;
+						case observationAttributesMapping.valueCodeableConcept:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.valueCodeableConcept=oConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueString:
+							oObservation.valueString=oEvent.dataValues[iteratorDataValues].value;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueRange_sup:
+							var rangeQuantity=Object.create(Quantity);
+							rangeQuantity.value=oEvent.dataValues[iteratorDataValues].value;
+							oObservationRange.high=rangeQuantity;
+							hasValueRangeInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueRange_Inf:
+							var rangeQuantity=Object.create(Quantity);
+							rangeQuantity.value=oEvent.dataValues[iteratorDataValues].value;
+							oObservationRange.low=rangeQuantity;
+							hasValueRangeInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueRatio_num:
+							oObservationRatio.numerator=oEvent.dataValues[iteratorDataValues].value;
+							hasValueRatioInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueRatio_denom:
+							oObservationRatio.denominator=oEvent.dataValues[iteratorDataValues].value;
+							hasValueRatioInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueSampledData_origin:
+							oOriginQuantity.value=oEvent.dataValues[iteratorDataValues].value;
+							break;
+						case observationAttributesMapping.valueSampledData_period:
+							oSampledData.period=oEvent.dataValues[iteratorDataValues].value;
+							hasValueSampledDataInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueSampledData_factor:
+							oSampledData.factor=oEvent.dataValues[iteratorDataValues].value;
+							hasValueSampledDataInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueSampledData_lowerLimit:
+							oSampledData.lowerLimit=oEvent.dataValues[iteratorDataValues].value;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueSampledData_upperLimit:
+							oSampledData.upperLimit=oEvent.dataValues[iteratorDataValues].value;
+							hasValueSampledDataInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueSampledData_dimensions:
+							oSampledData.dimensions=oEvent.dataValues[iteratorDataValues].value;
+							 hasValueSampledDataInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueSampledData_data:
+							oSampledData.data=oEvent.dataValues[iteratorDataValues].value;
+							hasValueSampledDataInfo=true;
+							break;
+						case observationAttributesMapping.valueTime:
+							oObservation.valueTime=oEvent.dataValues[iteratorDataValues].value;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valueDateTime:
+							oObservation.valueDateTime=oEvent.dataValues[iteratorDataValues].value;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valuePeriod_start:
+							oPeriodResult.start=oEvent.dataValues[iteratorDataValues].value;
+							hasValuePeriodInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.valuePeriod_end:
+							oPeriodResult.end=oEvent.dataValues[iteratorDataValues].value;
+							hasValuePeriodInfo=true;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.dataAbsentReason:
+							oAbsentRaisonConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.dataAbsentReason=oAbsentRaisonConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.interpretation:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.interpretation=oConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.comments:
+							oObservation.comments=oEvent.dataValues[iteratorDataValues].value;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.bodySite:
+							oBodySiteConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.bodySite=oBodySiteConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.method:
+							var  oConcept={};
+							oConcept= Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oObservation.method=oConcept;
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.specimen:
+							if(formatSpecimenId==true)
+							{
+								oObservation.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value+"-"};
+							}
+							else
+							{
+								oObservation.specimen={"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value};
+							}
+							observationIsSet=true;
+							break;
+						case observationAttributesMapping.device:
+							//oObservation.device={"reference":"Device/"+oEvent.dataValues[iteratorDataValues].value};
+							//observationIsSet=true;
+							break;
+						case observationAttributesMapping.referenceRange:
+							//oObservation.referenceRange=[];
+							break;
+						case observationAttributesMapping.related:
+							//oObservation.related=[];
+							break;
+						case observationAttributesMapping.component:
+							//oObservation.component=[];
+							break;
+						}
+					
+				}//End of inthe List Observation
+				inTheList=false;
+				itemListAttributesMapping=[];
+				if(practitionerNature=="care_provider")
+				{
+					itemListAttributesMapping=getListOfPractitionerAttributeMapping();
+				}
+				else if (practitionerNature=="specimen_collector")
+				{
+					itemListAttributesMapping=getListOfPractitionerSpecimenHandlingAttributeMapping();
+				}
+				else if (practitionerNature=="observation_performer")
+				{
+					itemListAttributesMapping=getListOfPractitionerObservationPerformerAttributeMapping();
+				}
+				
+				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+				if(inTheList==true)
+				{
+					if(practitionerNature=="care_provider")
+					{
+						var identifierListAttributes=practitionerAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfPractitionerIdentifier.push(oIdentifier);
+							practitionerSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case practitionerAttributesMapping.id:
+								oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+								var orgIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":""+oAttribute};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
+								listOfPractitionerIdentifier.push(oIdentifier);
+								practitionerSet=true;
+								break;
+							case practitionerAttributesMapping.name_family:
+								oName.family=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.name_given:
+								oName.given=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;;
+							break;
+							case practitionerAttributesMapping.telecom_phone:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="phone";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="1";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;;
+							break;
+							case practitionerAttributesMapping.telecom_email:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="email";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="2";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.gender:
+								if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+								{
+									oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+								}
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.address:
+								oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+								oPractitioner.address=[oAddress];
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.practitionerRole_managingOrganization:
+								oPractitionerRole.managingOrganization={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+								practitionerSet=true;
+							break;
+							case practitionerAttributesMapping.practitionerRole_role:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
+								oPractitionerRole.role=oConcept;
+								practitionerSet=true;
+							break;
+						}
+					
+					}
+					if(practitionerNature=="specimen_collector")
+					{
+						var identifierListAttributes=practitionerSpecimenHandlingAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfPractitionerIdentifier.push(oIdentifier);
+							practitionerSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case practitionerSpecimenHandlingAttributesMapping.id:
+								oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+								var orgIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":""+oAttribute};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
+								listOfPractitionerIdentifier.push(oIdentifier);
+								practitionerSet=true;
+								break;
+							case practitionerSpecimenHandlingAttributesMapping.name_family:
+								oName.family=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.name_given:
+								oName.given=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.telecom_phone:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="phone";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="1";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.telecom_email:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="email";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="2";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.gender:
+								if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+								{
+									oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+								}
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.address:
+								oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+								oPractitioner.address=[oAddress];
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.practitionerRole_managingOrganization:
+								oPractitionerRole.managingOrganization={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+								practitionerSet=true;
+							break;
+							case practitionerSpecimenHandlingAttributesMapping.practitionerRole_role:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
+								oPractitionerRole.role=oConcept;
+								practitionerSet=true;
+							break;
+						}
+					
+					}
+					if(practitionerNature=="observation_performer")
+					{
+						var identifierListAttributes=practitionerObservationPerformerAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var orgIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":""+oAttribute};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfPractitionerIdentifier.push(oIdentifier);
+							practitionerSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case practitionerObservationPerformerAttributesMapping.id:
+								oPractitioner.id=oEvent.dataValues[iteratorDataValues].value.trim()+"-";
+								var orgIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":""+oAttribute};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oEvent.dataValues[iteratorDataValues].value.trim();
+								listOfPractitionerIdentifier.push(oIdentifier);
+								practitionerSet=true;
+								break;
+							case practitionerObservationPerformerAttributesMapping.name_family:
+								oName.family=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.name_given:
+								oName.given=oEvent.dataValues[iteratorDataValues].value;
+								oName.text+=oEvent.dataValues[iteratorDataValues].value+" ";
+								practitionerSet=true;;
+							break;
+							case practitionerObservationPerformerAttributesMapping.telecom_phone:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="phone";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="1";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;;
+							break;
+							case practitionerObservationPerformerAttributesMapping.telecom_email:
+								var oContact={};
+								oContact= Object.create(ContactPoint);
+								oContact.resourceType="ContactPoint";
+								oContact.system="email";
+								oContact.value=oEvent.dataValues[iteratorDataValues].value;
+								oContact.use="home";
+								oContact.rank="2";
+								oPractitioner.telecom.push(oContact);
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.gender:
+								if(getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value)!="")
+								{
+									oPractitioner.gender=getAssociatedGenderValueSet(oEvent.dataValues[iteratorDataValues].value);
+								}
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.address:
+								oAddress.text=oEvent.dataValues[iteratorDataValues].value;
+								oPractitioner.address=[oAddress];
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.practitionerRole_managingOrganization:
+								oPractitionerRole.managingOrganization={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+								practitionerSet=true;
+							break;
+							case practitionerObservationPerformerAttributesMapping.practitionerRole_role:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oEvent.dataValues[iteratorDataValues].value.trim();
+								oPractitionerRole.role=oConcept;
+								practitionerSet=true;
+							break;
+						}
+					
+					}
+					
+				}//End If inTheList PractitionerAttributeMapping
+				
+				
+			}//End for iteratorDataValues
+			if(practitionerSet==true)
+			{
+				if(oPractitioner.id=="")
+				{
+					oPractitioner.id=oEvent.id;
+					if(listOfPractitionerIdentifier.length==0)
+					{
+						var orgIdentifier={};
+						oIdentifier=Object.create(Identifier);
+						//assignment of Identifier
+						oIdentifier.use="official";
+						oIdentifier.type={"text":"Practitioner Identifier"};
+						oIdentifier.system="http://hl7.org/fhir/";
+						oIdentifier.value=oEvent.id;
+						listOfPractitionerIdentifier.push(oIdentifier);
+					}
+				}
+				if(oPractitionerRole.managingOrganization=="")
+				{
+					oPractitionerRole.managingOrganization=oPatient.managingOrganization;
+				}
+				/*
+				if(oPractitionerRole.managingOrganization!="" || oPractitionerRole.role!="")
+				{
+					oPractitioner.practitionerRole.push(oPractitionerRole);
+				}*/
+				oPractitioner.practitionerRole.push(oPractitionerRole);
+				oPractitioner.name=[oName];
+				oPractitioner.identifier=listOfPractitionerIdentifier;
+				//console.log(oSpecimen);
+				if(practitionerNature=="care_provider")
+				{
+					var oRef= {"reference":"Practitioner/"+oPractitioner.id};
+					oPatient.careProvider.push(oRef);
+				}
+				listPractitionerExtrated.push(oPractitioner);
+				for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+				{
+					var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
+					var inTheRefList=false;
+					itemRefListAttributesMapping=[];
+					itemRefListAttributesMapping=practitionerAttributesMapping.list_reference.split(",");
+					//console.log(oAttribute);
+					inTheRefList=checkAttributeInList(itemRefListAttributesMapping,oAttribute);
+					if(inTheRefList==true)
+					{
+						//List initialization;
+						var oList= Object.create(List);
+						oList.resourceType="List";
+						oList.entry=[];
+						var listIsSet=false;
+						var listResourceIdentifier=[];
+						oList.id=oPractitioner.id+""+oEvent.dataValues[iteratorDataValues].dataElementId;
+						oList.status="current";
+						oList.mode="working";
+						oList.title=oAttribute;
+						oList.note=oEvent.dataValues[iteratorDataValues].value.trim();
+						oList.entry.push({"deleted":false,"item":{"reference":"Practitioner/"+oPractitioner.id}});
+						listResourceListExtracted.push(oList);
+					}
+				}
+				
+			}
+			
+			if(specimenIsSet==true)
+			{
+				//console.log(oSpecimen);
+				if(getIndexOfFhirResourceById(listSpecimenExtracted,oSpecimen.id)==-1 && oSpecimen.id!="")
+				{
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
+					listOfSpecimenIdentifier.push(associatedEntityIdentifier);
+					oSpecimen.identifier=listOfSpecimenIdentifier;
+					/*
+					if(listOfSpecimenIdentifier.length)
+					{
+						oSpecimen.id=listOfSpecimenIdentifier[0].value;
+					}*/
+					if(hasCollectionInfo==true)
+					{
+						oSpecimen.collection=oCollection;
+					}
+					if(hasTraitementInfo==true)
+					{
+						oSpecimen.treatment=[oTraitment];
+					}
+					if(hasContainerInfo==true)
+					{
+						oSpecimen.Container=[oContainer];
+					}
+					if (PatientSet==true)
+					{
+						oSpecimen.subject={"reference":"Patient/"+oPatient.id};
+					}
+					//entitySpecimen=oSpecimen;
+					
+					//listEntityObject.push(entitySpecimen);
+					if(practitionerSet==true)
+					{
+						if(practitionerNature=="specimen_collector")
+						{
+							oSpecimen.collection.collector={"reference":"Practitioner/"+oPractitioner.id};
+						}
+					}
+					listSpecimenExtracted.push(oSpecimen);
+					//Then check if there is refence list Elements 
+					for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+					{
+						var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
+						var inTheRefList=false;
+						itemRefListAttributesMapping=[];
+						itemRefListAttributesMapping=specimenAttributesMapping.list_reference.split(",");
+						inTheRefList=checkAttributeInList(itemRefListAttributesMapping,oAttribute);
+						if(inTheRefList==true)
+						{
+							//List initialization;
+							var oList= Object.create(List);
+							oList.resourceType="List";
+							oList.entry=[];
+							var listIsSet=false;
+							var listResourceIdentifier=[];
+							oList.id=oSpecimen.id+""+oEvent.dataValues[iteratorDataValues].dataElementId;
+							oList.status="current";
+							oList.mode="working";
+							oList.title=oAttribute;
+							oList.note=oEvent.dataValues[iteratorDataValues].value.trim();
+							oList.entry.push({"deleted":false,"item":{"reference":"Specimen/"+oSpecimen.id}});
+							listResourceListExtracted.push(oList);
+							
+						}
+						
+					}
+					
+				}
+				
+				//console.log(oSpecimen);
+				
+				
+			}//End if specimenIsSet
+			if(observationIsSet==true)
+			{
+				//console.log(oSpecimen);
+				if(oObservation.code!="")
+				{
+					oObservation.id=oEvent.id;
+					oSampledData.origin=oOriginQuantity;
+					//oObservation.identifier=listOfObservationIdentifier;
+					if(hasValueSampledDataInfo==true)
+					{
+						oObservation.valueSampledData=oSampledData;
+					}
+					if(hasEffectivePeriodInfo==true)
+					{
+						oObservation.effectivePeriod=oPeriodEffective;
+					}
+					if(hasValueQuantityInfo==true)
+					{
+						oObservation.valueQuantity=oValueQuantity;
+					}
+					if(hasValueRangeInfo==true)
+					{
+						oObservation.valueRange=oObservationRange;
+					}
+					//checkIfAsProperties(oObservationRange);
+					if(hasValueRatioInfo==true)
+					{
+						oObservation.valueRatio=oObservationRatio;
+					}
+					if(hasValuePeriodInfo==true)
+					{
+						oObservation.valuePeriod=oPeriodResult;
+					}
+					
+					//
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
+					listOfObservationIdentifier.push(associatedEntityIdentifier);
+					oObservation.identifier=listOfObservationIdentifier;
+					//Add additional information for validation
+					
+					if(oObservation.interpretation=="")
+					{
+						oObservation.status="registered";
+					}
+					else
+					{
+						oObservation.status="final";
+					}
+					
+					//By Default used Microscopy observation as code
+					if(oObservation.code=="")
+					{
+						var oConcept={};
+						oConcept= Object.create(CodeableConcept);
+						oConcept.text="Microscopic Observation";
+						oConcept.code=[{"code":"10355-6"}];
+						oObservation.code=oConcept;
+					}
+					if (PatientSet==true)
+					{
+						oObservation.subject={"reference":"Patient/"+oPatient.id};
+					}
+					if (specimenIsSet==true && oSpecimen.id!="")
+					{
+						//console.log("Observation specimen setted :"+oSpecimen.id);
+						oObservation.specimen={"reference":"Specimen/"+oSpecimen.id};
+					}
+					//Check if there is not performer info to add orgUnit
+					if(oObservation.performer.length==0)
+					{
+						if(practitionerSet==true && practitionerNature=="observation_performer")
+						{
+							var oPerformerRef={"reference":"Practitioner/"+oPractitioner.id};
+							oObservation.performer.push(oPerformerRef);
+						}
+						else
+						{
+							var oPerformerRef={"reference":"Organization/"+oEvent.orgUnit};
+							oObservation.performer.push(oPerformerRef);
+						}
+						
+					}
+					listObservationExtracted.push(oObservation);
+				}
+				
+				
+			}
+			if(conditionIsSet==true)
+			{
+				oCondition.id=oEvent.id;
+					//
+				var associatedEntityIdentifier={};
+				associatedEntityIdentifier=Object.create(Identifier);
+				//assignment of Identifier
+				associatedEntityIdentifier.use="secondary";
+				associatedEntityIdentifier.type={"text":"Associated TEI"};
+				associatedEntityIdentifier.system="http://hl7.org/fhir/";
+				associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
+				listOfConditionIdentifier.push(associatedEntityIdentifier);
+				oCondition.identifier=listOfObservationIdentifier;
+				//Add additional information for validation
+				if(oCondition.dateRecorded=="")
+				{
+					oCondition.dateRecorded=extractDateFromDateTime(oTrackedEntity.created);
+				}
+				if(oCondition.clinicalStatus=="")
+				{
+					oCondition.clinicalStatus="active";
+				}
+				if(oCondition.onsetDateTime=="")
+				{
+					oCondition.onsetDateTime=formatDateInZform(oTrackedEntity.created);
+				}
+				if(oCondition.verificationStatus=="")
+				{
+					oCondition.verificationStatus="provisional";
+				}
+				if (PatientSet==true)
+				{
+					oCondition.patient={"reference":"Patient/"+oPatient.id};
+				}
+				listConditionExtracted.push(oCondition);
+			}
+			
+		}//end iteratorEvent
+		//console.log(listDiagnosticOrderExtracted);
+		//Special loop for DiagnosticReport
+		//console.log(listSpecimenExtracted);
+		for(var iteratorEvent=0;iteratorEvent<listOfEvents.length;iteratorEvent++)
+		{
+			//DiagnosticReport initialization
+			var oEvent=listOfEvents[iteratorEvent];
+			var oDiagnosticReport={};
+			oDiagnosticReport= Object.create(DiagnosticReport);
+			oDiagnosticReport.resourceType="DiagnosticReport";
+			var listOfDiagnosticReportIdentifier=[];
+			var oEffectivePeriod={};
+			oEffectivePeriod= Object.create(Period);
+			oDiagnosticReport.request=[];
+			oDiagnosticReport.specimen=[];
+			oDiagnosticReport.result=[];
+			var diagnosticReportIsSet=false;
+			for(var iteratorDataValues=0;iteratorDataValues<oEvent.dataValues.length;iteratorDataValues++)
+			{
+				var oAttribute=oEvent.dataValues[iteratorDataValues].displayName.trim();
+				var inTheList=false;
+				inTheList=false;
+				itemListAttributesMapping=[];
+				itemListAttributesMapping=getListOfDiagnosticReportAttributeMapping();
+				inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+				if(inTheList==true)
+				{
+					switch(oAttribute)
+					{
+						case diagnosticReportAttributesMapping.identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"DiagnosticReport Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oEvent.dataValues[iteratorDataValues].value;
+							listOfDiagnosticReportIdentifier.push(oIdentifier);
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.status:
+							oDiagnosticReport.status=oEvent.dataValues[iteratorDataValues].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.category:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oDiagnosticReport.category=oConcept;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.code:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oDiagnosticReport.code=oConcept;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.subject:
+							//oDiagnosticReport.subject={"reference":"Patient/"+oEvent.dataValues[iteratorDataValues].value};
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.encounter:
+							//oDiagnosticReport.encounter={"reference":"Encounter/"+oEvent.dataValues[iteratorDataValues].value};
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectiveDateTime:
+							//oDiagnosticReport.effectiveDateTime=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_start:
+							oEffectivePeriod.start=oEvent.dataValues[iteratorDataValues].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_end:
+							oEffectivePeriod.end=oEvent.dataValues[iteratorDataValues].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.issued:
+							//oDiagnosticReport.issued=formatDateInZform(oEvent.dataValues[iteratorDataValues].value);
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.performer:
+							//oDiagnosticReport.performer={"reference":"Organization/"+oEvent.dataValues[iteratorDataValues].value};
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.request:
+							//oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oEvent.dataValues[iteratorDataValues].value}];
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.specimen:
+							//oDiagnosticReport.specimen=[{"reference":"Specimen/"+oEvent.dataValues[iteratorDataValues].value}];
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.result:
+							//oDiagnosticReport.result=[{"reference":"Observation/"+oEvent.dataValues[iteratorDataValues].value}];
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.imagingStudy:
+							oDiagnosticReport.imagingStudy=[];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.image:
+							oDiagnosticReport.image=[];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.conclusion:
+							oDiagnosticReport.conclusion=oEvent.dataValues[iteratorDataValues].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.codedDiagnosis:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oEvent.dataValues[iteratorDataValues].value;
+							oDiagnosticReport.codedDiagnosis=[oConcept];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.presentedForm:
+							oDiagnosticReport.presentedForm=[];
+							diagnosticReportIsSet=true;
+							break;
+					}
+				
+				}
+				
+			}//End for iteratorDataValues
+			if(diagnosticReportIsSet==true)
+			{
+				oDiagnosticReport.id=oEvent.id;
+				var associatedEntityIdentifier={};
+				associatedEntityIdentifier=Object.create(Identifier);
+				//assignment of Identifier
+				associatedEntityIdentifier.use="secondary";
+				associatedEntityIdentifier.type={"text":"Associated TEI"};
+				associatedEntityIdentifier.system="http://hl7.org/fhir/";
+				associatedEntityIdentifier.value=oEvent.trackedEntityInstance;
+				listOfDiagnosticReportIdentifier.push(associatedEntityIdentifier);
+				oDiagnosticReport.identifier=listOfDiagnosticReportIdentifier;
+				oDiagnosticReport.effectivePeriod=oEffectivePeriod;
+				//Add additional information for validation
+				oDiagnosticReport.status="final";
+				//By Default used Acyclovir for code
+				var oConcept={};
+				oConcept= Object.create(CodeableConcept);
+				oConcept.text="Acyclovir";
+				oConcept.code=[{"code":"1-8"}];
+				oDiagnosticReport.code=oConcept;
+				if (PatientSet==true)
+				{
+					oDiagnosticReport.subject={"reference":"Patient/"+oPatient.id};
+				}
+				if(listDiagnosticOrderExtracted.length>=1)
+				{
+					//console.log(listDiagnosticOrderExtracted);
+					var listOrderAssociated=[];
+					listOrderAssociated=getListEntityInstanceAssociatedDiagnosticOrders(listDiagnosticOrderExtracted,oEvent.trackedEntityInstance,'Associated TEI');
+					//console.log(listOrderAssociated);
+					//console.log("------------------");
+					for(var i=0;i<listOrderAssociated.length;i++)
+					{
+						var diagnosticOrderRef={"reference":"DiagnosticOrder/"+listOrderAssociated[i].id};
+						oDiagnosticReport.request.push(diagnosticOrderRef);
+					}
+				}
+				else
+				{
+					oDiagnosticReport.request=null;
+				}
+				if(listSpecimenExtracted.length>=1)
+				{
+					//console.log(listSpecimenExtracted);
+					var listSpecimenAssociated=[];
+					listSpecimenAssociated=getListEntityInstanceAssociatedSpecimens(listSpecimenExtracted,oEvent.trackedEntityInstance,'Associated TEI');
+					for(var i=0;i<listSpecimenAssociated.length;i++)
+					{
+						var specimenRef={"reference":"Specimen/"+listSpecimenAssociated[i].id};
+						oDiagnosticReport.specimen.push(specimenRef);
+					}
+					
+				}
+				else
+				{
+					oDiagnosticReport.specimen=null;
+				}
+				if(listObservationExtracted.length>=1)
+				{
+					var listObservationAssociated=[];
+					listObservationAssociated=getListEntityInstanceAssociatedDiagnosticOrders(listObservationAssociated,oEvent.trackedEntityInstance,'Associated TEI');
+					for(var i=0;i<listObservationAssociated.length;i++)
+					{
+						var observatioRef={"reference":"Observation/"+listObservationAssociated[i].id};
+						oDiagnosticReport.result.push(observatioRef);
+					}
+					//Add the effectiveDateTime information if not yet setted
+					if(oDiagnosticReport.effectiveDateTime=="")
+					{
+						//get the RecenteffectiveDateTime of all observation
+						var listOfEffectiveDateTime=[];
+						for(var i=0;i<listObservationAssociated.length;i++)
+						{
+							listOfEffectiveDateTime.push(listObservationAssociated[i].effectiveDateTime);
+						}
+						var recentEffectiveDateTime=getRecentDate(listOfEffectiveDateTime);
+						console.log("recent effectivetime :"+recentEffectiveDateTime);
+						oDiagnosticReport.effectiveDateTime=formatDateInZform(recentEffectiveDateTime);
+						oDiagnosticReport.issued= formatDateInZform(recentEffectiveDateTime);
+					}
+				}
+				else
+				{
+					oDiagnosticReport.effectiveDateTime=formatDateInZform(oEvent.eventDate);
+					oDiagnosticReport.result=null;
+					
+				}
+				if(oDiagnosticReport.performer=="")
+				{
+					oDiagnosticReport.performer={"reference":"Organization/"+oEvent.orgUnit};
+				}
+				listDiagnosticReportExtracted.push(oDiagnosticReport);
+			}
+		
+			
+		}//End iteratorEvents
+		
+		//Then populate others resources founded based on attribute fields
+		//Populate Specimen
+		for(var iteratorEntity=0;iteratorEntity<listofTrackedEntity.length;iteratorEntity++)
+		{
+			var oTrackedEntity=listofTrackedEntity[iteratorEntity];
+			var indexIdSpecimen=-1;
+			var indexIdOrder=-1;
+			var indexIdObservation=-1;
+			orderIsSet=false;
+			observationIsSet=false;
+			//Extract the data from entity attribute
+			//Check for Specimen Information
+			var idSpecimenToSearch=oTrackedEntity.trackedEntityInstance;
+			indexIdSpecimen=getIndexOfFhirResourceByIdentification(listSpecimenExtracted,idSpecimenToSearch);
+			if(indexIdSpecimen>=0)
+			{
+				var listOfSpecimenIdentifier=[];
+				if(listSpecimenExtracted[indexIdSpecimen].identifier.length>0)
+				{
+					listOfSpecimenIdentifier=listSpecimenExtracted[indexIdSpecimen].identifier;
+				}
+				var oTraitment={
+					"description":"",
+					"procedure":{}
+					};
+				var oConceptProcedure={};
+				oConceptProcedure= Object.create(CodeableConcept);
+				if(listSpecimenExtracted[indexIdSpecimen].treatment.length>0)
+				{
+					oTraitment=listSpecimenExtracted[indexIdSpecimen].treatment[0];
+				}
+				var oConceptCollectionMethod={};
+				oConceptCollectionMethod= Object.create(CodeableConcept);
+				var oConceptBodySite={};
+				oConceptBodySite= Object.create(CodeableConcept);
+				
+				var oCollection={};
+				
+				if(listSpecimenExtracted[indexIdSpecimen].collection!={})
+				{
+					oCollection=listSpecimenExtracted[indexIdSpecimen].collection;
+				}
+				else
+				{
+					oCollection= Object.create(Collection);
+				}
+				var oContainer={};
+				if(listSpecimenExtracted[indexIdSpecimen].container.length>0)
+				{
+					oContainer=listSpecimenExtracted[indexIdSpecimen].container[0];
+				}
+				else
+				{
+					oContainer= Object.create(Container);
+				}
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfSpecimenAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						var identifierListAttributes=specimenAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Specimen Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+							listSpecimenExtracted[indexIdSpecimen].id=oTrackedEntity.attributes[iteratorAttribute].value;
+							listOfSpecimenIdentifier.push(oIdentifier);
+							specimenIsSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case specimenAttributesMapping.status:
+								listSpecimenExtracted[indexIdSpecimen].status=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.type:
+								var oConceptSpecimenType={};
+								oConceptSpecimenType= Object.create(oConceptSpecimenType);
+								oConceptSpecimenType.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listSpecimenExtracted[indexIdSpecimen].type=oConceptSpecimenType;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.accession:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Lab Identification"};
+								oIdentifier.system="http://hl7.org/fhir";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listSpecimenExtracted[indexIdSpecimen].accession=oIdentifier;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.receivedTime:
+								listSpecimenExtracted[indexIdSpecimen].receivedTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								break;
+							case specimenAttributesMapping.collectedDateTime:
+								oCollection.collectedDateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_quantity_unit:
+								oCollection.quantity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_quantity_value:
+								oCollection.quantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_method:
+								oConceptCollectionMethod.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oCollection.method=oConceptCollectionMethod;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_bodySite:
+								oConceptBodySite.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oCollection.bodySite=oConceptBodySite;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_capacity_unit:
+								oContainer.capacity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_capacity_value:
+								oContainer.capacity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_description:
+								oContainer.description=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.traitment_description:
+								oTraitment.description=oTrackedEntity.attributes[iteratorAttribute].value;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.traitment_procedure:
+								oConceptProcedure.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oTraitment.procedure=oConceptProcedure;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Container Identification"};
+								oIdentifier.system="http://hl7.org/fhir";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								oContainer.Identifier=[oIdentifier];
+								specimenIsSet=true;
+								break;
+						}
+					
+					}
+				}//End for iteratorAttribute
+				
+			}//End if IndexIdSpecimen
+			else
+			{
+				
+				//Specimen initialization
+				var oSpecimen={};
+				oSpecimen= Object.create(Specimen);
+				oSpecimen.resourceType="Specimen";
+				//oSpecimen.id=oTrackedEntity.trackedEntityInstance;
+				//oSpecimen.meta={"lastUpdated": formatDateInZform(oTrackedEntity.lastUpdated)};
+				oSpecimen.active=true;
+				var listOfSpecimenIdentifier=[];
+				var listOfTraitment=[];
+				var oConceptProcedure={};
+				oConceptProcedure= Object.create(CodeableConcept);
+				var oConceptCollectionMethod={};
+				oConceptCollectionMethod= Object.create(CodeableConcept);
+				var oConceptBodySite={};
+				oConceptBodySite= Object.create(CodeableConcept);
+				//oConceptProcedure.
+				var oTraitment={
+					"description":"",
+					"procedure":{}
+					};
+				var oCollection={};
+				oCollection= Object.create(Collection);
+				var oContainer={};
+				oContainer= Object.create(Container);
+				var specimenIsSet=false;
+				var hasCollectionInfo=false;
+				var hasTraitementInfo=false;
+				var hasContainerInfo=false;
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName.trim();
+					var inTheList=false;
+					var itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfSpecimenAttributeMapping();
+					//console.log(itemListAttributesMapping);
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						var identifierListAttributes=specimenAttributesMapping.identifier.split(",");
+						var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+						if(resCheck==true)
+						{
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"Specimen Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+							oSpecimen.id=oTrackedEntity.attributes[iteratorAttribute].value+"-";
+							listOfSpecimenIdentifier.push(oIdentifier);
+							specimenIsSet=true;
+							continue;
+						}
+						switch(oAttribute)
+						{
+							case specimenAttributesMapping.status:
+								oSpecimen.status=oTrackedEntity.attributes[iteratorAttribute].value;
+								//oSpecimen.status="available";
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.type:
+								var oConceptSpecimenType={};
+								oConceptSpecimenType= Object.create(oConceptSpecimenType);
+								oConceptSpecimenType.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oSpecimen.type=oConceptSpecimenType;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.accession:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Lab Identification"};
+								oIdentifier.system="http://hl7.org/fhir";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								oSpecimen.accession=oIdentifier;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.receivedTime:
+								oSpecimen.receivedTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								break;
+							case specimenAttributesMapping.collectedDateTime:
+								oCollection.collectedDateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasCollectionInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_quantity_unit:
+								oCollection.quantity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasCollectionInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_quantity_value:
+								oCollection.quantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasCollectionInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_method:
+								oConceptCollectionMethod.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oCollection.method=oConceptCollectionMethod;
+								hasCollectionInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.collection_bodySite:
+								oConceptBodySite.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oCollection.bodySite=oConceptBodySite;
+								hasCollectionInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_capacity_unit:
+								oContainer.capacity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasContainerInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_capacity_value:
+								oContainer.capacity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasContainerInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_description:
+								oContainer.description=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasContainerInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.traitment_description:
+								oTraitment.description=oTrackedEntity.attributes[iteratorAttribute].value;
+								hasTraitementInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.traitment_procedure:
+								oConceptProcedure.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oTraitment.procedure=oConceptProcedure;
+								hasTraitementInfo=true;
+								specimenIsSet=true;
+								break;
+							case specimenAttributesMapping.container_identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Container Identification"};
+								oIdentifier.system="http://hl7.org/fhir";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								oContainer.Identifier=[oIdentifier];
+								specimenIsSet=true;
+								break;
+						}
+					
+					}
+				}
+				
+				if(specimenIsSet==true)
+				{
+					if(getIndexOfFhirResourceById(listSpecimenExtracted,oSpecimen.id)==-1)
+					{
+						var associatedEntityIdentifier={};
+						associatedEntityIdentifier=Object.create(Identifier);
+						//assignment of Identifier
+						associatedEntityIdentifier.use="secondary";
+						associatedEntityIdentifier.type={"text":"Associated TEI"};
+						associatedEntityIdentifier.system="http://hl7.org/fhir/";
+						associatedEntityIdentifier.value=oTrackedEntity.trackedEntityInstance;
+						listOfSpecimenIdentifier.push(associatedEntityIdentifier);
+						oSpecimen.Identifier=listOfSpecimenIdentifier;
+						/*
+						if(listOfSpecimenIdentifier.length)
+						{
+							oSpecimen.id=listOfSpecimenIdentifier[0].value;
+						}*/
+						if(hasCollectionInfo==true)
+						{
+							oSpecimen.collection=oCollection;
+						}
+						if(hasTraitementInfo==true)
+						{
+							oSpecimen.treatment=[oTraitment];
+						}
+						if(hasContainerInfo==true)
+						{
+							oSpecimen.Container=[oContainer];
+						}
+						if (PatientSet==true)
+						{
+							oSpecimen.subject={"reference":"Patient/"+oPatient.id};
+						}
+						//entitySpecimen=oSpecimen;
+						
+						//listEntityObject.push(entitySpecimen);
+						listSpecimenExtracted.push(oSpecimen);
+					}
+					//console.log(oSpecimen);
+				}
+			
+			
+			}//End else indexIdSpecimen
+			//Check for DiagnosticOrder Information
+		}//End for IteratorEntity to search for specimen
+		//Populate Condition
+		for(var iteratorEntity=0;iteratorEntity<listofTrackedEntity.length;iteratorEntity++)
+		{
+			var oTrackedEntity=listofTrackedEntity[iteratorEntity];
+			var indexIdCondition=-1;
+			var conditionIsSet=false;
+			var idConditionToSearch=oTrackedEntity.trackedEntityInstance;
+			indexIdCondition=getIndexOfFhirResourceByIdentification(listConditionExtracted,idConditionToSearch);
+			if(indexIdCondition>=0)
+			{
+				//console.log("Entered in condition statement!!")
+				var listOfConditionIdentifier=[];
+				if(listConditionExtracted[indexIdCondition].identifier.length>0)
+				{
+					listOfConditionIdentifier=listObservationExtracted[indexIdCondition].identifier;
+				}
+				
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfConditionAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+							case conditionAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Condition Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listOfConditionIdentifier.push(oIdentifier);
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.patient:
+								listConditionExtracted[indexIdCondition].patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.encounter:
+								listConditionExtracted[indexIdCondition].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.dateRecorded:
+								listConditionExtracted[indexIdCondition].dateRecorded=extractDateFromDateTime(oTrackedEntity.attributes[iteratorAttribute].value);
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.code:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listConditionExtracted[indexIdCondition].code=oConcept;
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.category:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listConditionExtracted[indexIdCondition].category=oConcept;
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.clinicalStatus:
+								listConditionExtracted[indexIdCondition].clinicalStatus=oTrackedEntity.attributes[iteratorAttribute].value;
+								//active
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.verificationStatus:
+								listConditionExtracted[indexIdCondition].verificationStatus=oTrackedEntity.attributes[iteratorAttribute].value;
+								//provisional
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.severity:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listConditionExtracted[indexIdCondition].severity=oConcept;
+								//provisional
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.onsetDateTime:
+								listConditionExtracted[indexIdCondition].onsetDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								
+								conditionIsSet=true;
+								break;
+							
+							}
+						
+					}
+				}
+				if(conditionIsSet==true)
+				{
+					listConditionExtracted[indexIdCondition].identifier=listOfConditionIdentifier;
+				}
+			}
+			else
+			{
+				//Observation initialization
+				var oCondition={};
+				oCondition= Object.create(Condition);
+				oCondition.resourceType="Condition";
+				var listOfConditionIdentifier=[];
+				var listOfDateCreatedAttribute=[];
+				
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName.trim();
+					listOfDateCreatedAttribute.push(oTrackedEntity.attributes[iteratorAttribute].created);
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfConditionAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true && oTrackedEntity.attributes[iteratorAttribute].value!="")
+					{
+						switch(oAttribute)
+						{
+							case conditionAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Condition Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listOfConditionIdentifier.push(oIdentifier);
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.patient:
+								//oCondition.patient={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.encounter:
+								//oCondition.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.dateRecorded:
+								oCondition.dateRecorded=extractDateFromDateTime(oTrackedEntity.attributes[iteratorAttribute].value);
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.code:
+								
+								if(oTrackedEntity.attributes[iteratorAttribute].value!="")
+								{
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									oCondition.code=oConcept;
+									conditionIsSet=true;
+								}
+								break;
+							case conditionAttributesMapping.category:
+								if(oTrackedEntity.attributes[iteratorAttribute].value!="")
+								{
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									oCondition.category=oConcept;
+									conditionIsSet=true;
+								}
+								break;
+							case conditionAttributesMapping.clinicalStatus:
+								oCondition.clinicalStatus=oTrackedEntity.attributes[iteratorAttribute].value;
+								//active
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.verificationStatus:
+								oCondition.verificationStatus=oTrackedEntity.attributes[iteratorAttribute].value;
+								//provisional
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.severity:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oCondition.severity=oConcept;
+								//provisional
+								conditionIsSet=true;
+								break;
+							case conditionAttributesMapping.onsetDateTime:
+								oCondition.onsetDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								
+								conditionIsSet=true;
+								break;
+						}//End of switch
+					
+					}
+				}
+				if(conditionIsSet==true && oCondition.code!="")
+				{
+					
+					oCondition.id=oTrackedEntity.trackedEntityInstance;
+					//
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oTrackedEntity.trackedEntityInstance;
+					listOfConditionIdentifier.push(associatedEntityIdentifier);
+					oCondition.identifier=listOfConditionIdentifier;
+					//Add additional information for validation
+					if(oCondition.dateRecorded=="")
+					{
+						var dateCreated=getOldDate(listOfDateCreatedAttribute);
+						oCondition.dateRecorded=extractDateFromDateTime(dateCreated);
+					}
+					if(oCondition.clinicalStatus=="")
+					{
+						oCondition.clinicalStatus="active";
+					}
+					if(oCondition.onsetDateTime=="")
+					{
+						var dateCreated=getOldDate(listOfDateCreatedAttribute);
+						oCondition.onsetDateTime=formatDateInZform(dateCreated);
+					}
+					if(oCondition.verificationStatus=="")
+					{
+						oCondition.verificationStatus="provisional";
+					}
+					if (PatientSet==true)
+					{
+						oCondition.patient={"reference":"Patient/"+oPatient.id};
+					}
+					listConditionExtracted.push(oCondition);
+				}
+		
+			}
+		}//End for IteratorEntity to search for Condition
+		//console.log(listConditionExtracted);
+		//Populate DiagnosticOrder
+		for(var iteratorEntity=0;iteratorEntity<listofTrackedEntity.length;iteratorEntity++)
+		{
+			var oTrackedEntity=listofTrackedEntity[iteratorEntity];
+			var indexIdOrder=-1;
+			orderIsSet=false;
+			var idOrderToSearch=oTrackedEntity.trackedEntityInstance;
+			indexIdOrder=getIndexOfFhirResourceByIdentification(listDiagnosticOrderExtracted,idOrderToSearch);
+			if(indexIdOrder>=0)
+			{
+				var oOrderEvent={};
+				if(listDiagnosticOrderExtracted[indexIdOrder].event.length>0)
+				{
+					oOrderEvent=listDiagnosticOrderExtracted[indexIdOrder].event[0];
+				}
+				else
+				{
+					oOrderEvent= Object.create(OrderEvent);
+				}
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfDiagnosticOrderAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						
+						switch(oAttribute)
+						{
+							case orderAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Order Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listOfOrderIdentifier.push(oIdentifier);
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.subject:
+								listDiagnosticOrderExtracted[indexIdOrder].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value.trim()+"-"};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderer:
+								//listDiagnosticOrderExtracted[indexIdOrder].orderer={"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//orderIsSet=true;
+								break;
+							case orderAttributesMapping.encounter:
+								//listDiagnosticOrderExtracted[indexIdOrder].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								//orderIsSet=true;
+								break;
+							case orderAttributesMapping.reason:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listDiagnosticOrderExtracted[indexIdOrder].reason=[oConcept];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.supportingInformation:
+								listDiagnosticOrderExtracted[indexIdOrder].supportingInformation=[oTrackedEntity.attributes[iteratorAttribute].value];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.specimen:
+								//listDiagnosticOrderExtracted[indexIdOrder].specimen={"reference":"Specimen/"+oTrackedEntity.attributes[i].value};
+								//orderIsSet=true;
+								break;
+							case orderAttributesMapping.status:
+								listDiagnosticOrderExtracted[indexIdOrder].status=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.priority:
+								listDiagnosticOrderExtracted[indexIdOrder].priority=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_dateTime:
+								oOrderEvent.dateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_status:
+								oOrderEvent.status=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_description:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oOrderEvent.description=oConcept;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.item:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listDiagnosticOrderExtracted[indexIdOrder].item=[oConcept];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.note:
+								listDiagnosticOrderExtracted[indexIdOrder].note={"text":oTrackedEntity.attributes[i].value};
+								orderIsSet=true;
+								break;
+							
+						}
+							
+					}
+			
+				}//End for oTrackedEntity.attributes
+				
+				//Get the corresponding Order if from the extracted order entry
+				if(orderIsSet==true)
+				{
+					listDiagnosticOrderExtracted[indexIdOrder].event[oOrderEvent];
+				}
+				if (listConditionExtracted.length>0)
+				{
+					listDiagnosticOrderExtracted[indexIdOrder].supportingInformation=[];
+					var listAssociatedCondition=getListEntityInstanceAssociatedCondition(listConditionExtracted,oTrackedEntity.trackedEntityInstance,"Associated TEI");
+					for(var iteratorResource=0;iteratorResource<listAssociatedCondition.length;iteratorResource++)
+					{
+						var resourceRef={"reference":"Condition/"+listAssociatedCondition[iteratorResource].id};
+						listDiagnosticOrderExtracted[indexIdOrder].supportingInformation.push(resourceRef);
+					}
+				}
+				
+			}//End if indexIdOrder
+			else
+			{
+				//Order Initialization
+				var oOrder={};
+				oOrder= Object.create(DiagnosticOrder);
+				oOrder.resourceType="DiagnosticOrder";
+				var listOfOrderIdentifier=[];
+				var oOrderEvent={};
+				oOrderEvent= Object.create(OrderEvent);
+				oOrder.specimen=[];
+				var orderIsSet=false;
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName.trim();
+					var inTheList=false;
+					//inTheList=checkAttributeInList
+					var itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfDiagnosticOrderAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+							case orderAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Order Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listOfOrderIdentifier.push(oIdentifier);
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.subject:
+								oOrder.subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderer:
+								oOrder.orderer={"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.encounter:
+								oOrder.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.reason:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oOrder.reason=[oConcept];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.supportingInformation:
+								oOrder.supportingInformation=[oTrackedEntity.attributes[iteratorAttribute].value];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.specimen:
+								oOrder.specimen={"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.status:
+								oOrder.status=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.priority:
+								oOrder.priority=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_dateTime:
+								oOrderEvent.dateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_status:
+								oOrderEvent.status=oTrackedEntity.attributes[iteratorAttribute].value;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.orderEvent_description:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oOrderEvent.description=oConcept;
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.item:
+								var oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oOrder.item=[oConcept];
+								orderIsSet=true;
+								break;
+							case orderAttributesMapping.note:
+								oOrder.note={"text":oTrackedEntity.attributes[iteratorAttribute].value};
+								orderIsSet=true;
+								break;
+							
+						}//End of switch
+					
+					}
+					
+				}
+				if(orderIsSet==true)
+				{
+					
+					oOrder.id=oTrackedEntity.trackedEntityInstance;
+					//oOrder.Identifier=listOfOrderIdentifier;
+					//Add additional information to allow to mapping of order to the patient
+					//as there is information of order amoung the patient attribute
+					//
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oTrackedEntity.trackedEntityInstance;
+					listOfOrderIdentifier.push(associatedEntityIdentifier);
+					oOrder.identifier=listOfOrderIdentifier;
+					//Add additional information for validation
+					oOrderEvent.status="requested";
+					
+					if (PatientSet==true)
+					{
+						oOrder.subject={"reference":"Patient/"+oPatient.id};
+					}
+					if (listSpecimenExtracted.length>0)
+					{
+						var listAssociatedSpecimen=getListEntityInstanceAssociatedSpecimens(listSpecimenExtracted,oTrackedEntity.trackedEntityInstance,"Associated TEI");
+						for(var iteratorSpecimen=0;iteratorSpecimen<listAssociatedSpecimen.length;iteratorSpecimen++)
+						{
+							var specimenRef={"reference":"Specimen/"+listAssociatedSpecimen[iteratorSpecimen].id};
+							oOrder.specimen.push(specimenRef);
+						}
+					}
+					if (listConditionExtracted.length>0)
+					{
+						oOrder.supportingInformation=[];
+						var listAssociatedCondition=getListEntityInstanceAssociatedCondition(listConditionExtracted,oTrackedEntity.trackedEntityInstance,"Associated TEI");
+						for(var iteratorResource=0;iteratorResource<listAssociatedCondition.length;iteratorResource++)
+						{
+							var resourceRef={"reference":"Condition/"+listAssociatedCondition[iteratorResource].id};
+							oOrder.supportingInformation.push(resourceRef);
+						}
+					}
+					listDiagnosticOrderExtracted.push(oOrder);
+					
+				}
+				
+			}
+			
+		}//En for IteratorEntity to search for DiagnosticOrder
+		//Populate Observation
+		for(var iteratorEntity=0;iteratorEntity<listofTrackedEntity.length;iteratorEntity++)
+		{
+			var oTrackedEntity=listofTrackedEntity[iteratorEntity];
+			var indexIdObservation=-1;
+			var observationIsSet=false;
+			var idObservationToSearch=oTrackedEntity.trackedEntityInstance;
+			indexIdObservation=getIndexOfFhirResourceByIdentification(listObservationExtracted,idObservationToSearch);
+			if(indexIdObservation>=0)
+			{
+				var listOfObservationIdentifier=[];
+				if(listObservationExtracted[indexIdObservation].identifier.length>0)
+				{
+					listOfObservationIdentifier=listObservationExtracted[indexIdObservation].identifier;
+				}
+				var oSampledData={};
+				if(listObservationExtracted[indexIdObservation].valueSampledData=={})
+				{
+					oSampledData= Object.create(SampledData);
+				}
+				else
+				{
+					oSampledData=listObservationExtracted[indexIdObservation].valueSampledData;
+				}
+				var oPeriodEffective={};
+				if(listObservationExtracted[indexIdObservation].effectivePeriod=={})
+				{
+					oPeriodEffective= Object.create(Period);
+				}
+				else
+				{
+					oPeriodEffective=listObservationExtracted[indexIdObservation].effectivePeriod;
+				}
+				
+				var oPeriodResult={};
+				if(listObservationExtracted[indexIdObservation].valuePeriod=={})
+				{
+					oPeriodResult= Object.create(Period);
+				}
+				else
+				{
+					oPeriodResult=listObservationExtracted[indexIdObservation].valuePeriod;
+				}
+				
+				var oValueQuantity={};
+				if(listObservationExtracted[indexIdObservation].valueQuantity=={})
+				{
+					oValueQuantity= Object.create(Quantity);
+				}
+				else
+				{
+					oValueQuantity=listObservationExtracted[indexIdObservation].valueQuantity;
+				}
+				var oObservationRange={};
+				if(listObservationExtracted[indexIdObservation].valueRange=={})
+				{
+					oObservationRange=Object.create(Range);
+				}
+				else
+				{
+					oObservationRange=listObservationExtracted[indexIdObservation].valueRange;
+				}
+				
+				var oObservationRatio={};
+				if(listObservationExtracted[indexIdObservation].valueRatio=={})
+				{
+					oObservationRatio=Object.create(Ratio);
+				}
+				else
+				{
+					oObservationRatio=listObservationExtracted[indexIdObservation].valueRatio;
+				}
+				var oBodySiteConcept={};
+				if(listObservationExtracted[indexIdObservation].bodySite=={})
+				{
+					oBodySiteConcept=Object.create(CodeableConcept);
+				}
+				else
+				{
+					oBodySiteConcept=listObservationExtracted[indexIdObservation]
+				}
+				
+				var oAbsentRaisonConcept={};
+				if(listObservationExtracted[indexIdObservation].dataAbsentReason=={})
+				{
+					oAbsentRaisonConcept=Object.create(CodeableConcept);
+				}
+				else
+				{
+					oAbsentRaisonConcept=listObservationExtracted[indexIdObservation].dataAbsentReason;
+				}
+				
+				
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfObservationAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+							case observationAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Observation Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listOfObservationIdentifier.push(oIdentifier);
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.status:
+								listObservationExtracted[indexIdObservation].status=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.category:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listObservationExtracted[indexIdObservation].category=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.code:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								listObservationExtracted[indexIdObservation].code=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.subject:
+								//listObservationExtracted[indexIdObservation].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								break;
+							case observationAttributesMapping.encounter:
+								listObservationExtracted[indexIdObservation].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.effectiveDateTime:
+								listObservationExtracted[indexIdObservation].effectiveDateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.effectivePeriod_dateSup:
+								oPeriodEffective.end= formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.effectivePeriod_dateInf:
+								oPeriodEffective.start=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.issued:
+								listObservationExtracted[indexIdObservation].issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								break;
+							case observationAttributesMapping.performer:
+								//listObservationExtracted[indexIdObservation].performer=[{"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+								//observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueQuantity_unit:
+									oValueQuantity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueQuantity_value:
+									oValueQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueCodeableConcept:
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									listObservationExtracted[indexIdObservation].valueCodeableConcept=oConcept;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueString:
+									listObservationExtracted[indexIdObservation].valueString=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueRange_sup:
+									var rangeQuantity=Object.create(Quantity);
+									rangeQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+									oObservationRange.high=rangeQuantity;
+									break;
+							case observationAttributesMapping.valueRange_Inf:
+									var rangeQuantity=Object.create(Quantity);
+									rangeQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+									oObservationRange.low=rangeQuantity;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueRatio_num:
+									oObservationRatio.numerator=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueRatio_denom:
+									oObservationRatio.denominator=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueSampledData_origin:
+									oOriginQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+									break;
+							case observationAttributesMapping.valueSampledData_period:
+									oSampledData.period=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueSampledData_factor:
+									oSampledData.factor=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueSampledData_lowerLimit:
+									oSampledData.lowerLimit=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueSampledData_upperLimit:
+									oSampledData.upperLimit=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueSampledData_dimensions:
+									oSampledData.dimensions=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueSampledData_data:
+									oSampledData.data=oTrackedEntity.attributes[iteratorAttribute].value;
+									break;
+							case observationAttributesMapping.valueTime:
+									listObservationExtracted[indexIdObservation].valueTime=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valueDateTime:
+									listObservationExtracted[indexIdObservation].valueDateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+									break;
+							case observationAttributesMapping.valuePeriod_start:
+									oPeriodResult.start=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.valuePeriod_end:
+									oPeriodResult.end=oTrackedEntity.attributes[iteratorAttribute].value;
+									break;
+							case observationAttributesMapping.dataAbsentReason:
+									oAbsentRaisonConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									listObservationExtracted[indexIdObservation].dataAbsentReason=oAbsentRaisonConcept;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.interpretation:
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									listObservationExtracted[indexIdObservation].interpretation=oConcept;
+									break;
+							case observationAttributesMapping.comments:
+									listObservationExtracted[indexIdObservation].comments=oTrackedEntity.attributes[iteratorAttribute].value;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.bodySite:
+									oBodySiteConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									listObservationExtracted[indexIdObservation].bodySite=oBodySiteConcept;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.method:
+									var  oConcept={};
+									oConcept= Object.create(CodeableConcept);
+									oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+									listObservationExtracted[indexIdObservation].method=oConcept;
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.specimen:
+									//listObservationExtracted[indexIdObservation].specimen={"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value};
+									break;
+							case observationAttributesMapping.device:
+									//listObservationExtracted[indexIdObservation].device={"reference":"Device/"+oTrackedEntity.attributes[iteratorAttribute].value};
+									//observationIsSet=true;
+									break;
+							case observationAttributesMapping.referenceRange:
+									listObservationExtracted[indexIdObservation].referenceRange=[];
+									break;
+							case observationAttributesMapping.related:
+									listObservationExtracted[indexIdObservation].related=[];
+									observationIsSet=true;
+									break;
+							case observationAttributesMapping.component:
+									listObservationExtracted[indexIdObservation].component=[];
+									observationIsSet=true;
+									break;
+							}
+						
+					}
+				}
+				if(observationIsSet==true)
+				{
+					oSampledData.origin=oOriginQuantity;
+					listObservationExtracted[indexIdObservation].valueSampledData=oSampledData;
+					listObservationExtracted[indexIdObservation].identifier=listOfObservationIdentifier;
+					listObservationExtracted[indexIdObservation].effectivePeriod=oPeriodEffective;
+					listObservationExtracted[indexIdObservation].valueQuantity=oValueQuantity;
+					listObservationExtracted[indexIdObservation].valueRange=oObservationRange;
+					//checkIfAsProperties(oObservationRange);
+					listObservationExtracted[indexIdObservation].valueRatio=oObservationRatio;
+					listObservationExtracted[indexIdObservation].valuePeriod=oPeriodResult;
+				}
+			}
+			else
+			{
+				//Observation initialization
+				var oObservation={};
+				oObservation= Object.create(Observation);
+				oObservation.resourceType="Observation";
+				var listOfObservationIdentifier=[];
+				var oSampledData={};
+				oSampledData= Object.create(SampledData);
+				var oPeriodEffective={};
+				oPeriodEffective= Object.create(Period);
+				var oPeriodResult={};
+				oPeriodResult= Object.create(Period);
+				var oValueQuantity={};
+				oValueQuantity= Object.create(Quantity);
+				var oOriginQuantity={};
+				oOriginQuantity= Object.create(Quantity);
+				var oObservationRange={};
+				oObservationRange=Object.create(Range);
+				var oObservationRatio={};
+				oObservationRatio=Object.create(Ratio);
+				var oBodySiteConcept={};
+				oBodySiteConcept=Object.create(CodeableConcept);
+				var oAbsentRaisonConcept={};
+				oAbsentRaisonConcept=Object.create(CodeableConcept);
+				var observationIsSet=false;
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName.trim();
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfObservationAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+							case observationAttributesMapping.identifier:
+								var oIdentifier={};
+								oIdentifier=Object.create(Identifier);
+								//assignment of Identifier
+								oIdentifier.use="official";
+								oIdentifier.type={"text":"Observation Identification"};
+								oIdentifier.system="http://hl7.org/fhir/";
+								oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								listOfObservationIdentifier.push(oIdentifier);
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.status:
+								oObservation.status=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.category:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.category=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.code:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.code=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.subject:
+								oObservation.subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								break;
+							case observationAttributesMapping.encounter:
+								oObservation.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.effectiveDateTime:
+								oObservation.effectiveDateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.effectivePeriod_dateSup:
+								oPeriodEffective.end= formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.effectivePeriod_dateInf:
+								oPeriodEffective.start=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.issued:
+								oObservation.issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+								break;
+							case observationAttributesMapping.performer:
+								oObservation.performer=[{"reference":"Practitioner/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueQuantity_unit:
+								oValueQuantity.unit=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueQuantity_value:
+								oValueQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueCodeableConcept:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.valueCodeableConcept=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueString:
+								oObservation.valueString=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueRange_sup:
+								var rangeQuantity=Object.create(Quantity);
+								rangeQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservationRange.high=rangeQuantity;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueRange_Inf:
+								var rangeQuantity=Object.create(Quantity);
+								rangeQuantity.value=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservationRange.low=rangeQuantity;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueRatio_num:
+								oObservationRatio.numerator=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueRatio_denom:
+								oObservationRatio.denominator=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueSampledData_origin:
+									oOriginQuantity.value=oEvent.dataValues[iteratorDataValues].value;
+									break;
+							case observationAttributesMapping.valueSampledData_period:
+								oSampledData.period=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueSampledData_factor:
+								oSampledData.factor=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueSampledData_lowerLimit:
+								oSampledData.lowerLimit=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueSampledData_upperLimit:
+								oSampledData.upperLimit=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueSampledData_dimensions:
+								oSampledData.dimensions=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueSampledData_data:
+								oSampledData.data=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueTime:
+								oObservation.valueTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valueDateTime:
+								oObservation.valueDateTime=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valuePeriod_start:
+								oPeriodResult.start=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.valuePeriod_end:
+								oPeriodResult.end=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.dataAbsentReason:
+								oAbsentRaisonConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.dataAbsentReason=oAbsentRaisonConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.interpretation:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.interpretation=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.comments:
+								oObservation.comments=oTrackedEntity.attributes[iteratorAttribute].value;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.bodySite:
+								oBodySiteConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.bodySite=oBodySiteConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.method:
+								var  oConcept={};
+								oConcept= Object.create(CodeableConcept);
+								oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+								oObservation.method=oConcept;
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.specimen:
+								oObservation.specimen={"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.device:
+								oObservation.device={"reference":"Device/"+oTrackedEntity.attributes[iteratorAttribute].value};
+								observationIsSet=true;
+								break;
+							case observationAttributesMapping.referenceRange:
+									//oObservation.referenceRange=[];
+									break;
+							case observationAttributesMapping.related:
+									//oObservation.related=[];
+									break;
+							case observationAttributesMapping.component:
+									//oObservation.component=[];
+									break;
+							}//End of switch
+					
+					}
+				}
+				if(observationIsSet==true)
+				{
+					
+					oObservation.id=oTrackedEntity.trackedEntityInstance;
+					//
+					oSampledData.origin=oOriginQuantity;
+					oObservation.valueSampledData=oSampledData;
+					//oObservation.identifier=listOfObservationIdentifier;
+					oObservation.effectivePeriod=oPeriodEffective;
+					oObservation.valueQuantity=oValueQuantity;
+					oObservation.valueRange=oObservationRange;
+					//checkIfAsProperties(oObservationRange);
+					oObservation.valueRatio=oObservationRatio;
+					oObservation.valuePeriod=oPeriodResult;
+					//
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oTrackedEntity.trackedEntityInstance;
+					listOfObservationIdentifier.push(associatedEntityIdentifier);
+					oObservation.identifier=listOfObservationIdentifier;
+					//Add additional information for validation
+					oObservation.status="registered";
+					//By Default used Microscopy observation as code
+					var oConcept={};
+					oConcept= Object.create(CodeableConcept);
+					oConcept.text="Microscopic Observation";
+					oConcept.code=[{"code":"10355-6"}];
+					if (PatientSet==true)
+					{
+						oObservation.subject={"reference":"Patient/"+oPatient.id};
+					}
+					if (listSpecimenExtracted.length>0)
+					{
+						var listAssociatedSpecimen=getListEntityInstanceAssociatedSpecimens(listSpecimenExtracted,oTrackedEntity.trackedEntityInstance,"Associated TEI");
+						for(var iteratorSpecimen=0;iteratorSpecimen<listAssociatedSpecimen.length;iteratorSpecimen++)
+						{
+							var specimenRef={"reference":"Specimen/"+listAssociatedSpecimen[iteratorSpecimen].id};
+							oObservation.specimen=specimenRef;
+							break;
+						}
+					}
+					listObservationExtracted.push(oObservation);
+				}
+		
+			}
+		}//End for IteratorEntity to search for Observation
+		
+		//Populate DiagnosticReport
+		for(var iteratorEntity=0;iteratorEntity<listofTrackedEntity.length;iteratorEntity++)
+		{
+			var oTrackedEntity=listofTrackedEntity[iteratorEntity];
+			var indexIdDiagnosticReport=-1;
+			var diagnosticReportIsSet=false;
+			var idDiagnosticReportToSearch=oTrackedEntity.trackedEntityInstance;
+			indexIdDiagnosticReport=getIndexOfFhirResourceByIdentification(listDiagnosticReportExtracted,idDiagnosticReportToSearch);
+			if(indexIdDiagnosticReport>=0)
+			{
+				var listOfDiagnosticReportIdentifier=[];
+				if(listDiagnosticReportExtracted[indexIdDiagnosticReport].identifier.length>0)
+				{
+					listOfDiagnosticReportIdentifier=listDiagnosticReportExtracted[indexIdDiagnosticReport].identifier;
+				}
+				var oEffectivePeriod={};
+				if(listDiagnosticReportExtracted[indexIdDiagnosticReport].effectivePeriod!="")
+				{
+					oEffectivePeriod=listDiagnosticReportExtracted[indexIdDiagnosticReport].effectivePeriod;
+				}
+				else
+				{
+					oEffectivePeriod= Object.create(Period);
+				}
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfDiagnosticReportAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+						case diagnosticReportAttributesMapping.identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"DiagnosticReport Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+							listOfDiagnosticReportIdentifier.push(oIdentifier);
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.status:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].status=oTrackedEntity.attributes[iteratorAttribute].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.category:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].category=oConcept;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.code:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].code=oConcept;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.subject:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.encounter:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectiveDateTime:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].effectiveDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_start:
+							oEffectivePeriod.start=oTrackedEntity.attributes[iteratorAttribute].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_end:
+							oEffectivePeriod.end=oTrackedEntity.attributes[iteratorAttribute].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.issued:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.performer:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].performer={"reference":"Organization/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.request:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].request=[{"reference":"DiagnosticOrder/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.specimen:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].specimen=[{"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.result:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].result=[{"reference":"Observation/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.imagingStudy:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].imagingStudy=[];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.image:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].image=[];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.conclusion:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].conclusion=oTrackedEntity.attributes[iteratorAttribute].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.codedDiagnosis:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].codedDiagnosis=[oConcept];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.presentedForm:
+							listDiagnosticReportExtracted[indexIdDiagnosticReport].presentedForm=[];
+							diagnosticReportIsSet=true;
+							break;
+						}
+						
+					}
+				}
+				if(diagnosticReportIsSet==true)
+				{
+					listDiagnosticReportExtracted[indexIdDiagnosticReport].identifier=listOfDiagnosticReportIdentifier;
+					listDiagnosticReportExtracted[indexIdDiagnosticReport].effectivePeriod=oEffectivePeriod;
+					//Add additional information for validation
+				}
+			}
+			else
+			{
+				//Observation initialization
+				
+				
+				var oDiagnosticReport={};
+				oDiagnosticReport= Object.create(DiagnosticReport);
+				oDiagnosticReport.resourceType="DiagnosticReport";
+				var listOfDiagnosticReportIdentifier=[];
+				var oEffectivePeriod={};
+				oEffectivePeriod= Object.create(Period);
+				oDiagnosticReport.request=[];
+				oDiagnosticReport.specimen=[];
+				oDiagnosticReport.result=[];
+				var diagnosticReportIsSet=false;
+				var effectivePeriodIsSet=false;
+				var listOfDateCreatedAttribute=[];
+				//console.log(listSpecimenExtracted);
+				for(var iteratorAttribute=0;iteratorAttribute<oTrackedEntity.attributes.length;iteratorAttribute++)
+				{
+					var oAttribute=oTrackedEntity.attributes[iteratorAttribute].displayName;
+					listOfDateCreatedAttribute.push(oTrackedEntity.attributes[iteratorAttribute].created);
+					var inTheList=false;
+					itemListAttributesMapping=[];
+					itemListAttributesMapping=getListOfDiagnosticReportAttributeMapping();
+					inTheList=checkAttributeInList(itemListAttributesMapping,oAttribute);
+					if(inTheList==true)
+					{
+						switch(oAttribute)
+						{
+						case diagnosticReportAttributesMapping.identifier:
+							var oIdentifier={};
+							oIdentifier=Object.create(Identifier);
+							//assignment of Identifier
+							oIdentifier.use="official";
+							oIdentifier.type={"text":"DiagnosticReport Identification"};
+							oIdentifier.system="http://hl7.org/fhir/";
+							oIdentifier.value=oTrackedEntity.attributes[iteratorAttribute].value;
+							listOfDiagnosticReportIdentifier.push(oIdentifier);
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.status:
+							oDiagnosticReport.status=oTrackedEntity.attributes[iteratorAttribute].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.category:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							oDiagnosticReport.category=oConcept;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.code:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							oDiagnosticReport.code=oConcept;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.subject:
+							//oDiagnosticReport.subject={"reference":"Patient/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.encounter:
+							oDiagnosticReport.encounter={"reference":"Encounter/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectiveDateTime:
+							//oDiagnosticReport.effectiveDateTime=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_start:
+							oEffectivePeriod.start=oTrackedEntity.attributes[iteratorAttribute].value;
+							effectivePeriodIsSet=true;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.effectivePeriod_end:
+							oEffectivePeriod.end=oTrackedEntity.attributes[iteratorAttribute].value;
+							effectivePeriodIsSet=true;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.issued:
+							//oDiagnosticReport.issued=formatDateInZform(oTrackedEntity.attributes[iteratorAttribute].value);
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.performer:
+							//oDiagnosticReport.performer={"reference":"Organization/"+oTrackedEntity.attributes[iteratorAttribute].value};
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.request:
+							//oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.specimen:
+							//oDiagnosticReport.specimen=[{"reference":"Specimen/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.result:
+							//oDiagnosticReport.result=[{"reference":"Observation/"+oTrackedEntity.attributes[iteratorAttribute].value}];
+							//diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.imagingStudy:
+							oDiagnosticReport.imagingStudy=[];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.image:
+							oDiagnosticReport.image=[];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.conclusion:
+							oDiagnosticReport.conclusion=oTrackedEntity.attributes[iteratorAttribute].value;
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.codedDiagnosis:
+							var oConcept={};
+							oConcept=Object.create(CodeableConcept);
+							oConcept.text=oTrackedEntity.attributes[iteratorAttribute].value;
+							oDiagnosticReport.codedDiagnosis=[oConcept];
+							diagnosticReportIsSet=true;
+							break;
+						case diagnosticReportAttributesMapping.presentedForm:
+							oDiagnosticReport.presentedForm=[];
+							diagnosticReportIsSet=true;
+							break;
+						}//End of switch
+					
+					}
+				}
+				if(diagnosticReportIsSet==true)
+				{
+					//console.log(listSpecimenExtracted);
+					oDiagnosticReport.id=oTrackedEntity.trackedEntityInstance;
+					var associatedEntityIdentifier={};
+					associatedEntityIdentifier=Object.create(Identifier);
+					//assignment of Identifier
+					associatedEntityIdentifier.use="secondary";
+					associatedEntityIdentifier.type={"text":"Associated TEI"};
+					associatedEntityIdentifier.system="http://hl7.org/fhir/";
+					associatedEntityIdentifier.value=oTrackedEntity.trackedEntityInstance;
+					listOfDiagnosticReportIdentifier.push(associatedEntityIdentifier);
+					oDiagnosticReport.identifier=listOfDiagnosticReportIdentifier;
+					if(effectivePeriodIsSet==true)
+					{
+						oDiagnosticReport.effectivePeriod=oEffectivePeriod;
+					}
+					//Add additional information for validation
+					oDiagnosticReport.status="final";
+					//By Default used Acyclovir for code
+					var oConcept={};
+					oConcept= Object.create(CodeableConcept);
+					oConcept.text="Acyclovir";
+					oConcept.code=[{"code":"1-8"}];
+					oDiagnosticReport.code=oConcept;
+					if (PatientSet==true)
+					{
+						oDiagnosticReport.subject={"reference":"Patient/"+oPatient.id};
+					}
+					if(listDiagnosticOrderExtracted.length>=1)
+					{
+						//console.log(listDiagnosticOrderExtracted);
+						var listOrderAssociated=[];
+						listOrderAssociated=getListEntityInstanceAssociatedDiagnosticOrders(listDiagnosticOrderExtracted,oTrackedEntity.trackedEntityInstance,'Associated TEI');
+						//console.log(listDiagnosticOrderExtracted);
+						//console.log("------------------");
+						//console.log("------And------------");
+						//console.log("Search item: "+oTrackedEntity.trackedEntityInstance);
+						
+						for(var i=0;i<listOrderAssociated.length;i++)
+						{
+							var diagnosticOrderRef={"reference":"DiagnosticOrder/"+listOrderAssociated[i].id};
+							oDiagnosticReport.request.push(diagnosticOrderRef);
+						}
+					}
+					else
+					{
+						oDiagnosticReport.request=null;
+					}
+					if(listSpecimenExtracted.length>=1)
+					{
+						//console.log(listSpecimenExtracted);
+						var listSpecimenAssociated=[];
+						listSpecimenAssociated=getListEntityInstanceAssociatedSpecimens(listSpecimenExtracted,oTrackedEntity.trackedEntityInstance,'Associated TEI');
+						for(var i=0;i<listSpecimenAssociated.length;i++)
+						{
+							var specimenRef={"reference":"Specimen/"+listSpecimenAssociated[i].id};
+							oDiagnosticReport.specimen.push(specimenRef);
+						}
+						
+					}
+					else
+					{
+						oDiagnosticReport.specimen=null;
+					}
+					var createdDate=getOldDate(listOfDateCreatedAttribute);
+					if(listObservationExtracted.length>=1)
+					{
+						var listObservationAssociated=[];
+						listObservationAssociated=getListEntityInstanceAssociatedObservation(listObservationExtracted,oTrackedEntity.trackedEntityInstance,'Associated TEI');
+						for(var i=0;i<listObservationAssociated.length;i++)
+						{
+							var observatioRef={"reference":"Observation/"+listObservationAssociated[i].id};
+							oDiagnosticReport.result.push(observatioRef);
+						}
+						if(oDiagnosticReport.effectiveDateTime=="" && listObservationAssociated.length>0)
+						{
+							//get the RecenteffectiveDateTime of all observation
+							var listOfEffectiveDateTime=[];
+							for(var i=0;i<listObservationAssociated.length;i++)
+							{
+								if(listObservationAssociated[i].effectiveDateTime!="")
+								{
+									listOfEffectiveDateTime.push(listObservationAssociated[i].effectiveDateTime);
+								}
+								
+							}
+							if(listOfEffectiveDateTime.length>0)
+							{
+								var recentEffectiveDateTime=getRecentDate(listOfEffectiveDateTime);
+								if(recentEffectiveDateTime!="")
+								{
+									oDiagnosticReport.effectiveDateTime= formatDateInZform(recentEffectiveDateTime);
+									oDiagnosticReport.issued=formatDateInZform( recentEffectiveDateTime);
+								}
+								else
+								{
+									oDiagnosticReport.effectiveDateTime=formatDateInZform( createdDate);
+									oDiagnosticReport.issued=formatDateInZform( createdDate);
+								}
+							}
+							else
+							{
+								oDiagnosticReport.effectiveDateTime=formatDateInZform( createdDate);
+								oDiagnosticReport.issued=formatDateInZform( createdDate);
+							}
+							
+						}
+						else
+						{
+							oDiagnosticReport.effectiveDateTime=formatDateInZform( createdDate);
+							oDiagnosticReport.issued=formatDateInZform( createdDate);
+						}
+						
+					}
+					else
+					{
+						if(oDiagnosticReport.effectiveDateTime=="")
+						{
+							oDiagnosticReport.effectiveDateTime=formatDateInZform(createdDate);
+						}
+						if(oDiagnosticReport.issued=="")
+						{
+							oDiagnosticReport.issued=formatDateInZform(createdDate);
+						}
+						oDiagnosticReport.result=null;
+						
+					}
+					if(oDiagnosticReport.performer=="")
+					{
+						oDiagnosticReport.performer={"reference":"Organization/"+oTrackedEntity.orgUnit};
+					}
+					listDiagnosticReportExtracted.push(oDiagnosticReport);
+				}
+		
+			}
+		}//End for IteratorEntity to search for Observation
+		
+		
+		for(var i=0;i<listPractitionerExtrated.length;i++)
+		{
+			listEntityObject.push(listPractitionerExtrated[i]);
+		}
+		for(var i=0;i<listPatientExtrated.length;i++)
+		{
+			listEntityObject.push(listPatientExtrated[i]);
+		}
+		for(var i=0;i<listSpecimenExtracted.length;i++)
+		{
+			listEntityObject.push(listSpecimenExtracted[i]);
+		}
+		for(var i=0;i<listConditionExtracted.length;i++)
+		{
+			listEntityObject.push(listConditionExtracted[i]);
+		}
+		for(var i=0;i<listDiagnosticOrderExtracted.length;i++)
+		{
+			listEntityObject.push(listDiagnosticOrderExtracted[i]);
+		}
+		for(var i=0;i<listObservationExtracted.length;i++)
+		{
+			listEntityObject.push(listObservationExtracted[i]);
+		}
+		for(var i=0;i<listDiagnosticReportExtracted.length;i++)
+		{
+			listEntityObject.push(listDiagnosticReportExtracted[i]);
+		}
+		for(var i=0;i<listResourceListExtracted.length;i++)
+		{
+			listEntityObject.push(listResourceListExtracted[i]);
+		}
+		//console.log(listSpecimenExtracted);
 		//console.log("#######################################################################");
 		return listEntityObject;
 	}
 	
-	function BuildBundleResponse(listOrganisation,listPatient,listPractitioner,listSpecimen,listCondition,listDiagnosticOrder,listObservation,listDiagnosticReport,listResourceList)
+	function BuildBundleResponse(listOrganisation,listPatient,listPractitioner,listSpecimen,listCondition,listDiagnosticOrder,listObservation,listDiagnosticReport,listResourceList,listBasic)
 	{
 		var oBundle={};
 		oBundle= Object.create(Bundle);
 		oBundle.resourceType="Bundle";
 		//Bundle ID, Build the BundleId : Id Of one of the organization +totalnumber of the resource within the bundle
 		var totalNumberOfResource=listOrganisation.length+listPatient.length+listPractitioner.length;
-		totalNumberOfResource+=listSpecimen.length+listDiagnosticOrder.length+listObservation.length+listDiagnosticReport.length+listResourceList.length;
-		var idBundle=listOrganisation[0].id+totalNumberOfResource;
+		totalNumberOfResource+=listSpecimen.length+listDiagnosticOrder.length+listObservation.length+listDiagnosticReport.length+listResourceList.length+listBasic.length;
+		
+		var idBundle="";
+		if(listOrganisation.length>0)
+		{
+			idBundle=listOrganisation[0].id+totalNumberOfResource;
+		}
+		else
+		{
+			idBundle="datasource-"+new Date().toJSON();
+			var tempResult=idBundle.replace(/:/g,"");//replace all occurence of : by ""
+			idBundle=tempResult.replace(".","");
+		}
 		oBundle.id=idBundle;
 		var lastlastUpdated=new Date().toJSON();
 		oBundle.meta={"lastUpdated":formatDateInZform(lastlastUpdated)};
@@ -6080,6 +10142,13 @@
 		{
 			var oEntry=Object.create(Entry);
 			oEntry.resource=listResourceList[i];
+			oEntry.search.mode="match";
+			listOfEntries.push(oEntry);
+		}
+		for (var i=0;i<listBasic.length;i++)
+		{
+			var oEntry=Object.create(Entry);
+			oEntry.resource=listBasic[i];
 			oEntry.search.mode="match";
 			listOfEntries.push(oEntry);
 		}
@@ -6356,227 +10425,417 @@
 										"eventDate":"",
 										"dataValues":[]									
 										};
-										
-										oEvent.id=reslistOfEvents[0].events[iteratorEvents].event;
-										oEvent.programStageId=reslistOfEvents[0].events[iteratorEvents].programStage;
-										oEvent.trackedEntityInstance=reslistOfEvents[0].events[iteratorEvents].trackedEntityInstance;
-										oEvent.eventDate=reslistOfEvents[0].events[iteratorEvents].eventDate;
-										oEvent.orgUnit=reslistOfEvents[0].events[iteratorEvents].orgUnit;
-										for(var counter=0;counter<listoProgramStages.length;counter++)
+										if(typeof(reslistOfEvents[0].events[iteratorEvents].eventDate)!="undefined")
 										{
-											//First find the program stages
-											if(listoProgramStages[counter].id==reslistOfEvents[0].events[iteratorEvents].programStage)
-											{
-												oEvent.programStageName=listoProgramStages[counter].name;
-											}
-										}
-										
-										for(var iteratorDataValue=0;iteratorDataValue<reslistOfEvents[0].events[iteratorEvents].dataValues.length;iteratorDataValue++)
-										{
-											//find  the name of the dataElements
-											var oEventDataValues={
-											"dataElementId":"",
-											"displayName":"",
-											"value":""
-											};
-											var oDataElementToSearch=reslistOfEvents[0].events[iteratorEvents].dataValues[iteratorDataValue].dataElement;
-											var dataElementFound=false;
+											oEvent.id=reslistOfEvents[0].events[iteratorEvents].event;
+											oEvent.programStageId=reslistOfEvents[0].events[iteratorEvents].programStage;
+											oEvent.trackedEntityInstance=reslistOfEvents[0].events[iteratorEvents].trackedEntityInstance;
+											oEvent.eventDate=reslistOfEvents[0].events[iteratorEvents].eventDate;
+											oEvent.orgUnit=reslistOfEvents[0].events[iteratorEvents].orgUnit;
 											for(var counter=0;counter<listoProgramStages.length;counter++)
 											{
 												//First find the program stages
 												if(listoProgramStages[counter].id==reslistOfEvents[0].events[iteratorEvents].programStage)
 												{
-													//oEvent.programStageName=listoProgramStages[counter].name;
-													//then fin the dataElements that match with
-													
-													for(var iteratorDataElement=0;iteratorDataElement<listoProgramStages[counter].dataElement.length;iteratorDataElement++)
+													oEvent.programStageName=listoProgramStages[counter].name;
+												}
+											}
+										
+											for(var iteratorDataValue=0;iteratorDataValue<reslistOfEvents[0].events[iteratorEvents].dataValues.length;iteratorDataValue++)
+											{
+												//find  the name of the dataElements
+												var oEventDataValues={
+												"dataElementId":"",
+												"displayName":"",
+												"value":""
+												};
+												var oDataElementToSearch=reslistOfEvents[0].events[iteratorEvents].dataValues[iteratorDataValue].dataElement;
+												var dataElementFound=false;
+												for(var counter=0;counter<listoProgramStages.length;counter++)
+												{
+													//First find the program stages
+													if(listoProgramStages[counter].id==reslistOfEvents[0].events[iteratorEvents].programStage)
 													{
-														if(listoProgramStages[counter].dataElement[iteratorDataElement].id==oDataElementToSearch)
+														//oEvent.programStageName=listoProgramStages[counter].name;
+														//then fin the dataElements that match with
+														
+														for(var iteratorDataElement=0;iteratorDataElement<listoProgramStages[counter].dataElement.length;iteratorDataElement++)
 														{
-															oEventDataValues.dataElementId=oDataElementToSearch;
-															oEventDataValues.displayName=listoProgramStages[counter].name+"/"+listoProgramStages[counter].dataElement[iteratorDataElement].displayName;
-															oEventDataValues.value=reslistOfEvents[0].events[iteratorEvents].dataValues[iteratorDataValue].value;
-															dataElementFound=true;
-															break;
+															if(listoProgramStages[counter].dataElement[iteratorDataElement].id==oDataElementToSearch)
+															{
+																oEventDataValues.dataElementId=oDataElementToSearch;
+																oEventDataValues.displayName=listoProgramStages[counter].name+"|"+listoProgramStages[counter].dataElement[iteratorDataElement].displayName;
+																oEventDataValues.value=reslistOfEvents[0].events[iteratorEvents].dataValues[iteratorDataValue].value;
+																dataElementFound=true;
+																break;
+															}
 														}
 													}
+													if(dataElementFound==true)
+													{
+														break;
+													}
 												}
-												if(dataElementFound==true)
+												oEvent.dataValues.push(oEventDataValues);
+												
+											}//End for iteraror Datavalues
+											//console.log(oEvent);
+											var listAttributeName= entityAPI.getObservationAttributesMapping().issued.split("|");
+											//console.log(listAttributeName);
+											if(listAttributeName.length>=1)
+											{
+												//console.log(oEvent.programStageName+"=="+listAttributeName[0]);
+												if(oEvent.programStageName==listAttributeName[0])
 												{
-													break;
+													var oEventDataValuesEventDate={
+													"dataElementId":"",
+													"displayName":"",
+													"value":""
+													};
+													oEventDataValuesEventDate.dataElementId="0000000";
+													oEventDataValuesEventDate.displayName=entityAPI.getObservationAttributesMapping().issued;
+													oEventDataValuesEventDate.value=oEvent.eventDate;
+													oEvent.dataValues.push(oEventDataValuesEventDate);
+													//listObjectEvents.push(oEvent);
 												}
 											}
-											oEvent.dataValues.push(oEventDataValues);
+											listAttributeName= entityAPI.getObservationAttributesMapping().effectiveDateTime.split("|");
+											if(listAttributeName.length>=1)
+											{
+												if(oEvent.programStageName==listAttributeName[0])
+												{
+													var oEventDataValuesEventDate={
+													"dataElementId":"",
+													"displayName":"",
+													"value":""
+													};
+													oEventDataValuesEventDate.dataElementId="0000000";
+													oEventDataValuesEventDate.displayName=entityAPI.getObservationAttributesMapping().effectiveDateTime;
+													oEventDataValuesEventDate.value=oEvent.eventDate;
+													oEvent.dataValues.push(oEventDataValuesEventDate);
+													//listObjectEvents.push(oEvent);
+												}
+											}
+											listAttributeName= entityAPI.getPractitionerAttributesMapping().meta_lastUpdated.split("|");
+											if(listAttributeName.length>=1)
+											{
+												if(oEvent.programStageName==listAttributeName[0])
+												{
+													var oEventDataValuesEventDate={
+													"dataElementId":"",
+													"displayName":"",
+													"value":""
+													};
+													oEventDataValuesEventDate.dataElementId="0000000";
+													oEventDataValuesEventDate.displayName=entityAPI.getPractitionerAttributesMapping().meta_lastUpdated;
+													oEventDataValuesEventDate.value=oEvent.eventDate;
+													oEvent.dataValues.push(oEventDataValuesEventDate);
+													//listObjectEvents.push(oEvent);
+												}
+											}
 											
-										}//End for iteraror Datavalues
-										var listAttributeName= entityAPI.getObservationAttributesMapping().issued.split("/");
-										//console.log(listAttributeName);
-										if(listAttributeName.length>=1)
-										{
-											//console.log(oEvent.programStageName+"=="+listAttributeName[0]);
-											if(oEvent.programStageName==listAttributeName[0])
-											{
-												var oEventDataValuesEventDate={
-												"dataElementId":"",
-												"displayName":"",
-												"value":""
-												};
-												oEventDataValuesEventDate.dataElementId="0000000";
-												oEventDataValuesEventDate.displayName=entityAPI.getObservationAttributesMapping().issued;
-												oEventDataValuesEventDate.value=oEvent.eventDate;
-												oEvent.dataValues.push(oEventDataValuesEventDate);
-												//listObjectEvents.push(oEvent);
-											}
-										}
-										listAttributeName= entityAPI.getObservationAttributesMapping().effectiveDateTime.split("/");
-										if(listAttributeName.length>=1)
-										{
-											if(oEvent.programStageName==listAttributeName[0])
-											{
-												var oEventDataValuesEventDate={
-												"dataElementId":"",
-												"displayName":"",
-												"value":""
-												};
-												oEventDataValuesEventDate.dataElementId="0000000";
-												oEventDataValuesEventDate.displayName=entityAPI.getObservationAttributesMapping().effectiveDateTime;
-												oEventDataValuesEventDate.value=oEvent.eventDate;
-												oEvent.dataValues.push(oEventDataValuesEventDate);
-												//listObjectEvents.push(oEvent);
-											}
-										}
-										listObjectEvents.push(oEvent);
+											listObjectEvents.push(oEvent);
+										}//End If typeof event
+										//console.log(oEvent.eventDate);
+										
 									}//End if founditem
 									
 								}//end for reslistOfEvents[0]
 								
-							//console.log(listObjectEvents[2]);
+							//console.log(listObjectEvents[0]);
 							//Replace list of Stages by the list of object Events
-							entityAPI.GetTrackedEntityInstancesFromOrgunitListAndProgramIdAndKeepDataElementsTrack(listOfOrgUnitId,programId,listObjectEvents,listoDataElements,function(listTrackedEntities)
+							entityAPI.GetTrackedEntityInstancesFromOrgunitListAndProgramIdAndKeepDataElementsTrack(listOfOrgUnitId,programId,listObjectEvents,listoDataElements,function(_listTrackedEntities)
 							{
-								
-								var listObjectEvents=listTrackedEntities[2];
-								//console.log("---------------listOfEvents------------");
-								//console.log(listObjectEvents);
-								if(listTrackedEntities[0].trackedEntityInstances.length>0)
+								//Check Options set to resolve ref value
+								var listIdAttributeToRequest="";
+								var listIdDataElementToRequest="";
+								if(listAttributeWithOptionSetValues.length>0)
 								{
-									for(var j=0;j<listTrackedEntities[0].trackedEntityInstances.length;j++)
+									for(var iteratorAttribute=0;iteratorAttribute<listAttributeWithOptionSetValues.length;iteratorAttribute++)
 									{
-										var listObjectEventsAssociated=getListEvents(listObjectEvents,listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance);
-										if(listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance=="qRYsAaeXoIX")
+										
+										if(listAttributeWithOptionSetValues[iteratorAttribute].type=="attribute")
 										{
-											//console.log("---------------AssociatedEvent------------");
-											//console.log(listObjectEventsAssociated);
-										}
-										//console.log("TEI :"+listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance+", events:"+listObjectEventsAssociated.length);
-										var tempListOfTrackedEntity=[];
-										tempListOfTrackedEntity.push(listTrackedEntities[0].trackedEntityInstances[j]);
-										var listEntityObject=GetAssociatedFhirResourceFromMappingAndEvent(tempListOfTrackedEntity,
-										listObjectEventsAssociated);
-										//console.log(listEntityObject);
-										for(var iteratorEntityExtracted=0;iteratorEntityExtracted<listEntityObject.length;iteratorEntityExtracted++)
-										{
-											
-											var entityObject=listEntityObject[iteratorEntityExtracted];
-											if(entityObject!=null)
+											if(iteratorAttribute==0)
 											{
-												if (entityObject.resourceType =="Patient")
+												listIdAttributeToRequest=listAttributeWithOptionSetValues[iteratorAttribute].id;
+											}
+											else
+											{
+												listIdAttributeToRequest+=","+listAttributeWithOptionSetValues[iteratorAttribute].id;
+											}
+										}
+									}
+									for(var iteratorAttribute=0;iteratorAttribute<listAttributeWithOptionSetValues.length;iteratorAttribute++)
+									{
+										
+										if(listAttributeWithOptionSetValues[iteratorAttribute].type=="element")
+										{
+											if(iteratorAttribute==0)
+											{
+												listIdDataElementToRequest=listAttributeWithOptionSetValues[iteratorAttribute].id;
+											}
+											else
+											{
+												listIdDataElementToRequest+=","+listAttributeWithOptionSetValues[iteratorAttribute].id;
+											}
+										}
+									}
+								}
+								
+								if(listIdAttributeToRequest!="" || listIdDataElementToRequest!="")
+								{
+									entityAPI.getOptionSetFromAttribute(listIdAttributeToRequest,listIdDataElementToRequest,_listTrackedEntities,function(listOptions)
+									{
+										//console.log(listOptions);
+										var listOptionSets=listOptions[0].options;
+										//console.log(listOptionSets);
+										var listTrackedEntities=listOptions[1];
+										var listObjectEvents=listTrackedEntities[2];
+										if(listTrackedEntities[0].trackedEntityInstances.length>0)
+										{
+											for(var j=0;j<listTrackedEntities[0].trackedEntityInstances.length;j++)
+											{
+												var listObjectEventsAssociated=getListEvents(listObjectEvents,listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance);
+												
+												//console.log("TEI :"+listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance+", events:"+listObjectEventsAssociated.length);
+												var tempListOfTrackedEntity=[];
+												tempListOfTrackedEntity.push(listTrackedEntities[0].trackedEntityInstances[j]);
+												var listEntityObject=GetAssociatedFhirResourceFromMappingAndEventAndOptionSet(tempListOfTrackedEntity,
+												listObjectEventsAssociated,listOptionSets);
+												//console.log(listEntityObject);
+												for(var iteratorEntityExtracted=0;iteratorEntityExtracted<listEntityObject.length;iteratorEntityExtracted++)
 												{
-													var indexPatient=getIndexOfFhirResourceById(fhirPatientList,entityObject.id);
-													if(indexPatient<0)
+													
+													var entityObject=listEntityObject[iteratorEntityExtracted];
+													if(entityObject!=null)
 													{
-														fhirPatientList.push(entityObject);
-													}
-													else
-													{
-														for(var iteratorIdentifier=0;iteratorIdentifier<entityObject.identifier.length;iteratorIdentifier++)
+														if (entityObject.resourceType =="Patient")
 														{
-															var oNewIdentifier=entityObject.identifier[iteratorIdentifier];
-															var identifierExist=false;
-															for(iterator=0;iterator<fhirPatientList[indexPatient].identifier.length;iterator++)
+															var indexPatient=getIndexOfFhirResourceById(fhirPatientList,entityObject.id);
+															if(indexPatient<0)
 															{
-																if(fhirPatientList[indexPatient].identifier[iterator].system==oNewIdentifier.system
-																&& fhirPatientList[indexPatient].identifier[iterator].value==oNewIdentifier.value)
-																{
-																	identifierExist=true;
-																	break;
-																}
-																else
-																{
-																	continue;
-																}
+																fhirPatientList.push(entityObject);
 															}
-															if(identifierExist==false)
+															else
 															{
-																fhirPatientList[indexPatient].identifier.push(oNewIdentifier);
+																for(var iteratorIdentifier=0;iteratorIdentifier<entityObject.identifier.length;iteratorIdentifier++)
+																{
+																	var oNewIdentifier=entityObject.identifier[iteratorIdentifier];
+																	var identifierExist=false;
+																	for(iterator=0;iterator<fhirPatientList[indexPatient].identifier.length;iterator++)
+																	{
+																		if(fhirPatientList[indexPatient].identifier[iterator].system==oNewIdentifier.system
+																		&& fhirPatientList[indexPatient].identifier[iterator].value==oNewIdentifier.value)
+																		{
+																			identifierExist=true;
+																			break;
+																		}
+																		else
+																		{
+																			continue;
+																		}
+																	}
+																	if(identifierExist==false)
+																	{
+																		fhirPatientList[indexPatient].identifier.push(oNewIdentifier);
+																	}
+																	
+																}
 															}
 															
+															continue;;
+														}
+														//console.log(fhirPatientList);
+														
+														else if (entityObject.resourceType =="Practitioner")
+														{
+															
+															fhirPractitionerList.push(entityObject);
+															continue;
+														}
+														else if (entityObject.resourceType =="Specimen")
+														{
+															fhirSpecimenList.push(entityObject);
+															continue;
+														}
+														else if (entityObject.resourceType =="Condition")
+														{
+															fhirConditionList.push(entityObject);
+															continue;
+														}
+														else if (entityObject.resourceType =="DiagnosticOrder")
+														{
+															//fhirSpecimenList.push(entityObject);
+															fhirDiagnosticOrderList.push(entityObject);
+															continue;
+														}
+														else if (entityObject.resourceType =="Observation")
+														{
+															//fhirSpecimenList.push(entityObject);
+															fhirObservationList.push(entityObject);
+															continue;
+														}
+														else if (entityObject.resourceType =="DiagnosticReport")
+														{
+															//fhirSpecimenList.push(entityObject);
+															fhirDiagnosticReport.push(entityObject);
+															continue;
+														}
+														else if (entityObject.resourceType =="List")
+														{
+															//fhirSpecimenList.push(entityObject);
+															fhirResourceList.push(entityObject);
+															continue;
 														}
 													}
-													
-													continue;;
-												}
-												//console.log(fhirPatientList);
 												
-												else if (entityObject.resourceType =="Practitioner")
-												{
-													
-													fhirPractitionerList.push(entityObject);
-													continue;
+												
 												}
-												else if (entityObject.resourceType =="Specimen")
-												{
-													fhirSpecimenList.push(entityObject);
-													continue;
-												}
-												else if (entityObject.resourceType =="Condition")
-												{
-													fhirConditionList.push(entityObject);
-													continue;
-												}
-												else if (entityObject.resourceType =="DiagnosticOrder")
-												{
-													//fhirSpecimenList.push(entityObject);
-													fhirDiagnosticOrderList.push(entityObject);
-													continue;
-												}
-												else if (entityObject.resourceType =="Observation")
-												{
-													//fhirSpecimenList.push(entityObject);
-													fhirObservationList.push(entityObject);
-													continue;
-												}
-												else if (entityObject.resourceType =="DiagnosticReport")
-												{
-													//fhirSpecimenList.push(entityObject);
-													fhirDiagnosticReport.push(entityObject);
-													continue;
-												}
-												else if (entityObject.resourceType =="List")
-												{
-													//fhirSpecimenList.push(entityObject);
-													fhirResourceList.push(entityObject);
-													continue;
-												}
-											}
-										
-										
+												//console.log(fhirSpecimenList);
+												
+											}//for EntityInstances
+											//
 										}
-										//console.log(fhirSpecimenList);
-										
-									}//for EntityInstances
-									//
-								}
-								//Add All the resource in the table
-								var oBundle={};
-								oBundle=BuildBundleResponse(fhirOrganizationlist,fhirPatientList,fhirPractitionerList,fhirSpecimenList,fhirConditionList,fhirDiagnosticOrderList,
-								fhirObservationList,fhirDiagnosticReport,fhirResourceList);
-								//console.log(oBundle);
-								//document.body.innerHTML = JSON.stringify(oBundle);
-								//document.write(JSON.stringify(oBundle));
-								//console.log(JSON.stringify(oBundle));
-								res.json(oBundle);
-								return res.end();
+										//get Optionset associated ressource
+										var fhirResourceBasic=getAssociatedFhirResourceFromOptionSets(listOptionSets);
+										//console.log(fhirBasicList);
+										//Add All the resource in the table
+										var oBundle={};
+										oBundle=BuildBundleResponse(fhirOrganizationlist,fhirPatientList,fhirPractitionerList,fhirSpecimenList,fhirConditionList,fhirDiagnosticOrderList,
+										fhirObservationList,fhirDiagnosticReport,fhirResourceList,fhirResourceBasic);
+										//console.log(oBundle);
+										//document.body.innerHTML = JSON.stringify(oBundle);
+										//document.write(JSON.stringify(oBundle));
+										//console.log(JSON.stringify(oBundle));
+										res.json(oBundle);
+										return res.end();
+									});
+								}//End if listIdAttributeToRequest
+								else
+								{
+									var listTrackedEntities=_listTrackedEntities;
+									//console.log(listOptions);
+									var listObjectEvents=listTrackedEntities[2];
+									//console.log("---------------listOfEvents------------");
+									//console.log(listObjectEvents);
+									if(listTrackedEntities[0].trackedEntityInstances.length>0)
+									{
+										for(var j=0;j<listTrackedEntities[0].trackedEntityInstances.length;j++)
+										{
+											var listObjectEventsAssociated=getListEvents(listObjectEvents,listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance);
+											
+											//console.log("TEI :"+listTrackedEntities[0].trackedEntityInstances[j].trackedEntityInstance+", events:"+listObjectEventsAssociated.length);
+											var tempListOfTrackedEntity=[];
+											tempListOfTrackedEntity.push(listTrackedEntities[0].trackedEntityInstances[j]);
+											var listEntityObject=GetAssociatedFhirResourceFromMappingAndEvent(tempListOfTrackedEntity,
+											listObjectEventsAssociated);
+											//console.log(listEntityObject);
+											for(var iteratorEntityExtracted=0;iteratorEntityExtracted<listEntityObject.length;iteratorEntityExtracted++)
+											{
+												
+												var entityObject=listEntityObject[iteratorEntityExtracted];
+												if(entityObject!=null)
+												{
+													if (entityObject.resourceType =="Patient")
+													{
+														var indexPatient=getIndexOfFhirResourceById(fhirPatientList,entityObject.id);
+														if(indexPatient<0)
+														{
+															fhirPatientList.push(entityObject);
+														}
+														else
+														{
+															for(var iteratorIdentifier=0;iteratorIdentifier<entityObject.identifier.length;iteratorIdentifier++)
+															{
+																var oNewIdentifier=entityObject.identifier[iteratorIdentifier];
+																var identifierExist=false;
+																for(iterator=0;iterator<fhirPatientList[indexPatient].identifier.length;iterator++)
+																{
+																	if(fhirPatientList[indexPatient].identifier[iterator].system==oNewIdentifier.system
+																	&& fhirPatientList[indexPatient].identifier[iterator].value==oNewIdentifier.value)
+																	{
+																		identifierExist=true;
+																		break;
+																	}
+																	else
+																	{
+																		continue;
+																	}
+																}
+																if(identifierExist==false)
+																{
+																	fhirPatientList[indexPatient].identifier.push(oNewIdentifier);
+																}
+																
+															}
+														}
+														
+														continue;;
+													}
+													//console.log(fhirPatientList);
+													
+													else if (entityObject.resourceType =="Practitioner")
+													{
+														
+														fhirPractitionerList.push(entityObject);
+														continue;
+													}
+													else if (entityObject.resourceType =="Specimen")
+													{
+														fhirSpecimenList.push(entityObject);
+														continue;
+													}
+													else if (entityObject.resourceType =="Condition")
+													{
+														fhirConditionList.push(entityObject);
+														continue;
+													}
+													else if (entityObject.resourceType =="DiagnosticOrder")
+													{
+														//fhirSpecimenList.push(entityObject);
+														fhirDiagnosticOrderList.push(entityObject);
+														continue;
+													}
+													else if (entityObject.resourceType =="Observation")
+													{
+														//fhirSpecimenList.push(entityObject);
+														fhirObservationList.push(entityObject);
+														continue;
+													}
+													else if (entityObject.resourceType =="DiagnosticReport")
+													{
+														//fhirSpecimenList.push(entityObject);
+														fhirDiagnosticReport.push(entityObject);
+														continue;
+													}
+													else if (entityObject.resourceType =="List")
+													{
+														//fhirSpecimenList.push(entityObject);
+														fhirResourceList.push(entityObject);
+														continue;
+													}
+												}
+											
+											
+											}
+											//console.log(fhirSpecimenList);
+											
+										}//for EntityInstances
+										//
+									}
+									//Add All the resource in the table
+									var oBundle={};
+									oBundle=BuildBundleResponse(fhirOrganizationlist,fhirPatientList,fhirPractitionerList,fhirSpecimenList,fhirConditionList,fhirDiagnosticOrderList,
+									fhirObservationList,fhirDiagnosticReport,fhirResourceList,[]);
+									//console.log(oBundle);
+									//document.body.innerHTML = JSON.stringify(oBundle);
+									//document.write(JSON.stringify(oBundle));
+									//console.log(JSON.stringify(oBundle));
+									res.json(oBundle);
+									return res.end();
+								}							
+								
 								//document.body. = JSON.stringify(oBundle);
 								});//GetTrackedEntityInstances
 							
@@ -6597,6 +10856,7 @@
 					{
 						
 						//console.log(listTrackedEntities[0]);
+						
 						
 						if(listTrackedEntities[0].trackedEntityInstances.length>0)
 						{
@@ -6677,7 +10937,8 @@
 			}//End for progAndStagesTracked
 		//console.log(fhirPatientGlobalList);
 		});
-  
+		
+		
 	}
 	
 	function getMetaDataForLab(programeAndStages)
@@ -6768,9 +11029,9 @@
 								var tempListFieldProgram=[];
 								var listDisplayNameIdMapping=resStages[3];
 								tempListFieldProgram=resStages[1];
-								tempListFieldProgram.push(stageName+"/"+executionDateLabel);
+								tempListFieldProgram.push(stageName+"|"+executionDateLabel);
 								listFieldProgram=tempListFieldProgram;
-								console.log(""+(j++)+" - "+stageName+"/"+executionDateLabel);
+								console.log(""+(j++)+" - "+stageName+"|"+executionDateLabel);
 								//listFieldProgram.push(executionDateLabel);
 								//console.log(stageName);
 								var DiplayNameIdMapping={
@@ -6780,7 +11041,7 @@
 									"stage":""
 								};
 								DiplayNameIdMapping.id="eventDate";
-								DiplayNameIdMapping.displayName=stageName+"/"+executionDateLabel;
+								DiplayNameIdMapping.displayName=stageName+"|"+executionDateLabel;
 								DiplayNameIdMapping.type="element";
 								DiplayNameIdMapping.stage=dictStage.id;
 								listDisplayNameIdMapping.push(DiplayNameIdMapping);
@@ -6824,12 +11085,12 @@
 											"type":"",
 											"stage":""
 											};
-											console.log(""+(j++)+" - "+tempNameStage+"/"+resDataElements[1].dataElements[countDataElement].displayName);
+											console.log(""+(j++)+" - "+tempNameStage+"|"+resDataElements[1].dataElements[countDataElement].displayName);
 											DiplayNameIdMapping.id=resDataElements[1].dataElements[countDataElement].id;
-											DiplayNameIdMapping.displayName=tempNameStage+"/"+resDataElements[1].dataElements[countDataElement].displayName.trim();
+											DiplayNameIdMapping.displayName=tempNameStage+"|"+resDataElements[1].dataElements[countDataElement].displayName.trim();
 											DiplayNameIdMapping.type="element";
 											DiplayNameIdMapping.stage=tempIdStage;
-											tempListFieldProgram.push(tempNameStage+"/"+resDataElements[1].dataElements[countDataElement].displayName.trim());
+											tempListFieldProgram.push(tempNameStage+"|"+resDataElements[1].dataElements[countDataElement].displayName.trim());
 											listDisplayNameIdMapping.push(DiplayNameIdMapping);
 										}
 										//console.log(listDisplayNameIdMapping);
@@ -6856,6 +11117,2904 @@
 		}
 	}
   
+	//**************************Function for csv datafile processing *********************//
+	function checkIfTableContainsNonEmptyValues(table)
+	{
+		var minDataSet=entityAPI.getMinDataSetRecord();
+		var compter=0;
+		for(var iterator=0;iterator<table.length;iterator++)
+		{
+			if(table[iterator]!="")
+			{
+				compter++;
+			}
+		}
+		if(compter>=minDataSet)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	function buildUniqueList(initialList,itemToAdd)
+	{
+		var found=false;
+		for(iterator=0;iterator<initialList.length;iterator++)
+		{
+			if(initialList[iterator]==itemToAdd.trim())
+			{
+				found=true;
+				break;
+			}
+		}
+		if(found==false)
+		{
+			initialList.push(itemToAdd.trim());
+		}
+		return initialList;
+	}
+	function getOrgUnitFromListByName(listOfOrgUnit,nameToSearch)
+	{
+		var orgUnitFound=null;
+		for(var iterator=0;iterator<listOfOrgUnit.length;iterator++)
+		{
+			//console.log(listOfOrgUnit[iterator].displayName+"=="+nameToSearch);
+			if(listOfOrgUnit[iterator].displayName==nameToSearch)
+			{
+				orgUnitFound=listOfOrgUnit[iterator];
+				break;
+			}
+		}
+		return orgUnitFound;
+	}
+	function getListAssociatedPatient(_listExtractedPatient,patientId)
+	{
+		var listOfPatientFound=[];
+		if(_listExtractedPatient.length>0)
+		{
+			for(var iteratorResource=0;iteratorResource< _listExtractedPatient.length;iteratorResource++)
+			{
+				var oPatient=_listExtractedPatient[iteratorResource];
+				if(oPatient.id==patientId)
+				{
+					listOfPatientFound.push(oPatient);
+				}
+				
+			}
+		}
+		return listOfPatientFound;
+	}
+	function getListAssociatedSpecimen(_listExtractedSpecimen,patientId,dateCollection)
+	{
+		var listOfSpecimenFound=[];
+		if(_listExtractedSpecimen.length>0)
+		{
+			for(var iteratorResource=0;iteratorResource< _listExtractedSpecimen.length;iteratorResource++)
+			{
+				var oSpecimen=_listExtractedSpecimen[iteratorResource];
+				var specimenPatientId=oSpecimen.subject.reference.split("/")[1];
+				var specimenReceivedTime=oSpecimen.receivedTime;
+				if(specimenPatientId==patientId && specimenReceivedTime==dateCollection)
+				{
+					listOfSpecimenFound.push(oSpecimen);
+				}
+				
+			}
+		}
+		return listOfSpecimenFound;
+	}
+	function getIndexAssociatedSpecimenForPractitioner(_listExtractedSpecimen,practitionerNames)
+	{
+		var index=-1;
+		for(var iteratorResource=0;iteratorResource< _listExtractedSpecimen.length;iteratorResource++)
+		{
+			var oSpecimen=_listExtractedSpecimen[iteratorResource];
+			if(oSpecimen.collection!="")
+			{
+				//console.log(""+oSpecimen.collection.collector+"== "+practitionerNames+" :"+ (oSpecimen.collection.collector==practitionerNames));
+				if (oSpecimen.collection.collector==practitionerNames)
+				{
+					index=iteratorResource;
+					//console.log("index ="+index);
+				}
+			}
+			
+		}
+		return index;
+	}
+	function getListAssociatedCondition(_listExtractedCondition,patientId,dateCollection)
+	{
+		var listOfConditionFound=[];
+		if(_listExtractedCondition.length>0)
+		{
+			for(var iteratorResource=0;iteratorResource< _listExtractedCondition.length;iteratorResource++)
+			{
+				var oCondition=_listExtractedCondition[iteratorResource];
+				var conditionPatientId=oCondition.patient.reference.split("/")[1];
+				var conditionDateRecorded=oCondition.dateRecorded;
+				if(conditionPatientId==patientId && conditionDateRecorded==dateCollection)
+				{
+					listOfConditionFound.push(oCondition);
+				}
+				
+			}
+		}
+		return listOfConditionFound;
+	}
+	function getListAssociatedDiagnosticOrder(_listExtractedDiagnosticOrder,patientId,dateCollection)
+	{
+		var listOfDiagnosticOrderFound=[];
+		if(_listExtractedDiagnosticOrder.length>0)
+		{
+			for(var iteratorResource=0;iteratorResource< _listExtractedDiagnosticOrder.length;iteratorResource++)
+			{
+				var oOrder=_listExtractedDiagnosticOrder[iteratorResource];
+				var orderPatientId=oOrder.subject.reference.split("/")[1];
+				var orderDateRecorded=oOrder.event[0].dateTime;
+				if(orderPatientId==patientId && orderDateRecorded==dateCollection)
+				{
+					listOfDiagnosticOrderFound.push(oOrder);
+				}
+				
+			}
+		}
+		return listOfDiagnosticOrderFound;
+	}
+	function getListAssociatedObservation(_listExtractedObservation,patientId,dateCollection)
+	{
+		var listOfObservationFound=[];
+		if(_listExtractedObservation.length>0)
+		{
+			for(var iteratorResource=0;iteratorResource< _listExtractedObservation.length;iteratorResource++)
+			{
+				var oObservation=_listExtractedObservation[iteratorResource];
+				var observationPatientId=oObservation.subject.reference.split("/")[1];
+				var observationDateRecorded=oObservation.issued;
+				if(observationPatientId==patientId && observationDateRecorded==dateCollection)
+				{
+					listOfObservationFound.push(oObservation);
+				}
+				
+			}
+		}
+		return listOfObservationFound;
+	}
+	function getNbreResourceExtracted(resourceType,listMappedResourceExtracted)
+	{
+		var counter=0;
+		for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+		{
+			if(listMappedResourceExtracted[iteratorMappedResource].type==resourceType)
+			{
+				counter++;
+			}
+		}
+		return counter;
+	}
+	function getOrganizationIdByName(orgName,listOrganizations)
+	{
+		var organizationId=-1;
+		for(var iteratorResource=0;iteratorResource<listOrganizations.length;iteratorResource++)
+		{
+			if(listOrganizations[iteratorResource].displayName==orgName)
+			{
+				organizationId=listOrganizations[iteratorResource].id;
+			}
+		}
+		return organizationId;
+	}
+	convertcsv2fhir=function (req, res, next)
+	{
+	  //var listCsvFile= entityAPI.getListOfFiles();
+	  //console.log(listCsvFile);
+	  var listResourceExtracted=[];
+	  var listMappedResourceExtracted=[];
+	  var filePath=sourceFileLocation;
+		entityAPI.getListOfFiles(filePath,function (resfileName)
+		{
+		  //console.log(fileName);
+		  
+		  var fileName=resfileName;
+		  console.log("Processing file : "+fileName);
+			entityAPI.readCSVFile(fileName,function(dataFile)
+			{
+				
+				var listOfAttributesPatient=getListOfPatientAttributeMapping();
+				//console.log(listOfAttributesPatient);
+				if(dataFile.length>0)
+				{
+					if(dataFile[0].length>0)
+					{
+						var listPatientAttributeIndex=[];
+						var listManagingOrgAssociated=[];
+						var nbreOfHeaderAttributes=0;
+						for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+						{
+							var itemToSearch=dataFile[0][iteratorHeader].trim();
+							
+							var resultChecking=checkAttributeInList(listOfAttributesPatient,itemToSearch);
+							if(resultChecking==true)
+							{
+								nbreOfHeaderAttributes++;
+								listPatientAttributeIndex.push(iteratorHeader);
+							}
+							//console.log(""+itemToSearch+" :"+resultChecking);
+						}
+						//console.log("header attribute :"+nbreOfHeaderAttributes+" patient attribute:"+listOfAttributesPatient.length);
+						var minDataRecordSet=entityAPI.getMinDataSetRecord();
+						if(nbreOfHeaderAttributes>=minDataRecordSet)
+						{
+							var listPatientExtrated=[];
+							
+							entityAPI.getAllOrgUnits("",[],dataFile,listMappedResourceExtracted, function(dataList)
+							{
+							//console.log("Tararaa!!");
+							//console.log(dataFile);
+							
+							var dataFile=dataList[1];
+							var listMappedResourceExtracted=dataList[2];
+							var listManagingOrgToResolve=[];
+							var listOrganizationUnits=[];
+							//Transform the object list to json list
+							//console.log(dataList[0].length);
+							var entries=dataList[0];
+							for(var iteratorEntry=0;iteratorEntry<entries.length;iteratorEntry++)
+							{
+								var oResource=entries[iteratorEntry].resource;
+								var organisationUnit={
+								"id":"",
+								"displayName":""
+								};
+								organisationUnit.id=oResource.id;
+								organisationUnit.displayName=oResource.name;
+								listOrganizationUnits.push(organisationUnit);
+							}
+							//console.log(listOrganizationUnits);
+							//now getAll Basic to allow attribute resolution
+							
+							entityAPI.getAllBasics("",[],listOrganizationUnits,dataFile,[],function(dataListWithBasics)
+							{
+								//console.log(dataListWithBasics[0].length);
+								var listPatientExtracted=[];
+								var listSpecimenExtracted=[];
+								var listPractitionerExtracted=[];
+								var listListResourceExtracted=[];
+								var listBasicExtracted=[];
+								var listConditionExtracted=[];
+								var listDiagnosticOrderExtracted=[];
+								var listObservationExtracted=[];
+								
+								var idCounter=new Date().getTime();
+								var listOptions=[];
+								var listOrganizationUnits=dataListWithBasics[1];
+								var dataFile=dataListWithBasics[2];
+								var listMappedResourceExtracted=[];
+								//console.log(listMappedResourceExtracted);
+								var entries=dataListWithBasics[0];
+								for(var iteratorEntry=0;iteratorEntry<entries.length;iteratorEntry++)
+								{
+									var oResource=entries[iteratorEntry].resource;
+									var oOption={
+									"id":"",
+									"code":"",
+									"displayName":""
+									};
+									oOption.id=oResource.id;
+									oOption.code=oResource.code.coding[0].code;
+									oOption.displayName=oResource.code.text;
+									listOptions.push(oOption);
+								}
+								//console.log(listOptions);
+								for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+								{
+									
+									if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+									{
+										var dicResourceExtracted={
+										"type":"",
+										"ligneIndex":"",
+										"value":""
+										};
+										//console.log(dataFile[iteratorLigne]);
+										//console.log("---------------------");
+										//console.log("Patient Initialization");
+										//Patient Initialization
+										var oPatient={};
+										oPatient= Object.create(Patient);
+										oPatient.resourceType="Patient";
+										//if(oTrackedEntity)
+										
+										var oName={};
+										oName= Object.create(HumanName);
+										oName.resourceType="HumanName";
+										oName.use="official";
+										//
+										var oContact={};
+										oContact= Object.create(ContactPoint);
+										oContact.resourceType="ContactPoint";
+										var oAddress={};
+										oAddress= Object.create(Address);
+										oAddress.resourceType="Address";
+										oPatient.careProvider=[];
+										var PatientSet=false;
+										var listOfIdentifier=[];
+										for(var iteratorValue=0;iteratorValue<listPatientAttributeIndex.length;iteratorValue++)
+										{
+											if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]!="")
+											{
+												var oAttribute=dataFile[0][listPatientAttributeIndex[iteratorValue]].trim();
+												var identifierListAttributes=patientAttributesMapping.identifier.split(",");
+												var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+												if(resCheck==true)
+												{
+													var orgIdentifier={};
+													oIdentifier=Object.create(Identifier);
+													//assignment of Identifier
+													oIdentifier.use="official";
+													oIdentifier.type={"text":""+oAttribute};
+													oIdentifier.system="http://hl7.org/fhir/";
+													oIdentifier.value=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+													listOfIdentifier.push(oIdentifier);
+													PatientSet=true;
+													continue;
+												}
+												
+												//console.log(oAttribute);
+												switch(oAttribute)
+												{
+													case patientAttributesMapping.id:
+														if(formatPatientId==true)
+														{
+															oPatient.id=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim()+"-";
+														}
+														else if (formatPatientId==false)
+														{
+															oPatient.id=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim();
+														}
+														
+														var oIdentifier={};
+														oIdentifier=Object.create(Identifier);
+														//assignment of Identifier
+														oIdentifier.use="official";
+														oIdentifier.type={"text":""+oAttribute};
+														oIdentifier.system="http://hl7.org/fhir/";
+														oIdentifier.value=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														listOfIdentifier.push(oIdentifier);
+														PatientSet=true;
+														break;
+													case patientAttributesMapping.name_family:
+														oName.family=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														oName.text+=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]+" ";
+														PatientSet=true;
+													break;
+													case patientAttributesMapping.name_given:
+														oName.given=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														oName.text+=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]+" ";
+														PatientSet=true;
+													break;
+													case patientAttributesMapping.telecom_phone:
+														oContact.system="phone";
+														oContact.value=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														oContact.use="home";
+														oContact.rank="1";
+														oPatient.telecom=[oContact];
+														PatientSet=true;
+													break;
+													case patientAttributesMapping.telecom_email:
+														oContact.system="email";
+														oContact.value=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														oContact.use="home";
+														oContact.rank="2";
+														oPatient.telecom=[oContact];
+														PatientSet=true;
+													break;
+													case patientAttributesMapping.gender:
+														/*if(getAssociatedGenderValueSet(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]])!="")
+														{
+															oPatient.gender=getAssociatedGenderValueSet(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]);
+														}*/
+														oPatient.gender=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														PatientSet=true;
+													break;
+													case patientAttributesMapping.birthDate:
+														oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														PatientSet=true;
+														if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]!="" && dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].includes("-")==false)
+														{
+															var currentYear=new Date().getFullYear();
+															var ageOfPatient=parseInt(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]);
+															var yearOfBirth=currentYear-ageOfPatient;
+															//console.log(yearOfBirth);
+															var dateOfBirth=""+yearOfBirth+"-01-01";
+															oPatient.birthDate=dateOfBirth;
+															PatientSet=true;
+															//console.log(new Date().getFullYear()-patientAttributesMapping.birthDate);
+														}
+														else if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]!="" && dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].includes("-")==true)
+														{
+															oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+															PatientSet=true;
+														}
+														break;
+													case patientAttributesMapping.deceasedBoolean:
+														//console.log(oAttribute);
+														//var code=getCodeFromDisplayNameInListOptionSet
+														if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].toLowerCase()=="alive")
+														{
+															oPatient.deceasedBoolean=false;
+														}
+														else
+														{
+															oPatient.deceasedBoolean=true;
+														}
+														PatientSet=true;
+														break;
+														//oTrackedEntity.attributes[i].value;
+													case patientAttributesMapping.deceasedDateTime:
+														if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim()!="")
+														{
+															oPatient.deceasedDateTime=formatDateInZform(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim());
+														}
+														break;
+														case patientAttributesMapping.address_text:
+															oAddress.text=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+															//oPatient.address=[oAddress];
+															PatientSet=true;
+														break;
+														case patientAttributesMapping.address_city:
+															oAddress.city=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+															//oPatient.address=[oAddress];
+															PatientSet=true;
+														break;
+													case patientAttributesMapping.managingOrganization:
+															var organizationId=getOrganizationIdByName(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim(),listOrganizationUnits);
+															if(organizationId!=-1)
+															{
+																oPatient.managingOrganization={"reference":"Organization/"+organizationId};
+															}
+															else
+															{
+																oPatient.managingOrganization="";
+															}
+													break;
+													
+												}
+						
+											}
+										}//End for iteratorValue
+										if(PatientSet==true)
+										{
+											/*if(getIndexOfFhirResourceById(listPatientExtrated,oPatient.id)==-1)
+											{}*/
+												
+												
+												oPatient.name=[oName];
+												oPatient.identifier=listOfIdentifier;
+												//entityPatient=oPatient;
+												oPatient.address=[oAddress];
+												dicResourceExtracted.type="Patient";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oPatient;
+												//console.log(dicResourceExtracted);
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												//listPatientExtrated.push(oPatient);
+											
+											
+										}//End PatientSet
+									}//End if dataFile[iteratorLigne].length
+									//Resolve ManagingOrganization Name
+									
+								}//End for iterator ligne
+								//console.log(listMappedResourceExtracted);
+								
+									
+								//Extract other Resource
+								//Extract Specimen
+								var listSpecimenExtracted=[];
+								var nbreOfHeaderAttributes=0;
+								var listSpecimenAttributeIndex=[];
+								var listOfAttributesSpecimen=getListOfSpecimenAttributeMapping();
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesSpecimen,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listSpecimenAttributeIndex.push(iteratorHeader);
+									}
+									//console.log(""+itemToSearch+" :"+resultChecking);
+								}
+							
+								if(listSpecimenAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Specimen initialization
+											var oSpecimen={};
+											oSpecimen= Object.create(Specimen);
+											oSpecimen.resourceType="Specimen";
+											oSpecimen.active=true;
+											var listOfSpecimenIdentifier=[];
+											var listOfTraitment=[];
+											var oConceptProcedure={};
+											oConceptProcedure= Object.create(CodeableConcept);
+											var oConceptCollectionMethod={};
+											oConceptCollectionMethod= Object.create(CodeableConcept);
+											var oConceptBodySite={};
+											oConceptBodySite= Object.create(CodeableConcept);
+											//oConceptProcedure.
+											var oTraitment={
+												"description":"",
+												"procedure":{}
+												};
+											var oCollection={};
+											oCollection= Object.create(Collection);
+											var oContainer={};
+											oContainer= Object.create(Container);
+											var specimenIsSet=false;
+											var hasCollectionInfo=false;
+											var hasTraitementInfo=false;
+											var hasContainerInfo=false;
+											var identifierListAttributes=specimenAttributesMapping.identifier.split(",");
+											for(var iteratorValue=0;iteratorValue<listSpecimenAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listSpecimenAttributeIndex[iteratorValue]].trim();
+												
+													var resCheck=checkAttributeInList(identifierListAttributes,oAttribute);
+													if(resCheck==true)
+													{
+														if(checkIfIdentifierExist(listOfSpecimenIdentifier,dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim(),
+														"Specimen ID")==false)
+														{
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Specimen ID"};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															//oSpecimen.id=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim()+"-";
+															listOfSpecimenIdentifier.push(oIdentifier);
+															specimenIsSet=true;
+														}
+														
+														continue;
+													}
+													switch(oAttribute)
+													{
+														case specimenAttributesMapping.id:
+															if(formatSpecimenId==true)
+															{
+																oSpecimen.id=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim()+"-";
+															}
+															else if (formatSpecimenId==false)
+															{
+																oSpecimen.id=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															}
+															
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Specimen ID"};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															//oSpecimen.id=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim()+"-";
+															listOfSpecimenIdentifier.push(oIdentifier);
+															break;
+														case specimenAttributesMapping.status:
+															oSpecimen.status=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															//oSpecimen.status="available";
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.type:
+															var oConceptSpecimenType={};
+															oConceptSpecimenType= Object.create(oConceptSpecimenType);
+															oConceptSpecimenType.text=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															oSpecimen.type=oConceptSpecimenType;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.subject:
+															var subjectRef="";
+															if(formatPatientId==true)
+															{
+																subjectRef={"reference":"Patient/"+dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim()+"-"};
+															}
+															else if (formatPatientId==false)
+															{
+																subjectRef={"reference":"Patient/"+dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim()};
+															}
+															
+															oSpecimen.subject=subjectRef;
+															break;
+														case specimenAttributesMapping.accession:
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Lab Identification"};
+															oIdentifier.system="http://hl7.org/fhir";
+															oIdentifier.value=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															oSpecimen.accession=oIdentifier;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.receivedTime:
+															oSpecimen.receivedTime=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collector:
+															oCollection.collector=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collection_comment:
+															oCollection.comment=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collectedDateTime:
+															oCollection.collectedDateTime=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															hasCollectionInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collection_quantity_unit:
+															oCollection.quantity.unit=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															hasCollectionInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collection_quantity_value:
+															oCollection.quantity.value=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															hasCollectionInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collection_method:
+															oConceptCollectionMethod.text=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															oCollection.method=oConceptCollectionMethod;
+															hasCollectionInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.collection_bodySite:
+															oConceptBodySite.text=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															oCollection.bodySite=oConceptBodySite;
+															hasCollectionInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.container_capacity_unit:
+															oContainer.capacity.unit=oEvent.dataValues[iteratorDataValues].value;
+															hasContainerInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.container_capacity_value:
+															oContainer.capacity.value=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															hasContainerInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.container_description:
+															oContainer.description=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															hasContainerInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.traitment_description:
+															oTraitment.description=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															hasTraitementInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.traitment_procedure:
+															oConceptProcedure.text=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															oTraitment.procedure=oConceptProcedure;
+															hasTraitementInfo=true;
+															specimenIsSet=true;
+															break;
+														case specimenAttributesMapping.container_identifier:
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Container Identification"};
+															oIdentifier.system="http://hl7.org/fhir";
+															oIdentifier.value=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															oContainer.Identifier=[oIdentifier];
+															specimenIsSet=true;
+															break;
+													}
+							
+												}
+												
+											}//End for iteratorValue
+											if(specimenIsSet==true)
+											{
+												
+												//if(getIndexOfFhirResourceById(listSpecimenExtracted,oSpecimen.id)==-1 && oSpecimen.id!="")
+												if(oSpecimen.id!="")
+												{
+													oSpecimen.identifier=listOfSpecimenIdentifier;
+													
+													if(hasCollectionInfo==true)
+													{
+														oSpecimen.collection=oCollection;
+													}
+													if(hasTraitementInfo==true)
+													{
+														oSpecimen.treatment=[oTraitment];
+													}
+													if(hasContainerInfo==true)
+													{
+														oSpecimen.Container=[oContainer];
+													}
+													//entitySpecimen=oSpecimen;
+													
+													//listEntityObject.push(entitySpecimen);
+													dicResourceExtracted.type="Specimen";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oSpecimen;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+												}
+													//console.log(dicResourceExtracted);
+													//listSpecimenExtracted.push(oSpecimen);
+												//console.log(oSpecimen);
+											}//End if specimenIsSet
+										}//End if dataFile[iteratorLine]
+									}//End for iteratorLigne
+									//console.log(listSpecimenExtracted);
+								}//End if listSpecimenAttributeIndex.length
+								//console.log(listSpecimenExtracted);
+								
+							
+								//console.log(listMappedResourceExtracted);
+								//Extract Condition
+								var listConditionExtracted=[];
+								var nbreOfHeaderAttributes=0;
+								var listConditionAttributeIndex=[];
+								var listOfAttributesCondition=getListOfConditionAttributeMapping();
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesCondition,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listConditionAttributeIndex.push(iteratorHeader);
+									}
+									//console.log(""+itemToSearch+" :"+resultChecking);
+								}
+								//console.log(listConditionAttributeIndex);
+								if(listConditionAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Condition Initialization
+											var oCondition={};
+											oCondition= Object.create(Condition);
+											oCondition.resourceType="Condition";
+											var listOfConditionIdentifier=[];
+											var conditionIsSet=false;
+											for(var iteratorValue=0;iteratorValue<listConditionAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listConditionAttributeIndex[iteratorValue]].trim();
+													switch(oAttribute)
+													{
+														case conditionAttributesMapping.identifier:
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Condition Identification"};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]];
+															listOfConditionIdentifier.push(oIdentifier);
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.patient:
+															if(formatPatientId==true)
+															{
+																oCondition.patient={"reference":"Patient/"+dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]].trim()+"-"};
+															}
+															else if (formatPatientId==false)
+															{
+																oCondition.patient={"reference":"Patient/"+dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]].trim()};
+															}
+															
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.encounter:
+															//oCondition.encounter={"reference":"Encounter/"+dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]};
+															//conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.dateRecorded:
+															oCondition.dateRecorded=extractDateFromDateTime(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]);
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.code:
+															var code=getCodeFromDisplayNameInListOptionSet(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]].trim(),listOptions);
+															if(code!="")
+															{
+																var  oConcept={};
+																oConcept= Object.create(CodeableConcept);
+																oConcept.text=code;
+																oCondition.code=oConcept;
+																conditionIsSet=true;
+															}
+															//console.log(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]].trim()+" :"+code);
+															break;
+														case conditionAttributesMapping.category:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]];
+															oCondition.category=oConcept;
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.clinicalStatus:
+															oCondition.clinicalStatus=dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]];
+															//active
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.verificationStatus:
+															oCondition.verificationStatus=dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]];
+															//provisional
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.severity:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]];
+															oCondition.severity=oConcept;
+															//provisional
+															conditionIsSet=true;
+															break;
+														case conditionAttributesMapping.onsetDateTime:
+															oCondition.onsetDateTime=formatDateInZform(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]);
+															conditionIsSet=true;
+															break;
+													}//End of switch
+												}
+											}//End iteratorValue
+											if(conditionIsSet==true)
+											{
+												oCondition.id="cond-"+idCounter+iteratorLigne;
+												//oCondition.id="cond-"+new Date().getTime();
+												if(oCondition.clinicalStatus=="")
+												{
+													oCondition.clinicalStatus="active";
+												}
+												if(oCondition.verificationStatus=="")
+												{
+													oCondition.verificationStatus="provisional";
+												}
+												dicResourceExtracted.type="Condition";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oCondition;
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												//console.log(dicResourceExtracted);
+												//listConditionExtracted.push(oCondition);
+											}
+						//
+										}//End if dataFile[iteratorLigne]
+									}//end for iteratorLigne
+								}//end if listConditionAttributeIndex
+								//console.log(listConditionExtracted[0].patient.reference.split("/")[1]);
+								//console.log(listConditionExtracted);
+								//Extract DiagnosticOrder
+								var listDiagnosticOrderExtracted=[];
+								var nbreOfHeaderAttributes=0;
+								var listDiagnosticOrderAttributeIndex=[];
+								var listOfAttributesDiagnosticOrder=getListOfDiagnosticOrderAttributeMapping();
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesDiagnosticOrder,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listDiagnosticOrderAttributeIndex.push(iteratorHeader);
+									}
+								}//End for iteratorHeader
+								if(listDiagnosticOrderAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Order Initialization
+											var oOrder={};
+											oOrder= Object.create(DiagnosticOrder);
+											oOrder.resourceType="DiagnosticOrder";
+											var listOfOrderIdentifier=[];
+											var oOrderEvent={};
+											oOrderEvent= Object.create(OrderEvent);
+											oOrder.specimen=[];
+											var orderIsSet=false;
+											for(var iteratorValue=0;iteratorValue<listDiagnosticOrderAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listDiagnosticOrderAttributeIndex[iteratorValue]].trim();
+													switch(oAttribute)
+													{
+														case orderAttributesMapping.identifier:
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Order Identification"};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															listOfOrderIdentifier.push(oIdentifier);
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.subject:
+															if(formatPatientId==true)
+															{
+																oOrder.subject={"reference":"Patient/"+dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]].trim()+"-"};
+															}
+															else if (formatPatientId==false)
+															{
+																oOrder.subject={"reference":"Patient/"+dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]].trim()};
+															}
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.orderer:
+															//oOrder.orderer={"reference":"Practitioner/"+dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]};
+															//orderIsSet=true;
+															break;
+														case orderAttributesMapping.encounter:
+															//oOrder.encounter={"reference":"Encounter/"+dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]};
+															//orderIsSet=true;
+															break;
+														case orderAttributesMapping.reason:
+															var oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															oOrder.reason=[oConcept];
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.supportingInformation:
+															oOrder.supportingInformation=[dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]];
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.specimen:
+															//oOrder.specimen={"reference":"Specimen/"+dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]};
+															//orderIsSet=true;
+															break;
+														case orderAttributesMapping.status:
+															oOrder.status=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.priority:
+															oOrder.priority=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.orderEvent_dateTime:
+															oOrderEvent.dateTime=formatDateInZform(dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]);
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.orderEvent_status:
+															oOrderEvent.status=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.orderEvent_description:
+															var oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															oOrderEvent.description=oConcept;
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.item:
+															var oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
+															oOrder.item=[oConcept];
+															orderIsSet=true;
+															break;
+														case orderAttributesMapping.note:
+															oOrder.note={"text":dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]};
+															orderIsSet=true;
+															break;
+														
+													}//End of switch
+													
+												}
+												
+											}//for iteratorValue
+											if(orderIsSet==true)
+											{
+												oOrder.id="ord-"+idCounter+iteratorLigne;
+												//oOrder.id="ord-"+new Date().getTime();
+												oOrder.identifier=listOfOrderIdentifier;
+												//Add additional information for validation
+												oOrderEvent.status="requested";
+												oOrder.event=[];
+												oOrder.event.push(oOrderEvent);
+												var patientIdAssociated=oOrder.subject.reference.split("/")[1];
+												var dateTimeEvent=oOrderEvent.dateTime;
+												//console.log(patientIdAssociated+":"+dateTimeEvent);
+												var nbrSpecimenExtracted=0;
+												var nbrConditionExtracted=0;
+												nbrSpecimenExtracted=getNbreResourceExtracted("Specimen",listMappedResourceExtracted);
+												nbrConditionExtracted=getNbreResourceExtracted("Condition",listMappedResourceExtracted);
+												//for()
+												if (nbrSpecimenExtracted>0)
+												{
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="Specimen" && 
+														listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var resourceRef={"reference":"Specimen/"+listMappedResourceExtracted[iteratorMappedResource].value.id};
+															//console.log(resourceRef);
+															//console.log("---------------");
+															oOrder.specimen.push(resourceRef);
+															//console.log(oOrder);
+															break;
+														}
+													}
+												}
+												
+												if (nbrConditionExtracted>0)
+												{
+													oOrder.supportingInformation=[];
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="Condition" && 
+														listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var resourceRef={"reference":"Condition/"+listMappedResourceExtracted[iteratorMappedResource].value.id};
+															//console.log(resourceRef);
+															oOrder.supportingInformation.push(resourceRef);
+															//console.log(oOrder);
+															break;
+														}
+													}
+												}
+												dicResourceExtracted.type="DiagnosticOrder";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oOrder;
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												//console.log(dicResourceExtracted.value);
+												
+											}
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//end if listDiagnosticOrderAttributeIndex.length
+								//console.log(listDiagnosticOrderExtracted);
+								//Extract DiagnosticOrder
+								var listObservationExtracted=[];
+							
+								var nbreOfHeaderAttributes=0;
+								var listObservationAttributeIndex=[];
+								var listOfAttributesObservation=getListOfObservationAttributeMapping();
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesObservation,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listObservationAttributeIndex.push(iteratorHeader);
+									}
+								}//End for iteratorHeader
+								if(listObservationAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Observation initialization
+											var oObservation={};
+											oObservation= Object.create(Observation);
+											oObservation.resourceType="Observation";
+											oObservation.performer=[];
+											var listOfObservationIdentifier=[];
+											var oSampledData={};
+											oSampledData= Object.create(SampledData);
+											var oPeriodEffective={};
+											oPeriodEffective= Object.create(Period);
+											var oPeriodResult={};
+											oPeriodResult= Object.create(Period);
+											var oValueQuantity={};
+											oValueQuantity= Object.create(Quantity);
+											var oOriginQuantity={};
+											oOriginQuantity= Object.create(Quantity);
+											var oObservationRange={};
+											oObservationRange=Object.create(Range);
+											var oObservationRatio={};
+											oObservationRatio=Object.create(Ratio);
+											var oBodySiteConcept={};
+											oBodySiteConcept=Object.create(CodeableConcept);
+											var oAbsentRaisonConcept={};
+											oAbsentRaisonConcept=Object.create(CodeableConcept);
+											var observationIsSet=false;
+											var hasValueSampledDataInfo=false;
+											var hasEffectivePeriodInfo=false;
+											var hasValueQuantityInfo=false;
+											var hasValueRangeInfo=false;
+											var hasValueRatioInfo=false;
+											var hasValuePeriodInfo=false;
+											for(var iteratorValue=0;iteratorValue<listObservationAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listObservationAttributeIndex[iteratorValue]].trim();
+													
+													switch(oAttribute)
+													{
+														case observationAttributesMapping.identifier:
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":"Observation Identification"};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															listOfObservationIdentifier.push(oIdentifier);
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.status:
+															oObservation.status=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.category:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.category=oConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.code:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.code=oConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.subject:
+															if(formatPatientId==true)
+															{
+																oObservation.subject={"reference":"Patient/"+dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]].trim()+"-"};
+															}
+															else if (formatPatientId==false)
+															{
+																oObservation.subject={"reference":"Patient/"+dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]].trim()};
+															}
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.encounter:
+															//oObservation.encounter={"reference":"Encounter/"+dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]};
+															//observationIsSet=true;
+															break;
+														case observationAttributesMapping.effectiveDateTime:
+															oObservation.effectiveDateTime=formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.effectivePeriod_dateSup:
+															oPeriodEffective.end= formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															hasEffectivePeriodInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.effectivePeriod_dateInf:
+															oPeriodEffective.start=formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															hasEffectivePeriodInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.issued:
+															oObservation.issued=formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															break;
+														case observationAttributesMapping.valueQuantity_unit:
+															oValueQuantity.unit=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueQuantityInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueQuantity_value:
+															oValueQuantity.value=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueQuantityInfo=true;
+															break;
+														case observationAttributesMapping.valueCodeableConcept:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.valueCodeableConcept=oConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueString:
+															oObservation.valueString=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueRange_sup:
+															var rangeQuantity=Object.create(Quantity);
+															rangeQuantity.value=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservationRange.high=rangeQuantity;
+															hasValueRangeInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueRange_Inf:
+															var rangeQuantity=Object.create(Quantity);
+															rangeQuantity.value=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservationRange.low=rangeQuantity;
+															hasValueRangeInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueRatio_num:
+															oObservationRatio.numerator=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueRatioInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueRatio_denom:
+															oObservationRatio.denominator=oEvent.dataValues[iteratorDataValues].value;
+															hasValueRatioInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueSampledData_origin:
+															oOriginQuantity.value=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															break;
+														case observationAttributesMapping.valueSampledData_period:
+															oSampledData.period=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueSampledDataInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueSampledData_factor:
+															oSampledData.factor=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueSampledDataInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueSampledData_lowerLimit:
+															oSampledData.lowerLimit=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueSampledData_upperLimit:
+															oSampledData.upperLimit=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueSampledDataInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueSampledData_dimensions:
+															oSampledData.dimensions=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															 hasValueSampledDataInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueSampledData_data:
+															oSampledData.data=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValueSampledDataInfo=true;
+															break;
+														case observationAttributesMapping.valueTime:
+															oObservation.valueTime=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valueDateTime:
+															oObservation.valueDateTime=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valuePeriod_start:
+															oPeriodResult.start=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValuePeriodInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.valuePeriod_end:
+															oPeriodResult.end=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															hasValuePeriodInfo=true;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.dataAbsentReason:
+															oAbsentRaisonConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.dataAbsentReason=oAbsentRaisonConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.interpretation:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.interpretation=oConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.comments:
+															var code=getCodeFromDisplayNameInListOptionSet(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]].trim(),listOptions);
+															if(code!="")
+															{
+																oObservation.comments=code;
+																observationIsSet=true;
+															}
+															console.log(oObservation.comments);
+															break;
+														case observationAttributesMapping.bodySite:
+															oBodySiteConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.bodySite=oBodySiteConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.method:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
+															oObservation.method=oConcept;
+															observationIsSet=true;
+															break;
+														case observationAttributesMapping.specimen:
+															//oObservation.specimen={"reference":"Specimen/"+dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]].trim()+"-"};
+															//observationIsSet=true;
+															break;
+														case observationAttributesMapping.device:
+															//oObservation.device={"reference":"Device/"+dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]};
+															//observationIsSet=true;
+															break;
+														case observationAttributesMapping.referenceRange:
+															//oObservation.referenceRange=[];
+															break;
+														case observationAttributesMapping.related:
+															//oObservation.related=[];
+															break;
+														case observationAttributesMapping.component:
+															//oObservation.component=[];
+															break;
+														}//End switch
+						
+													
+												}
+												
+											}//for iteratorValue
+											if(observationIsSet==true)
+											{
+												
+												oObservation.id="obs-"+idCounter+iteratorLigne;
+												//oObservation.id="obs-"+new Date().getTime();
+												//
+												
+												oSampledData.origin=oOriginQuantity;
+												//oObservation.identifier=listOfObservationIdentifier;
+												if(hasValueSampledDataInfo==true)
+												{
+													oObservation.valueSampledData=oSampledData;
+												}
+												if(hasEffectivePeriodInfo==true)
+												{
+													oObservation.effectivePeriod=oPeriodEffective;
+												}
+												if(hasValueQuantityInfo==true)
+												{
+													oObservation.valueQuantity=oValueQuantity;
+												}
+												if(hasValueRangeInfo==true)
+												{
+													oObservation.valueRange=oObservationRange;
+												}
+												//checkIfAsProperties(oObservationRange);
+												if(hasValueRatioInfo==true)
+												{
+													oObservation.valueRatio=oObservationRatio;
+												}
+												if(hasValuePeriodInfo==true)
+												{
+													oObservation.valuePeriod=oPeriodResult;
+												}
+												oObservation.identifier=listOfObservationIdentifier;
+												//Add additional information for validation
+												
+												if(oObservation.interpretation=="")
+												{
+													oObservation.status="registered";
+												}
+												else
+												{
+													oObservation.status="final";
+												}
+												
+												//By Default used Microscopy observation as code if note setted
+												/*
+												if(oObservation.code=="")
+												{
+													var oConcept={};
+													oConcept= Object.create(CodeableConcept);
+													oConcept.text="Microscopic Observation";
+													oConcept.code=[{"code":"10355-6"}];
+													oObservation.code=oConcept;
+												}*/
+												//Assign specimen concerned
+												var nbrSpecimenExtracted=0;
+												nbrSpecimenExtracted=getNbreResourceExtracted("Specimen",listMappedResourceExtracted);
+												
+												if (nbrSpecimenExtracted>0)
+												{
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="Specimen" && 
+														listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var resourceRef={"reference":"Specimen/"+listMappedResourceExtracted[iteratorMappedResource].value.id};
+															oObservation.specimen=resourceRef;
+															break;
+														}
+													}
+												}
+												
+												dicResourceExtracted.type="Observation";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oObservation;
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												//Check if there is not performer info to add orgUnit
+												//listObservationExtracted.push(oObservation);
+												
+											}
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//end if listObservationAttributeIndex.length
+								//console.log(listTestingLaboratory);
+								
+								//console.log(listMappedResourceExtracted[2].value);
+								//Extract Practitioner Care provider
+								var listPractitionerExtracted=[];
+								var nbreOfHeaderAttributes=0;
+								var listPractitionerAttributeIndex=[];
+								//var practitionerNature=getPractitionerNature(oEvent.programStageName);
+								var listOfAttributesPractitioner=getListOfPractitionerAttributeMapping();
+								//console.log(listOfAttributesPractitioner);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesPractitioner,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listPractitionerAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listPractitionerAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Practitioner Initialization
+											var oPractitioner={};
+											oPractitioner= Object.create(Practitioner);
+											oPractitioner.resourceType="Practitioner";
+											var oName={};
+											oName= Object.create(HumanName);
+											oName.resourceType="HumanName";
+											oName.use="official";
+											var oAddress={};
+											oAddress= Object.create(Address);
+											oAddress.resourceType="Address";
+											oPractitioner.telecom=[];
+											oPractitioner.practitionerRole=[];
+											var oPractitionerRole={};
+											oPractitionerRole= Object.create(PractitionerRole);
+											var practitionerSet=false;
+											var listOfPractitionerIdentifier=[];
+											var stageName=(dataFile[0][listPractitionerAttributeIndex[0]].trim().split("|"))[0];
+											var practitionerNature=getPractitionerNature(stageName.trim());
+											
+											for(var iteratorValue=0;iteratorValue<listPractitionerAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listPractitionerAttributeIndex[iteratorValue]].trim();
+													
+													switch(oAttribute)
+													{
+														case practitionerAttributesMapping.id:
+															oPractitioner.id=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															var oIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":""+oAttribute};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															listOfPractitionerIdentifier.push(oIdentifier);
+															practitionerSet=true;
+															break;
+														case practitionerAttributesMapping.name_family:
+															oName.family=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oName.text+=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim()+" ";
+															practitionerSet=true;
+														break;
+														case practitionerAttributesMapping.name_given:
+															oName.given=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oName.text+=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim()+" ";
+															practitionerSet=true;;
+														break;
+														case practitionerAttributesMapping.telecom_phone:
+															var oContact={};
+															oContact= Object.create(ContactPoint);
+															oContact.resourceType="ContactPoint";
+															oContact.system="phone";
+															oContact.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oContact.use="home";
+															oContact.rank="1";
+															oPractitioner.telecom.push(oContact);
+															practitionerSet=true;;
+														break;
+														case practitionerAttributesMapping.telecom_email:
+															var oContact={};
+															oContact= Object.create(ContactPoint);
+															oContact.resourceType="ContactPoint";
+															oContact.system="email";
+															oContact.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oContact.use="home";
+															oContact.rank="2";
+															//oPractitioner.telecom.push(oContact);
+															practitionerSet=true;
+														break;
+														case practitionerAttributesMapping.gender:
+															if(getAssociatedGenderValueSet(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim())!="")
+															{
+																oPractitioner.gender=getAssociatedGenderValueSet(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim());
+															}
+															practitionerSet=true;
+														break;
+														case practitionerAttributesMapping.address:
+															oAddress.text=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oPractitioner.address=[oAddress];
+															practitionerSet=true;
+														break;
+														case practitionerAttributesMapping.practitionerRole_managingOrganization:
+															var organizationId=getOrganizationIdByName(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim(),listOrganizationUnits);
+															if(organizationId!=-1)
+															{
+																oPractitionerRole.managingOrganization={"reference":"Organization/"+organizationId};
+															}
+															else
+															{
+																oPractitionerRole.managingOrganization="";
+															}
+															practitionerSet=true;
+														break;
+														case practitionerAttributesMapping.practitionerRole_role:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oPractitionerRole.role=oConcept;
+															practitionerSet=true;
+														break;
+													}//End switch
+												}//end if dataFile[iteratorLigne]
+											}//End for iteratorValue
+											if(practitionerSet==true)
+											{
+												if(oPractitioner.id=="")
+												{
+													oPractitioner.id="pract-"+idCounter+iteratorLigne;
+													//oPractitioner.id="pract-"+new Date().getTime();
+												}
+												oPractitioner.name=[oName];
+												oPractitioner.identifier=listOfPractitionerIdentifier;
+												oPractitioner.telecom.push(oContact);
+												oPractitioner.practitionerRole.push(oPractitionerRole);
+												dicResourceExtracted.type="Practitioner";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oPractitioner;
+												//console.log(dicResourceExtracted.value.practitionerRole);
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												
+												if(practitionerNature=="care_provider")
+												{
+													//Identify care provider associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Patient")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.careProvider.push(resourceRef);
+															break;
+														}
+													}
+												}
+												if(practitionerNature=="specimen_collector")
+												{
+													//Identify specimen collected associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Specimen")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.collection.collector=resourceRef;
+															break;
+														}
+													}
+												}
+												if(practitionerNature=="observation_performer")
+												{
+													//Identify specimen collected associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Observation")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.performer.push(resourceRef);
+															break;
+														}
+													}
+												}
+												
+											}//End if practitionerSet
+										}//End if dataFile[iteratorLigne]
+									}//End for  iteratorLigne
+								}//End if PractitionerAttributeIndex
+								
+								//Extract Practitioner Specimen Handler
+								listPractitionerAttributeIndex=[];
+								listOfAttributesPractitioner=[];
+								listOfAttributesPractitioner=getListOfPractitionerSpecimenHandlingAttributeMapping();
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesPractitioner,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listPractitionerAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listPractitionerAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Practitioner Initialization
+											var oPractitioner={};
+											oPractitioner= Object.create(Practitioner);
+											oPractitioner.resourceType="Practitioner";
+											var oName={};
+											oName= Object.create(HumanName);
+											oName.resourceType="HumanName";
+											oName.use="official";
+											
+											var oAddress={};
+											oAddress= Object.create(Address);
+											oAddress.resourceType="Address";
+											oPractitioner.telecom=[];
+											oPractitioner.practitionerRole=[];
+											var oPractitionerRole={};
+											oPractitionerRole= Object.create(PractitionerRole);
+											var practitionerSet=false;
+											var listOfPractitionerIdentifier=[];
+											var stageName=(dataFile[0][listPractitionerAttributeIndex[0]].trim().split("|"))[0];
+											var practitionerNature=getPractitionerNature(stageName.trim());
+											
+											for(var iteratorValue=0;iteratorValue<listPractitionerAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listPractitionerAttributeIndex[iteratorValue]].trim();
+													
+													switch(oAttribute)
+													{
+														case practitionerSpecimenHandlingAttributesMapping.id:
+															oPractitioner.id=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															var orgIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":""+oAttribute};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															listOfPractitionerIdentifier.push(oIdentifier);
+															practitionerSet=true;
+															break;
+														case practitionerSpecimenHandlingAttributesMapping.name_family:
+															oName.family=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oName.text+=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim()+" ";
+															practitionerSet=true;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.name_given:
+															oName.given=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oName.text+=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim()+" ";
+															practitionerSet=true;;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.telecom_phone:
+															var oContact={};
+															oContact= Object.create(ContactPoint);
+															oContact.resourceType="ContactPoint";
+															oContact.system="phone";
+															oContact.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oContact.use="home";
+															oContact.rank="1";
+															oPractitioner.telecom.push(oContact);
+															practitionerSet=true;;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.telecom_email:
+															var oContact={};
+															oContact= Object.create(ContactPoint);
+															oContact.resourceType="ContactPoint";
+															oContact.system="email";
+															oContact.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oContact.use="home";
+															oContact.rank="2";
+															oPractitioner.telecom.push(oContact);
+															practitionerSet=true;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.gender:
+															if(getAssociatedGenderValueSet(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim())!="")
+															{
+																oPractitioner.gender=getAssociatedGenderValueSet(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim());
+															}
+															practitionerSet=true;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.address:
+															oAddress.text=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oPractitioner.address=[oAddress];
+															practitionerSet=true;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.practitionerRole_managingOrganization:
+															var organizationId=getOrganizationIdByName(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim(),listOrganizationUnits);
+															if(organizationId!=-1)
+															{
+																oPractitionerRole.managingOrganization={"reference":"Organization/"+organizationId};
+															}
+															else
+															{
+																oPractitionerRole.managingOrganization="";
+															}
+															practitionerSet=true;
+														break;
+														case practitionerSpecimenHandlingAttributesMapping.practitionerRole_role:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oPractitionerRole.role=oConcept;
+															practitionerSet=true;
+														break;
+													}//End switch
+												}//end if dataFile[iteratorLigne]
+											}//End for iteratorValue
+											if(practitionerSet==true)
+											{
+												if(oPractitioner.id=="")
+												{
+													oPractitioner.id="practsp-"+idCounter+iteratorLigne;
+													//oPractitioner.id="practsp-"+new Date().getTime();
+												}
+												oPractitioner.name=[oName];
+												oPractitioner.identifier=listOfPractitionerIdentifier;
+												oPractitioner.practitionerRole.push(oPractitionerRole);
+												dicResourceExtracted.type="Practitioner";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oPractitioner;
+												//console.log(dicResourceExtracted.value);
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												if(practitionerNature=="care_provider")
+												{
+													//Identify care provider associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Patient")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.careProvider.push(resourceRef);
+															break;
+														}
+													}
+												}
+												if(practitionerNature=="specimen_collector")
+												{
+													//Identify specimen collected associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Specimen")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.collection.collector=resourceRef;
+															//console.log(listMappedResourceExtracted[iteratorMappedResource].value);
+															break;
+														}
+													}
+												}
+												if(practitionerNature=="observation_performer")
+												{
+													//Identify specimen collected associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Observation")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.performer.push(resourceRef);
+															break;
+														}
+													}
+												}
+												
+											}//End if practitionerSet
+										}//End if dataFile[iteratorLigne]
+									}//End for  iteratorLigne
+								}//End if PractitionerAttributeIndex
+								//Extract Practitioner Observation performer
+								listPractitionerAttributeIndex=[];
+								listOfAttributesPractitioner=[];
+								listOfAttributesPractitioner=getListOfPractitionerObservationPerformerAttributeMapping();
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesPractitioner,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listPractitionerAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listPractitionerAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Practitioner Initialization
+											var oPractitioner={};
+											oPractitioner= Object.create(Practitioner);
+											oPractitioner.resourceType="Practitioner";
+											var oName={};
+											oName= Object.create(HumanName);
+											oName.resourceType="HumanName";
+											oName.use="official";
+											
+											var oAddress={};
+											oAddress= Object.create(Address);
+											oAddress.resourceType="Address";
+											oPractitioner.telecom=[];
+											oPractitioner.practitionerRole=[];
+											var oPractitionerRole={};
+											oPractitionerRole= Object.create(PractitionerRole);
+											var practitionerSet=false;
+											var listOfPractitionerIdentifier=[];
+											var stageName=(dataFile[0][listPractitionerAttributeIndex[0]].trim().split("|"))[0];
+											var practitionerNature=getPractitionerNature(stageName.trim());
+											
+											for(var iteratorValue=0;iteratorValue<listPractitionerAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listPractitionerAttributeIndex[iteratorValue]].trim();
+													
+													switch(oAttribute)
+													{
+														case practitionerObservationPerformerAttributesMapping.id:
+															oPractitioner.id=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															var orgIdentifier={};
+															oIdentifier=Object.create(Identifier);
+															//assignment of Identifier
+															oIdentifier.use="official";
+															oIdentifier.type={"text":""+oAttribute};
+															oIdentifier.system="http://hl7.org/fhir/";
+															oIdentifier.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															listOfPractitionerIdentifier.push(oIdentifier);
+															practitionerSet=true;
+															break;
+														case practitionerObservationPerformerAttributesMapping.name_family:
+															oName.family=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oName.text+=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim()+" ";
+															practitionerSet=true;
+														break;
+														case practitionerObservationPerformerAttributesMapping.name_given:
+															oName.given=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oName.text+=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim()+" ";
+															practitionerSet=true;;
+														break;
+														case practitionerObservationPerformerAttributesMapping.telecom_phone:
+															var oContact={};
+															oContact= Object.create(ContactPoint);
+															oContact.resourceType="ContactPoint";
+															oContact.system="phone";
+															oContact.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oContact.use="home";
+															oContact.rank="1";
+															oPractitioner.telecom.push(oContact);
+															practitionerSet=true;;
+														break;
+														case practitionerObservationPerformerAttributesMapping.telecom_email:
+															var oContact={};
+															oContact= Object.create(ContactPoint);
+															oContact.resourceType="ContactPoint";
+															oContact.system="email";
+															oContact.value=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oContact.use="home";
+															oContact.rank="2";
+															oPractitioner.telecom.push(oContact);
+															practitionerSet=true;
+														break;
+														case practitionerObservationPerformerAttributesMapping.gender:
+															if(getAssociatedGenderValueSet(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim())!="")
+															{
+																oPractitioner.gender=getAssociatedGenderValueSet(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim());
+															}
+															practitionerSet=true;
+														break;
+														case practitionerObservationPerformerAttributesMapping.address:
+															oAddress.text=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oPractitioner.address=[oAddress];
+															practitionerSet=true;
+														break;
+														case practitionerObservationPerformerAttributesMapping.practitionerRole_managingOrganization:
+															var organizationId=getOrganizationIdByName(dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim(),listOrganizationUnits);
+															if(organizationId!=-1)
+															{
+																oPractitionerRole.managingOrganization={"reference":"Organization/"+organizationId};
+															}
+															else
+															{
+																oPractitionerRole.managingOrganization="";
+															}
+															practitionerSet=true;
+														break;
+														case practitionerObservationPerformerAttributesMapping.practitionerRole_role:
+															var  oConcept={};
+															oConcept= Object.create(CodeableConcept);
+															oConcept.text=dataFile[iteratorLigne][listPractitionerAttributeIndex[iteratorValue]].trim();
+															oPractitionerRole.role=oConcept;
+															practitionerSet=true;
+														break;
+													}//End switch
+												}//end if dataFile[iteratorLigne]
+											}//End for iteratorValue
+											if(practitionerSet==true)
+											{
+												if(oPractitioner.id=="")
+												{
+													oPractitioner.id="practperf-"+idCounter+iteratorLigne;
+													//oPractitioner.id="practperf-"+new Date().getTime();
+												}
+												oPractitioner.name=[oName];
+												oPractitioner.identifier=listOfPractitionerIdentifier;
+												oPractitioner.practitionerRole.push(oPractitionerRole);
+												dicResourceExtracted.type="Practitioner";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oPractitioner;
+												//console.log(dicResourceExtracted.value);
+												listMappedResourceExtracted.push(dicResourceExtracted);
+												if(practitionerNature=="care_provider")
+												{
+													//Identify care provider associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Patient")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.careProvider.push(resourceRef);
+															break;
+														}
+													}
+												}
+												if(practitionerNature=="specimen_collector")
+												{
+													//Identify specimen collected associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Specimen")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.collection.collector=resourceRef;
+															console.log(listMappedResourceExtracted[iteratorMappedResource].value);
+															break;
+														}
+													}
+												}
+												if(practitionerNature=="observation_performer")
+												{
+													//Identify specimen collected associated
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+														&& listMappedResourceExtracted[iteratorMappedResource].type=="Observation")
+														{
+															var resourceRef={"reference":"Practitioner/"+oPractitioner.id};
+															listMappedResourceExtracted[iteratorMappedResource].value.performer.push(resourceRef);
+															break;
+														}
+													}
+												}
+												
+											}//End if practitionerSet
+										}//End if dataFile[iteratorLigne]
+									}//End for  iteratorLigne
+								}//End if PractitionerAttributeIndex
+								
+								var listDiagnosticReportExtracted=[];
+								var nbreOfHeaderAttributes=0;
+								var listDiagnosticReportAttributeIndex=[];
+								var listOfAttributesDiagnosticReport=getListOfDiagnosticReportAttributeMapping();	
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									
+									var resultChecking=checkAttributeInList(listOfAttributesDiagnosticReport,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listDiagnosticReportAttributeIndex.push(iteratorHeader);
+									}
+								}//End for iteratorHeader
+								if(listDiagnosticReportAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											var dicResourceExtracted={
+											"type":"",
+											"ligneIndex":"",
+											"value":""
+											};
+											//Observation initialization
+											var oDiagnosticReport={};
+											oDiagnosticReport= Object.create(DiagnosticReport);
+											oDiagnosticReport.resourceType="DiagnosticReport";
+											var listOfDiagnosticReportIdentifier=[];
+											var oEffectivePeriod={};
+											oEffectivePeriod= Object.create(Period);
+											oDiagnosticReport.request=[];
+											oDiagnosticReport.specimen=[];
+											oDiagnosticReport.result=[];
+											oDiagnosticReport.performer="";
+											var diagnosticReportIsSet=false;
+											var effectivePeriodIsSet=false;
+											for(var iteratorValue=0;iteratorValue<listDiagnosticReportAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]!="")
+												{
+													var oAttribute=dataFile[0][listDiagnosticReportAttributeIndex[iteratorValue]].trim();
+													switch(oAttribute)
+													{
+													case diagnosticReportAttributesMapping.identifier:
+														var oIdentifier={};
+														oIdentifier=Object.create(Identifier);
+														//assignment of Identifier
+														oIdentifier.use="official";
+														oIdentifier.type={"text":"DiagnosticReport Identification"};
+														oIdentifier.system="http://hl7.org/fhir/";
+														oIdentifier.value=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														listOfDiagnosticReportIdentifier.push(oIdentifier);
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.status:
+														oDiagnosticReport.status=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.category:
+														var oConcept={};
+														oConcept=Object.create(CodeableConcept);
+														oConcept.text=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														oDiagnosticReport.category=oConcept;
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.code:
+														var oConcept={};
+														oConcept=Object.create(CodeableConcept);
+														oConcept.text=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														oDiagnosticReport.code=oConcept;
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.subject:
+														if(formatPatientId==true)
+														{
+															oDiagnosticReport.subject={"reference":"Patient/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]].trim()+"-"};
+														}
+														else if (formatPatientId==false)
+														{
+															oDiagnosticReport.subject={"reference":"Patient/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]].trim()};
+														}
+														
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.encounter:
+														//oDiagnosticReport.encounter={"reference":"Encounter/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]};
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.effectiveDateTime:
+														oDiagnosticReport.effectiveDateTime=formatDateInZform(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.effectivePeriod_start:
+														oEffectivePeriod.start=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														effectivePeriodIsSet=true;
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.effectivePeriod_end:
+														oEffectivePeriod.end=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														effectivePeriodIsSet=true;
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.issued:
+														oDiagnosticReport.issued=formatDateInZform(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.performer:
+														//oDiagnosticReport.performer={"reference":"Organization/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]};
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.request:
+														//oDiagnosticReport.request=[{"reference":"DiagnosticOrder/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]}];
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.specimen:
+														//oDiagnosticReport.specimen=[{"reference":"Specimen/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]}];
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.result:
+														//oDiagnosticReport.result=[{"reference":"Observation/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]}];
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.imagingStudy:
+														//oDiagnosticReport.imagingStudy=[];
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.image:
+														//oDiagnosticReport.image=[];
+														//diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.conclusion:
+														oDiagnosticReport.conclusion=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.codedDiagnosis:
+														var oConcept={};
+														oConcept=Object.create(CodeableConcept);
+														oConcept.text=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
+														oDiagnosticReport.codedDiagnosis=[oConcept];
+														diagnosticReportIsSet=true;
+														break;
+													case diagnosticReportAttributesMapping.presentedForm:
+														oDiagnosticReport.presentedForm=[];
+														diagnosticReportIsSet=true;
+														break;
+													}//End of switch
+						
+												}
+												
+											}//for iteratorValue
+											if(diagnosticReportIsSet==true)
+											{
+												oDiagnosticReport.id="rep-"+idCounter+iteratorLigne;
+												//oDiagnosticReport.id="rep-"+new Date().getTime();
+												oDiagnosticReport.identifier=listOfDiagnosticReportIdentifier;
+												if(effectivePeriodIsSet==true)
+												{
+													oDiagnosticReport.effectivePeriod=oEffectivePeriod;
+												}
+												//Add additional information for validation
+												oDiagnosticReport.status="final";
+												//By Default used Acyclovir for code
+												var oConcept={};
+												oConcept= Object.create(CodeableConcept);
+												oConcept.text="Acyclovir";
+												oConcept.code=[{"code":"1-8"}];
+												oDiagnosticReport.code=oConcept;
+												var patientIdAssociated=oDiagnosticReport.subject.reference.split("/")[1];
+												var issuedDateTime=oDiagnosticReport.issued;
+												var nbrDiagnosticOrder=getNbreResourceExtracted("DiagnosticOrder",listMappedResourceExtracted);
+												var nbrSpecimen=getNbreResourceExtracted("Specimen",listMappedResourceExtracted);
+												var nbrObservation=getNbreResourceExtracted("Observation",listMappedResourceExtracted);
+												if(nbrDiagnosticOrder>0)
+												{
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="DiagnosticOrder" && 
+															listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var resourceRef={"reference":"DiagnosticOrder/"+listMappedResourceExtracted[iteratorMappedResource].value.id};
+															oDiagnosticReport.request.push(resourceRef);
+														}
+													}
+												}
+												if(nbrSpecimen>0)
+												{
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="Specimen" && 
+															listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var resourceRef={"reference":"Specimen/"+listMappedResourceExtracted[iteratorMappedResource].value.id};
+															oDiagnosticReport.specimen.push(resourceRef);
+														}
+													}
+													
+												}
+												if(nbrObservation)
+												{
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="Observation" && 
+															listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var resourceRef={"reference":"Observation/"+listMappedResourceExtracted[iteratorMappedResource].value.id};
+															oDiagnosticReport.result.push(resourceRef);
+														}
+													}
+												}
+												//There is no performer as practitioner, define patient Managing org as performer
+												if(oDiagnosticReport.performer=="")
+												{
+													for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+													{
+														if(listMappedResourceExtracted[iteratorMappedResource].type=="Patient" && 
+															listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne)
+														{
+															var orgunitRef=listMappedResourceExtracted[iteratorMappedResource].value.managingOrganization;
+															oDiagnosticReport.performer=orgunitRef;
+														}
+													}
+													
+												}
+												dicResourceExtracted.type="DiagnosticReport";
+												dicResourceExtracted.ligneIndex=iteratorLigne;
+												dicResourceExtracted.value=oDiagnosticReport;
+												//console.log(dicResourceExtracted.value);
+												listMappedResourceExtracted.push(dicResourceExtracted);
+											}
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//end if listDiagnosticReportAttributeIndex.length
+								
+								//Additional non clearly identifiable resource
+								//Extract ListResource Reference for specimen
+								var listListResourceExtracted=[];
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=specimenAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								//console.log(listListResourceAttributeIndex);
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refSpecimenId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="Specimen")
+												{
+													refSpecimenId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"Specimen/"+refSpecimenId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listPractitionerAttributeIndex
+								
+								//Extract ListResource Reference for Patient
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=patientAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refPatientId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="Patient")
+												{
+													refPatientId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"Patient/"+refPatientId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listPractitionerAttributeIndex
+								
+								//Extract ListResource Reference for Practitioner
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=practitionerAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refPractitionerId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="Practitioner")
+												{
+													refPractitionerId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"Practitioner/"+refPractitionerId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listPractitionerAttributeIndex
+								
+								//Extract ListResource Reference for DiagnosticOrder
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=orderAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refOrderId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="DiagnosticOrder")
+												{
+													refOrderId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"DiagnosticOrder/"+refOrderId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listListResourceAttributeIndex
+								
+								//Extract ListResource Reference for Observation
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=observationAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refObservationId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="Observation")
+												{
+													refObservationId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"Observation/"+refObservationId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listListResourceAttributeIndex
+								
+								//Extract ListResource Reference for DiagnosticReport
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=diagnosticReportAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refDiagnosticReportId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="DiagnosticReport")
+												{
+													refDiagnosticReportId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"DiagnosticReport/"+refDiagnosticReportId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listListResourceAttributeIndex
+								
+								//Extract ListResource Reference for Condition
+								var nbreOfHeaderAttributes=0;
+								var listListResourceAttributeIndex=[];
+								var listOfAttributesListResource=conditionAttributesMapping.list_reference.split(",");
+								//console.log(listOfAttributesListResource);
+								for(var iteratorHeader=0;iteratorHeader<dataFile[0].length;iteratorHeader++)
+								{
+									var itemToSearch=dataFile[0][iteratorHeader].trim();
+									var resultChecking=checkAttributeInList(listOfAttributesListResource,itemToSearch);
+									if(resultChecking==true)
+									{
+										nbreOfHeaderAttributes++;
+										listListResourceAttributeIndex.push(iteratorHeader);
+									}
+								}//End of for iteratorHeader
+								if(listListResourceAttributeIndex.length>0)
+								{
+									for(var iteratorLigne=1;iteratorLigne<dataFile.length;iteratorLigne++)
+									{
+										if(dataFile[iteratorLigne].length>0 && checkIfTableContainsNonEmptyValues(dataFile[iteratorLigne])==true)
+										{
+											
+											//Identify related Specimen resource associated
+											var refConditionReportId=-1;
+											for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+											{
+												if(listMappedResourceExtracted[iteratorMappedResource].ligneIndex==iteratorLigne
+												&& listMappedResourceExtracted[iteratorMappedResource].type=="Condition")
+												{
+													refConditionReportId=listMappedResourceExtracted[iteratorMappedResource].value.id;
+													break;
+												}
+											}
+											
+											for(var iteratorValue=0;iteratorValue<listListResourceAttributeIndex.length;iteratorValue++)
+											{
+												if(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]]!="")
+												{
+													var dicResourceExtracted={
+													"type":"",
+													"ligneIndex":"",
+													"value":""
+													};
+													//List initialization;
+													var oList= Object.create(List);
+													oList.resourceType="List";
+													var listResourceIdentifier=[];
+													oList.entry=[];
+													var listIsSet=false;
+													oList.id="lst-"+idCounter+""+iteratorLigne;
+													//oList.id="lst-"+new Date().getTime();
+													oList.status="current";
+													oList.mode="working";
+													
+													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.title=oAttribute;
+													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													oList.entry.push({"deleted":false,"item":{"reference":"Condition/"+refConditionReportId}});
+													//console.log(oList);
+													dicResourceExtracted.type="List";
+													dicResourceExtracted.ligneIndex=iteratorLigne;
+													dicResourceExtracted.value=oList;
+													listMappedResourceExtracted.push(dicResourceExtracted);
+													
+												}//end if dataFile[iteratorLigne]
+											}//end for  var iteratorValue=0
+											
+										}//end if dataFile[iteratorLigne].length
+									}//end for iteratorLigne
+								}//End If listListResourceAttributeIndex
+								
+							
+								//Put all associated resource to appropriate list to construct Bundle
+								for(var iteratorMappedResource=0;iteratorMappedResource<listMappedResourceExtracted.length;iteratorMappedResource++)
+								{
+									if(listMappedResourceExtracted[iteratorMappedResource].type=="Patient")
+									{
+										listPatientExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value);
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="Specimen")
+									{
+										listSpecimenExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="Condition")
+									{
+										listConditionExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="DiagnosticOrder")
+									{
+										listDiagnosticOrderExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="Observation")
+									{
+										listObservationExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="List")
+									{
+										listListResourceExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="Practitioner")
+									{
+										listPractitionerExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+									else if (listMappedResourceExtracted[iteratorMappedResource].type=="DiagnosticReport")
+									{
+										listDiagnosticReportExtracted.push(listMappedResourceExtracted[iteratorMappedResource].value)
+									}
+								}
+								//console.log(listPractitionerExtracted[3]);
+								if (listPatientExtracted.length>0)
+								{
+									
+									var oBundle={};
+									oBundle=BuildBundleResponse([],listPatientExtracted,listPractitionerExtracted,listSpecimenExtracted,listConditionExtracted,listDiagnosticOrderExtracted,
+									listObservationExtracted,listDiagnosticReportExtracted,listListResourceExtracted,listBasicExtracted);
+									var requestContent=JSON.stringify(oBundle);
+									//console.log(requestContent);
+									
+									entityAPI.postData(oBundle.id,requestContent,fileName,function(res)
+									{
+										console.log(res[0]);
+										entityAPI.moveFileToTreated(res[1]);
+									});
+								}
+								else
+								{
+									//console.log(listPatientExtrated.length);
+									console.log("No patient mapped information found!: "+fileName);
+									entityAPI.moveFileToErrors(fileName);
+								}
+							});
+							
+							
+							
+							});//End entityAPI.GetAllOrgUnits
+							
+						}//End if nbreOfHeaderAttributes
+						else
+						{
+							console.log("Invalid file format on patient headers attributes: "+fileName);
+							//res.send("Invalid file format");
+							entityAPI.moveFileToErrors(fileName);
+						}
+					}
+					else
+					{
+						//res.send("Invalid file format");
+						console.log("Invalid file format on headers: "+fileName);
+						entityAPI.moveFileToErrors(fileName);
+					}
+				}
+				else
+				{
+					//res.send("Invalid file format");
+					console.log("Invalid file format on data file length :"+fileName);
+					entityAPI.moveFileToErrors(fileName);
+				}
+				
+			  });//End of dataFile call
+			//console.log("----End of operation----");
+		});//End entityAPI.getListOfFiles
+		//console.log(listResourceExtracted);
+		//res.send('{"treated":"ok"}')  
+		  
+			
+			//console.log(dataFile);
+			//entityAPI.moveFileToTreated(listCsvFile[iterator]);
+	  
+	}
+	
+	downloadcsv=function (req, res)
+	{
+		var filePath=dataFileLocation;
+		console.log(filePath);
+		entityAPI.getListOfFiles(filePath,function (resfileName)
+		{
+			var fileName=resfileName;
+			if(fileName.includes(".csv")==true)
+			{
+				console.log("*************"+dataFileLocation);
+				res.download(dataFileLocation+"/"+fileName);
+			}
+		});
+		
+	}
+	//************************************************************************************//
+	
+	
 	function errorHandler(err, req, res, next) {
 	  if (res.headersSent) {
 		return next(err);
@@ -6863,16 +14022,15 @@
 	  res.status(500);
 	  res.render('error', { error: err });
 	}
-
-
   app = express();
+  app.use(express.static(entityAPI.resolvePathDirectory(__dirname,'public')));
   app.use(errorHandler);
 
   //app.use(express.json());
 
   //app.get("/trackedentities", entityinstances);
   
-  app.get ("/trackedentities", function (req,res,next)
+	app.get ("/trackedentities", function (req,res,next)
 	{
 		if(checkMappingExist()==false)
 		{
@@ -6889,13 +14047,28 @@
 		}
 		//getEntityinstances(req,res,next);
 	  });
-	 app.get ("/trackedentities_csv", function (req,res,next)
-		{
-			console.log("Generation of csv template");
-			res.send("Generation of csv template");
-			getMetaDataForLab(progAndStagesTracked);
-		});
-
+	app.get ("/trackedentities_csv", function (req,res,next)
+	{
+		console.log("Generation of csv template");
+		res.send("Generation of csv template");
+		getMetaDataForLab(progAndStagesTracked);
+	});
+	app.get ("/uploadfile", function (req,res,next)
+	{
+		res.sendFile(entityAPI.resolvePathDirectory(__dirname,'views/index.html'));
+	});
+	app.post("/upload",entityAPI.processUploadData);
+	app.get('/downloadcsv', function(req, res) {
+		//console.log("Generation of csv template");
+		//getMetaDataForLab(progAndStagesTracked);
+		downloadcsv(req, res);
+	});
+	app.get ("/csv2fhir", function (req,res,next)
+	{
+		console.log("Reading of csv file content");
+		convertcsv2fhir(req,res,next);
+		//console.log("End of operation");
+	}); 
   server = app.listen(process.env.PORT || 8083, function() {
     return console.log("Service DHIS2 tracked converstion to Fhir is running on port:" + (server.address().port));
   });

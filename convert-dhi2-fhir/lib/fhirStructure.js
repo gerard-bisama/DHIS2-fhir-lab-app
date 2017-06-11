@@ -136,6 +136,11 @@ var Practitioner={
   //An identifier for this qualification for the practitioner,R!  Coded representation of the qualification,Period during which the qualification is valid,Organization that regulates and issues the qualification
   "communication" : [] //{ CodeableConcept } A language the practitioner is able to use in patient communication 
 };
+var PractitionerRole={
+	"managingOrganization":"",//{ Reference(Organization) }
+	"role":"",//{ CodeableConcept }
+	"specialty":""//{ CodeableConcept }
+	};
 var Quantity={
   // from Element: extension
   "value" : 0, // Numerical value (with implicit precision)
@@ -245,7 +250,7 @@ var Observation={
   "identifier" : [], //{ Identifier } Unique Id for this particular observation
   "status" : "", // R!  registered | preliminary | final | amended +
   "category" : { CodeableConcept }, // Classification of  type of observation
-  "code" : { CodeableConcept }, // R!  Type of observation (code / type)
+  "code" :"", // R! { CodeableConcept } Type of observation (code / type)
   "subject" :"", // { Reference(Patient|Group|Device|Location) } Who and/or what this is about
   "encounter" : "", //{ Reference(Patient|Group|Device|Location) } Healthcare event during which this observation is made
   // effective[x]: Clinically relevant time/time-period for observation. One of these 2:
@@ -418,6 +423,15 @@ var List={
   },*/
   "emptyReason" : "" //{ CodeableConcept } C? Why list is empty
 };
+var Basic={
+  "resourceType" : "Basic",
+  "id":"",
+  "identifier" : "", //{ CodeableConcept } Business identifier
+  "code" : "", // R!{ CodeableConcept }  Kind of Resource
+  "subject" : "", //{ Reference(Any) } Identifies the focus of this resource
+  "author" : "", // { Reference(Any) } Who created
+  "created" : "" // <date> When created
+};
 
 exports.Identifier=Identifier;
 exports.ContactPoint=ContactPoint;
@@ -427,6 +441,7 @@ exports.CodeableConcept=CodeableConcept;
 exports.Patient=Patient;
 exports.HumanName=HumanName;
 exports.Practitioner=Practitioner;
+exports.PractitionerRole=PractitionerRole;
 exports.Specimen=Specimen;
 exports.OrderEvent=OrderEvent;
 exports.Collection=Collection;
@@ -443,3 +458,4 @@ exports.Condition=Condition;
 exports.Bundle=Bundle;
 exports.Entry=Entry;
 exports.List=List;
+exports.Basic=Basic;

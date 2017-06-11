@@ -68,7 +68,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 		}
 		retVal.setUrl("jdbc:mysql://localhost:3306/dhis2_fhir");
 		retVal.setUsername("root");
-		retVal.setPassword("admin123");
+		retVal.setPassword("xxxxxx");
 		
 		return retVal;
 	}

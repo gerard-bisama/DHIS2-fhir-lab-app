@@ -534,7 +534,7 @@ public class FhirDHISOrchestrator extends UntypedActor {
                         List<DiagnosticReport> listAssociatedDiagnosticReport=new ArrayList<>();
 
                         String careProviderId="";
-                        if(oPatient.getCareProvider()!=null)
+                        if(oPatient.getCareProvider().size()>0)
                         {
                             careProviderId= oPatient.getCareProvider().get(0).getReference().getIdPart();
 

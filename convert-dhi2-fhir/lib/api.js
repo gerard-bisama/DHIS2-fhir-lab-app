@@ -119,35 +119,40 @@ exports.getAllOrgUnits= function getAllOrgUnits(bundleParam,entryStoredData,list
 	request.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			var myArr = JSON.parse(this.responseText);
-			for(var iterator=0;iterator<myArr.entry.length;iterator++)
+			if(myArr.entry!="undefined")
 			{
-				entryStoredData.push(myArr.entry[iterator]);
-			}
-			//console.log(entryStoredData.length);
-			if(myArr.link.length>0)
-			{
-				var hasNextPageBundle=false;
-				var iterator=0;
-				for(;iterator <myArr.link.length;iterator++)
+				for(var iterator=0;iterator<myArr.entry.length;iterator++)
 				{
-					if(myArr.link[iterator].relation=="next")
+					entryStoredData.push(myArr.entry[iterator]);
+				}
+				//console.log(entryStoredData.length);
+				if(myArr.link.length>0)
+				{
+					var hasNextPageBundle=false;
+					var iterator=0;
+					for(;iterator <myArr.link.length;iterator++)
 					{
-						hasNextPageBundle=true;
-						break;
-						//GetOrgUnitId(myArr.link[iterator].url,listAssociatedDataRow,listAssociatedResource,callback);
+						if(myArr.link[iterator].relation=="next")
+						{
+							hasNextPageBundle=true;
+							break;
+							//GetOrgUnitId(myArr.link[iterator].url,listAssociatedDataRow,listAssociatedResource,callback);
+						}
 					}
+					if(hasNextPageBundle==true)
+					{
+						getAllOrgUnits(myArr.link[iterator].url,entryStoredData,listAssociatedDataRow,listAssociatedResource,callback);
+					}
+					else
+					{
+						 var modifiedArray = [entryStoredData,listAssociatedDataRow,listAssociatedResource];
+						 return callback(modifiedArray);
+					}
+					
 				}
-				if(hasNextPageBundle==true)
-				{
-					getAllOrgUnits(myArr.link[iterator].url,entryStoredData,listAssociatedDataRow,listAssociatedResource,callback);
-				}
-				else
-				{
-					 var modifiedArray = [entryStoredData,listAssociatedDataRow,listAssociatedResource];
-					 return callback(modifiedArray);
-				}
-				
+			
 			}
+			
 		}
 		else
 		{

@@ -764,7 +764,7 @@ public class FhirResourceValidator  {
         }
         return copy;
     }
-    public List<Practitioner> extractPractitionerFromBundleString(String bundleJsonString) throws Exception
+    public List<Practitioner> extractPractitionerFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
     {
         List<Practitioner> extractedPractitioner=new ArrayList<>();
         if(bundleJsonString.length()<2)
@@ -781,6 +781,24 @@ public class FhirResourceValidator  {
                 FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
                 fhirProcessor.processResourcesBundle();
                 extractedPractitioner=fhirProcessor.getListOfPractitioner();
+                if(oBundle.getLink(Bundle.LINK_NEXT)!=null)
+                {
+                    IGenericClient oClient=this._context.newRestfulGenericClient(sourceServerURI);
+                    Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedPractitioner.addAll(fhirProcessor.getListOfPractitioner());
+                    while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
+                    {
+                        Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedPractitioner.addAll(fhirProcessor.getListOfPractitioner());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
             }
 
         }

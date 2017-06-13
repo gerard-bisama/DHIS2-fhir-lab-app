@@ -243,6 +243,7 @@ public class DefaultOrchestrator extends UntypedActor {
                     throw new Exception("Failed to process the fhir synchronization request");
                 }
                 //Received Tracked entities
+
                 int nbrRetreivedPractitioner=resourceBundle.getListOfPractitioners().size();
                 int nbrRetreivedPatient=resourceBundle.getListOfPatient().size();
                 int nbrRetreivedOrganization=resourceBundle.getListOfOrganization().size();
@@ -380,7 +381,8 @@ public class DefaultOrchestrator extends UntypedActor {
                 {
                     responseOrganization=nullResponse;
                 }
-                if(resourceBundle.getListOfValidPractitioners().size()>0)
+                /*if(resourceBundle.getListOfValidPractitioners().size()>0)
+                if(false)
                 {
                     this.listOfValidPractitioner=resourceBundle.getListOfValidPractitioners();
                     nbrOfSearchRequestToWaitFor=resourceBundle.getListOfValidPractitioners().size();
@@ -404,8 +406,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 else
                 {
                     responsePractitioner=nullResponse;
-                }
-                if(resourceBundle.getListOfValidPatient().size()>0)
+                }*/
+                /*if(resourceBundle.getListOfValidPatient().size()>0)
+                if(false)
                 {
                     this.listOfValidPatient=resourceBundle.getListOfValidPatient();
                     //nbrOfSearchRequestToWaitFor=resourceBundle.getListOfValidePractitioners().size();
@@ -429,8 +432,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 else
                 {
                     responsePatient=nullResponse;
-                }
-                if(resourceBundle.getListOfValidSpecimen().size()>0)
+                }*/
+                /*if(resourceBundle.getListOfValidSpecimen().size()>0)
+                if(false)
                 {
                     this.listOfValidSpecimen=resourceBundle.getListOfValidSpecimen();
                     List<String> listOfId=new ArrayList<>();
@@ -454,7 +458,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 {
                     responseSpecimen=nullResponse;
                 }
-                if(resourceBundle.getListOfValidListResource().size()>0)
+                */
+                /*if(resourceBundle.getListOfValidListResource().size()>0)
+                if(false)
                 {
                     this.listOfValidListResource=resourceBundle.getListOfValidListResource();
                     List<String> listOfId=new ArrayList<>();
@@ -476,7 +482,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 {
                     responseListResource=nullResponse;
                 }
-                if(resourceBundle.getListOfValidBasic().size()>0)
+                */
+                /*if(resourceBundle.getListOfValidBasic().size()>0)
+                if(false)
                 {
                     this.listOfValidBasic=resourceBundle.getListOfValidBasic();
                     List<String> listOfId=new ArrayList<>();
@@ -498,7 +506,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 {
                     responseBasic=nullResponse;
                 }
-                if(resourceBundle.getListOfValidCondition().size()>0)
+                */
+                /*if(resourceBundle.getListOfValidCondition().size()>0)
+                if(false)
                 {
                     this.listOfValidCondition=resourceBundle.getListOfValidCondition();
                     List<String> listOfId=new ArrayList<>();
@@ -520,7 +530,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 {
                     responseCondition=nullResponse;
                 }
-                if(resourceBundle.getListOfValidDiagnosticOrder().size()>0)
+                */
+                /*if(resourceBundle.getListOfValidDiagnosticOrder().size()>0)
+                if(false)
                 {
                     this.listOfValidDiagnosticOrder=resourceBundle.getListOfValidDiagnosticOrder();
                     List<String> listOfId=new ArrayList<>();
@@ -542,8 +554,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 else
                 {
                     responseDiagnosticOrder=nullResponse;
-                }
-                if(resourceBundle.getListOfValidObservation().size()>0)
+                }*/
+                /*if(resourceBundle.getListOfValidObservation().size()>0)
+                if(false)
                 {
                     this.listOfValidObservation=resourceBundle.getListOfValidObservation();
                     List<String> listOfId=new ArrayList<>();
@@ -566,7 +579,9 @@ public class DefaultOrchestrator extends UntypedActor {
                 {
                     responseObservation=nullResponse;
                 }
-                if(resourceBundle.getListOfValidDiagnosticReport().size()>0)
+                */
+                /*if(resourceBundle.getListOfValidDiagnosticReport().size()>0)
+                if(false)
                 {
                     this.listOfValidDiagnosticReport=resourceBundle.getListOfValidDiagnosticReport();
                     List<String> listOfId=new ArrayList<>();
@@ -589,6 +604,7 @@ public class DefaultOrchestrator extends UntypedActor {
                     responseDiagnosticReport=nullResponse;
                 }
 
+                */
 
 
                 //System.out.print(listSolvedPractitionerResponse.size());
@@ -623,6 +639,195 @@ public class DefaultOrchestrator extends UntypedActor {
         }
 
     }
+    private void triggerPractitionerOrchestrator(List<Practitioner> listPractitionerToProcess,
+                                                 PractitionerOrchestratorActor.ResolvePractitionerRequest practitionerRequest)
+    {
+        this.listOfValidPractitioner=listPractitionerToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidPractitioner.size();
+        List<String> listOfId=new ArrayList<>();
+        for(Practitioner oPractitionerToIdentify:listOfValidPractitioner)
+        {
+            listOfId.add(oPractitionerToIdentify.getId().getIdPart());
+
+        }
+        listIdsPractitionerUsedForSearch=listOfId;
+        practitionerRequest=new PractitionerOrchestratorActor.ResolvePractitionerRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef practitionerRequestOrchestrator=getContext().actorOf(
+                Props.create(PractitionerOrchestratorActor.class,config));
+        practitionerRequestOrchestrator.tell(practitionerRequest,getSelf());
+    }
+    private void triggerPatientOrchestrator(List<Patient> listPatientToProcess,
+                                                 PatientOrchestratorActor.ResolvePatientRequest patientRequest)
+    {
+        this.listOfValidPatient=listPatientToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidPatient.size();
+        List<String> listOfId=new ArrayList<>();
+        for(Patient oPatientToIdentify:listOfValidPatient)
+        {
+            listOfId.add(oPatientToIdentify.getId().getIdPart());
+
+        }
+        listIdsPatientUsedForSearch=listOfId;
+        patientRequest=new PatientOrchestratorActor.ResolvePatientRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef patientRequestOrchestrator=getContext().actorOf(
+                Props.create(PatientOrchestratorActor.class,config));
+        patientRequestOrchestrator.tell(patientRequest,getSelf());
+    }
+    private void triggerSpecimenOrchestrator(List<Specimen> listSpecimenToProcess,
+                                            SpecimenOrchestratorActor.ResolveSpecimenRequest specimenRequest)
+    {
+        this.listOfValidSpecimen=listSpecimenToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidSpecimen.size();
+        List<String> listOfId=new ArrayList<>();
+        for(Specimen oSpecimenToIdentify:listOfValidSpecimen)
+        {
+            listOfId.add(oSpecimenToIdentify.getId().getIdPart());
+
+        }
+        listIdsSpecimenUsedForSearch=listOfId;
+        specimenRequest=new SpecimenOrchestratorActor.ResolveSpecimenRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef specimenRequestOrchestrator=getContext().actorOf(
+                Props.create(SpecimenOrchestratorActor.class,config));
+        specimenRequestOrchestrator.tell(specimenRequest,getSelf());
+    }
+    private void triggerListResourceOrchestrator(List<ListResource> listListResourceToProcess,
+                                             ListResourceOrchestratorActor.ResolveListResourceRequest listResourceRequest)
+    {
+        this.listOfValidListResource=listListResourceToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidListResource.size();
+        List<String> listOfId=new ArrayList<>();
+        for(ListResource oListResourceToIdentify:listOfValidListResource)
+        {
+            listOfId.add(oListResourceToIdentify.getId().getIdPart());
+
+        }
+        listIdsListResourceUsedForSearch=listOfId;
+        listResourceRequest=new ListResourceOrchestratorActor.ResolveListResourceRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef listResourceRequestOrchestrator=getContext().actorOf(
+                Props.create(ListResourceOrchestratorActor.class,config));
+        listResourceRequestOrchestrator.tell(listResourceRequest,getSelf());
+    }
+    private void triggerConditionOrchestrator(List<Condition> listConditionToProcess,
+                                                 ConditionOrchestratorActor.ResolveConditionRequest conditionRequest)
+    {
+        this.listOfValidCondition=listConditionToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidCondition.size();
+        List<String> listOfId=new ArrayList<>();
+        for(Condition oConditionToIdentify:listOfValidCondition)
+        {
+            listOfId.add(oConditionToIdentify.getId().getIdPart());
+
+        }
+        listIdsConditionUsedForSearch=listOfId;
+        conditionRequest=new ConditionOrchestratorActor.ResolveConditionRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef conditionRequestOrchestrator=getContext().actorOf(
+                Props.create(ConditionOrchestratorActor.class,config));
+        conditionRequestOrchestrator.tell(conditionRequest,getSelf());
+    }
+    private void triggerDiagnosticOrderOrchestrator(List<DiagnosticOrder> listDiagnosticOrderToProcess,
+                                              DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest)
+    {
+        this.listOfValidDiagnosticOrder=listDiagnosticOrderToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidDiagnosticOrder.size();
+        List<String> listOfId=new ArrayList<>();
+        for(DiagnosticOrder oOrderToIdentify:listOfValidDiagnosticOrder)
+        {
+            listOfId.add(oOrderToIdentify.getId().getIdPart());
+
+        }
+        listIdsDiagnosticOrderUsedForSearch=listOfId;
+        diagnosticOrderRequest=new DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef orderRequestOrchestrator=getContext().actorOf(
+                Props.create(DiagnosticOrderOrchestratorActor.class,config));
+        orderRequestOrchestrator.tell(diagnosticOrderRequest,getSelf());
+    }
+    private void triggerObservationOrchestrator(List<Observation> listObservationToProcess,
+                                                   ObservationOrchestratorActor.ResolveObservationRequest observationRequest)
+    {
+        this.listOfValidObservation=listObservationToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidObservation.size();
+        List<String> listOfId=new ArrayList<>();
+        for(Observation oObservation:listOfValidObservation)
+        {
+            listOfId.add(oObservation.getId().getIdPart());
+
+        }
+        listIdsObservationUsedForSearch=listOfId;
+        observationRequest=new ObservationOrchestratorActor.ResolveObservationRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef observationRequestOrchestrator=getContext().actorOf(
+                Props.create(ObservationOrchestratorActor.class,config));
+        observationRequestOrchestrator.tell(observationRequest,getSelf());
+    }
+    private void triggerDiagnosticReportOrchestrator(List<DiagnosticReport> listDiagnosticReportToProcess,
+                                                DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest reportRequest)
+    {
+        this.listOfValidDiagnosticReport=listDiagnosticReportToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidDiagnosticReport.size();
+        List<String> listOfId=new ArrayList<>();
+        for(DiagnosticReport oReport:listOfValidDiagnosticReport)
+        {
+            listOfId.add(oReport.getId().getIdPart());
+
+        }
+        listIdsDiagnosticReportUsedForSearch=listOfId;
+        reportRequest=new DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef diagnosticReportRequestOrchestrator=getContext().actorOf(
+                Props.create(DiagnosticReportOrchestratorActor.class,config));
+        diagnosticReportRequestOrchestrator.tell(reportRequest,getSelf());
+    }
+    private void triggerBasicOrchestrator(List<Basic> listBasicToProcess,
+                                                     BasicOrchestratorActor.ResolveBasicRequest basicRequest)
+    {
+        this.listOfValidBasic=listBasicToProcess;
+        nbrOfSearchRequestToWaitFor=this.listOfValidBasic.size();
+        List<String> listOfId=new ArrayList<>();
+        for(Basic oBasic:listOfValidBasic)
+        {
+            listOfId.add(oBasic.getId().getIdPart());
+
+        }
+        listIdsBasicUsedForSearch=listOfId;
+        basicRequest=new BasicOrchestratorActor.ResolveBasicRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                listOfId
+        );
+        ActorRef basicRequestOrchestrator=getContext().actorOf(
+                Props.create(BasicOrchestratorActor.class,config));
+        basicRequestOrchestrator.tell(basicRequest,getSelf());
+    }
     private void finalizePractitionerRequest(String practitionerResponse) {
 
 
@@ -644,8 +849,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 //Identify List of Practitioner to Update
                 //this.listOfPractitionerToUpdate=IdentifyPractitionerToUpdate(listSolvedPractitionerResponse);
                 //identifyMapCouplePractitionerAndIdToUpdate(listSolvedPractitionerResponse);
-                identifyPractitionerToUpdate(listSolvedPractitionerResponse);//Always run update identification before the add identification
-                identifyPractitionerToAdd();
+
                 //from the original list of Practitioner found, extract the rest of Practitioner to add
                 String ServerApp="";
                 String baseServerRepoURI="";
@@ -658,6 +862,8 @@ public class DefaultOrchestrator extends UntypedActor {
                         this.mediatorConfiguration.getServerTargetFhirDataModel()
                 );
                 String resultInsertion=null;
+                identifyPractitionerToUpdate(listSolvedPractitionerResponse,baseServerRepoURI);//Always run update identification before the add identification
+                identifyPractitionerToAdd();
                 //resultOutPutHeader+="res:";
                 if(listOfPractitionerToAdd.size()>0){
                     resultInsertion =FhirResourceProcessor.createPractitioner(resourceBundle.getContext(),
@@ -1075,7 +1281,7 @@ public class DefaultOrchestrator extends UntypedActor {
 
                 String resultInsertion=null;
                 //resultOutPutHeader+="res:";
-                if(listOfOrganizationToAdd.size()>0){
+                if(listOfOrganizationToAdd.size()>0 ){
                     resultInsertion =FhirResourceProcessor.createOrganization(resourceBundle.getContext(),
                             this.listOfOrganizationToAdd,
                             baseServerRepoURI);
@@ -1086,7 +1292,7 @@ public class DefaultOrchestrator extends UntypedActor {
                     resultOutPutHeader+=resultInsertion+",";
                 }
                 String  resultUpdate=null;
-                if(this.listOfOrganizationToUpdate.size()>0)
+                if(this.listOfOrganizationToUpdate.size()>0 && listOfOrganizationToAdd.size()>0 )
                 {
                     resultUpdate=FhirResourceProcessor.updateOrganizationInTransaction(resourceBundle.getContext(),
                             this.listOfOrganizationToUpdate,
@@ -1660,17 +1866,224 @@ public class DefaultOrchestrator extends UntypedActor {
             finalizePractitionerRequest(responsePractitioner);
             finalizePatientRequest(responsePatient);
             finalizeSpecimenRequest(responseSpecimen);
-            finalizeListResourceRequest(responseListResource);
-            finalizeBasicRequest(responseBasic);
             finalizeConditionRequest(responseCondition);
             finalizeDiagnosticOrderRequest(responseDiagnosticOrder);
             finalizeObservationRequest(responseObservation);
             finalizeDiagnosticReportRequest(responseDiagnosticReport);
+            finalizeListResourceRequest(responseListResource);
+            finalizeBasicRequest(responseBasic);
             FinishRequest _fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
             originalRequest.getRespondTo().tell(_fr, getSelf());
         }
     }
+    private void mainFinalizeOrganization()
+    {
+        if(responseOrganization==null)
+        {
+            return ;
+        }
+        else
+        {
+            PractitionerOrchestratorActor.ResolvePractitionerRequest practitionerRequest =null;
+            if(resourceBundle.getListOfValidPractitioners().size()>0)
+            {
+            triggerPractitionerOrchestrator(resourceBundle.getListOfValidPractitioners(),
+                     practitionerRequest );
+            }
+            else
+            {
+                responsePractitioner=nullResponse;
+            }
+        }
+    }
+    private void mainFinalizePractitioner()
+    {
+        if(responsePractitioner==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+            PatientOrchestratorActor.ResolvePatientRequest patientRequest =null;
+            if(resourceBundle.getListOfValidPatient().size()>0)
+            {
+                triggerPatientOrchestrator(resourceBundle.getListOfValidPatient(),
+                        patientRequest );
+            }
+            else
+            {
+                responsePatient=nullResponse;
+            }
 
+        }
+    }
+    private void mainFinalizePatient()
+    {
+        if(responsePatient==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+           SpecimenOrchestratorActor.ResolveSpecimenRequest specimenRequest =null;
+            if(resourceBundle.getListOfValidSpecimen().size()>0)
+            {
+                triggerSpecimenOrchestrator(resourceBundle.getListOfValidSpecimen(),
+                        specimenRequest );
+            }
+            else
+            {
+                responseSpecimen=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeSpecimen()
+    {
+        if(responseSpecimen==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+            ConditionOrchestratorActor.ResolveConditionRequest conditionRequest =null;
+            if(resourceBundle.getListOfValidCondition().size()>0)
+            {
+                triggerConditionOrchestrator(resourceBundle.getListOfValidCondition(),
+                        conditionRequest );
+            }
+            else
+            {
+                responseCondition=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeCondition()
+    {
+        if(responseCondition==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+            DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderRequest diagnosticOrderRequest =null;
+            if(resourceBundle.getListOfValidDiagnosticOrder().size()>0)
+            {
+                triggerDiagnosticOrderOrchestrator(resourceBundle.getListOfValidDiagnosticOrder(),
+                        diagnosticOrderRequest );
+            }
+            else
+            {
+                responseDiagnosticOrder=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeDiagnosticOrder()
+    {
+        if(responseDiagnosticOrder==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+           ObservationOrchestratorActor.ResolveObservationRequest observationRequest =null;
+            if(resourceBundle.getListOfValidObservation().size()>0)
+            {
+                triggerObservationOrchestrator(resourceBundle.getListOfValidObservation(),
+                        observationRequest );
+            }
+            else
+            {
+                responseObservation=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeObservation()
+    {
+        if(responseObservation==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+            DiagnosticReportOrchestratorActor.ResolveDiagnosticReportRequest reportRequest =null;
+            if(resourceBundle.getListOfValidDiagnosticReport().size()>0)
+            {
+                triggerDiagnosticReportOrchestrator(resourceBundle.getListOfValidDiagnosticReport(),
+                        reportRequest );
+            }
+            else
+            {
+                responseDiagnosticReport=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeDiagnosticReport()
+    {
+        if(responseDiagnosticReport==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+            ListResourceOrchestratorActor.ResolveListResourceRequest reportRequest =null;
+            if(resourceBundle.getListOfValidListResource().size()>0)
+            {
+                triggerListResourceOrchestrator(resourceBundle.getListOfValidListResource(),
+                        reportRequest );
+            }
+            else
+            {
+                responseListResource=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeListResource()
+    {
+        if(responseListResource==null)
+        {
+            return ;
+        }
+        else
+        {
+            //System.out.print(0);
+            BasicOrchestratorActor.ResolveBasicRequest reportRequest =null;
+            if(resourceBundle.getListOfValidBasic().size()>0)
+            {
+                triggerBasicOrchestrator(resourceBundle.getListOfValidBasic(),
+                        reportRequest );
+            }
+            else
+            {
+                responseBasic=nullResponse;
+            }
+
+        }
+    }
+    private void mainFinalizeBasic()
+    {
+        if(responseBasic==null)
+        {
+            return ;
+        }
+        else
+        {
+            mainFinalize();
+
+        }
+    }
     void stopRequestProcessing(FinishRequest _fr)
     {
         if(responsePatient!=null && responsePractitioner!=null && responseOrganization !=null
@@ -1680,14 +2093,14 @@ public class DefaultOrchestrator extends UntypedActor {
         }
     }
 
-    void identifyPractitionerToUpdate(List<String> bundleSearchResultSet)
+    void identifyPractitionerToUpdate(List<String> bundleSearchResultSet,String serverRepoURI)
     {
         //List<Practitioner> ListIdentifiedForUpdateTarget=new ArrayList<>();
         try
         {
             for (String oBundleSearchResult:bundleSearchResultSet)
             {
-                for (Practitioner oPractitioner :resourceBundle.extractPractitionerFromBundleString(oBundleSearchResult))
+                for (Practitioner oPractitioner :resourceBundle.extractPractitionerFromBundleString(oBundleSearchResult,serverRepoURI))
                 {
                     if(listIdsPractitionerUsedForSearch.contains(oPractitioner.getId().getIdPart()))
                     {
@@ -2400,52 +2813,54 @@ public class DefaultOrchestrator extends UntypedActor {
         else if (msg instanceof PractitionerOrchestratorActor.ResolvePractitionerResponse){
             responsePractitioner =((PractitionerOrchestratorActor.ResolvePractitionerResponse)msg).getResponseObject();
             //finalizeRequest(responsePractitioner);
-            mainFinalize();
+            //mainFinalize();
+            mainFinalizePractitioner();
         }
         else if (msg instanceof PatientOrchestratorActor.ResolvePatientResponse){
             responsePatient =((PatientOrchestratorActor.ResolvePatientResponse)msg).getResponseObject();
             //finalizePatientRequest(responsePatient);
-            mainFinalize();
+            mainFinalizePatient();
         }
         else if (msg instanceof OrganizationOrchestratorActor.ResolveOrganizationResponse){
             responseOrganization =((OrganizationOrchestratorActor.ResolveOrganizationResponse)msg).getResponseObject();
             //finalizePatientRequest(responseObject);
             //finalizeOrganizationRequest(responseOrganization);
-            mainFinalize();
+            //mainFinalize();
+            mainFinalizeOrganization();
         }
         else if (msg instanceof SpecimenOrchestratorActor.ResolveSpecimenResponse){
             responseSpecimen =((SpecimenOrchestratorActor.ResolveSpecimenResponse)msg).getResponseObject();
             //finalizePatientRequest(responseObject);
             //finalizeOrganizationRequest(responseOrganization);
-            mainFinalize();
+            mainFinalizeSpecimen();
         }
         else if (msg instanceof ConditionOrchestratorActor.ResolveConditionResponse){
             responseCondition =((ConditionOrchestratorActor.ResolveConditionResponse)msg).getResponseObject();
             //finalizePatientRequest(responseObject);
             //finalizeOrganizationRequest(responseOrganization);
-            mainFinalize();
+            mainFinalizeCondition();
         }
         else if (msg instanceof DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderResponse){
             responseDiagnosticOrder =((DiagnosticOrderOrchestratorActor.ResolveDiagnosticOrderResponse)msg).getResponseObject();
             //finalizePatientRequest(responseObject);
             //finalizeOrganizationRequest(responseOrganization);
-            mainFinalize();
+            mainFinalizeDiagnosticOrder();
         }
         else if (msg instanceof ObservationOrchestratorActor.ResolveObservationResponse){
             responseObservation =((ObservationOrchestratorActor.ResolveObservationResponse)msg).getResponseObject();
-            mainFinalize();
+            mainFinalizeObservation();
         }
         else if (msg instanceof DiagnosticReportOrchestratorActor.ResolveDiagnosticReportResponse){
             responseDiagnosticReport =((DiagnosticReportOrchestratorActor.ResolveDiagnosticReportResponse)msg).getResponseObject();
-            mainFinalize();
+            mainFinalizeDiagnosticReport();
         }
         else if (msg instanceof ListResourceOrchestratorActor.ResolveListResourceResponse){
             responseListResource =((ListResourceOrchestratorActor.ResolveListResourceResponse)msg).getResponseObject();
-            mainFinalize();
+            mainFinalizeListResource();
         }
         else if (msg instanceof BasicOrchestratorActor.ResolveBasicResponse){
             responseBasic =((BasicOrchestratorActor.ResolveBasicResponse)msg).getResponseObject();
-            mainFinalize();
+            mainFinalizeBasic();
         }
         else
         {

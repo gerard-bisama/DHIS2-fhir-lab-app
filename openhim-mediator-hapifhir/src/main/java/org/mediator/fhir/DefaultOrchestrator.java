@@ -1872,6 +1872,8 @@ public class DefaultOrchestrator extends UntypedActor {
             finalizeDiagnosticReportRequest(responseDiagnosticReport);
             finalizeListResourceRequest(responseListResource);
             finalizeBasicRequest(responseBasic);
+            FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                    "End of DHIS2 -> Hapi Fhir data sync","Notice");
             FinishRequest _fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
             originalRequest.getRespondTo().tell(_fr, getSelf());
         }

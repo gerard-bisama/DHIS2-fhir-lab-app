@@ -297,7 +297,8 @@ public class FhirDHISOrchestrator extends UntypedActor {
 
                     }//End of else resProcessing
                 }//End of for Bundle
-
+                FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                        "CSV Bundle resources request succeded","Notice");
                 this.listOfValidPatient.addAll(resourceBundle.getListOfValidPatient());
                 this.listOfValidPractitioner.addAll(resourceBundle.getListOfValidPractitioners());
                 this.listOfValidSpecimen.addAll(resourceBundle.getListOfValidSpecimen());
@@ -796,6 +797,8 @@ public class FhirDHISOrchestrator extends UntypedActor {
 
 
                     }//End for Patient
+                    FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                            "End of update operation process","Notice");
                 }//End of this.listOfPatientToUpdate.size
                 if(allowAddNewCase==true && listOfPatientToAdd.size()>0)
                 {
@@ -1052,6 +1055,8 @@ public class FhirDHISOrchestrator extends UntypedActor {
                             }
                         }
                     }
+                    FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
+                            "End of insert operation process","Notice");
                 }
 
 

@@ -1,21 +1,17 @@
-# DHIS2 Tracker FHIR APP
-This tools is used to search for DHIS2 tracked entities related to Lab based Disease Surveillance (Patient,Practitioner,Organization,Specimen,Observation,Diagnostic Order and Diagnostic Report 
-( > Ref:https://www.hl7.org/fhir/resourcelist.html) in the Tracker and convert then to DHIR related DSTU2 resources and synchronize the in the HAPI FHIR server,so the synchronized resources could be accessed through HAPI FHIR API by third party application for IDSR.
-Two main generic use cases has been implemented:
-1. Publish facility and Geographic Hierarchy data in the FHIR Repository
-2. Publish and query Health Worker demographic information in the FHIR Repository
-3. Creation and query of client demographic information
-4. Creation and query of Laboratory test and result for reporting and verification of Suspected Disease.
+# Fhir Lab integration app
+The FHIR Lab apps is utilizing the HL7 FHIR standard to represent IDSR data to ensure the sharing of  data between the IDSR, laboratory facilities and other systems that could need to have access to the laboratory data as well as patient demographic and disease specifics information. 
 
-The Laboratory Testing Workflow (LTW) Integration  and the Sharing Laboratory Reports Profile are used as model to produce the data for the Lab based IDSR.
+The case is represented by the patient demographic information, disease to follow up and the symptoms description and is recorded in the IDSR in a specific programs. Laboratory data are  registered for the specifics case as events. The laboratory data comes from the facilities and contain information on providers (Organization and care provider), specimen handing, laboratory order, laboratory observation and test performed. 
 
-The Laboratory Testing Workflow (LTW) Integration covers the workflow related to tests performed by a clinical laboratory inside a healthcare institution, for both identified orders and unknown orders, related to both identified patients and unidentified or misidentified patients.The Sharing Laboratory Reports Content Profile defines the laboratory report, observation and interpretation as electronic content to be shared in a community of healthcare settings and care providers.(Ref: IHE Laboratory Technical Framework, Volume 1 (LAB TF-1))
+Those information  are collected by facilities and submitted to a central IDSR which is a DHIS2 based system. To submit the laboratory data, the facilities should be able to have information from the IDSR in the standardized format to allow them to reference case and related laboratory data in their own system or procedure, in order to share (pull or push) data without caring of the  data structure of the client or the IDRS service providers.
+
+That is why the app architure is composed of the Fhir conversion module that generates HL7 Fhir resource from the IDSR data and  csv based Lab data. Then the generated Fhir resource are stored in a Fhir repository which provides the appropriate interface for search and CRUD operation. Then, all the requests could be made to the  Fhir repository to get formalized information on Lab request, specimen handling information, status of the results, disease diagnosed, etc.
 
 #Getting started guide
 The tools is composed of 3 mains applications:
-1. The dhis2-fhir convertion: used to convert dhis2 organisation unit and tracked entities to FHIR based resource. The configuration is done here to map tracked entities and tracked entities attributes to fhir related resource to allow the conversion. For Organization unit there is no need for mapping.
+1. The dhis2-fhir conversion: used to convert dhis2 organisation unit and tracked entities to FHIR based resource. The configuration is done here to map tracked entities and tracked entities attributes to fhir related resource to allow the conversion. For Organization unit there is no need for mapping. This module provide also a web UI to allow facilities to upload data. 
 2. The HAPI FHIR Server: used to store and validate dhis tracked entities converted to FHIR resources. Act as FHIR Repository an could be used by any fhir client to request resource.
-3. The fhir mediator: used to synchronize data between dhis2 and the Fhir Repository. A cronjob can be configured to synchronize tracked entities in the FHIR repository on time base.
+3. The fhir mediator: used to synchronize interation between the conversion module, the IDSR and the Fhir Repository. A cronjob can be configured to trigger different actions. The main action concern the dhis2->Fhir conversion, the sync of converted Fhir resource with the Hapi server, the extraction and conversion of csv data in to Fhir resources and then, the sync of csv converted data with DHIS2.
 
 To begin, copy the source: ```sh git clone https://github.com/gerard-bisama/DHIS2-fhir-lab-app.git```. The tree components are copied in the source.
 
@@ -68,7 +64,25 @@ For example, for patient resource the mapping of csv column names and FHIR resou
 	"deceasedBoolean":"Immediate Outcome"
   }
 ```
-Do the same for other FHIR resource model.
+Do the same for others FHIR resource model.
+
+An other challenge is that more than one practitioner can be involved on the laboratory management process. There is no way for the app to categorized the role of practitioner at any stage of the program. The main role in the laboratory management is the care provider who requested the lab exam, the provider who collect the specimen and the provider who perferm the examination. The role are hard coded in like this: care_provider, specimen_collector,observation_performer
+```sh
+"practitioner_stage_nature":[
+{
+	"stage":"Initial investigation and diagnosis",# Name of stage as defined in the program. if no practitioner information is concerned leave empty all stage attribute
+	"nature":"care_provider"
+},
+{
+	"stage":"Specimen Handling",
+	"nature":"specimen_collector"
+},
+{
+	"stage":"Lab Results",
+	"nature":"observation_performer"
+}
+],
+```
 
 2. Configuration of the FHIR-mediator
 
@@ -108,6 +122,11 @@ serverTargetPort=8084 # Port of the HAPI server
 serverTargetScheme=http # could be https also depending on the server configuration
 serverTargetAppName=hapi-fhir-jpaserver-local
 serverTargetFhirDataModel=baseDstu2
+.
+.
+resourceTempLocation=/home/datalab/temp #make sure that the following path are pointed the appropriate file. this allow the configuration to be done in one place but they are used by more than one app
+dataElementMappingFile=/home/datalab/FileMapping.json
+fhirAttributeMapping=/media/dhis2-fhir/convert-dhi2-fhir/manifest.webapp
 ```
 The second step is to configure the connection with the openHIM core
 ```sh 
@@ -121,7 +140,7 @@ core.api.port=8080 # the port of openhim-core, configure during the installation
 core.api.user=root@openhim.org #Default openhim admin username
 core.api.password=xxxx #password defined during the installation of openhim
 ``` 
-Copy also the FileMapping.json file generated by the app  the convert-dhis2-fhir and the configured manifest.webapp in /home/mediator/config.
+
 
 3. Configuration of the HAPI JPA Server
 
@@ -165,7 +184,10 @@ the run the app on port 8083 by default. Can check if the up return the bundle o
 ```sh
 curl http://localhost:8083/trackedentities
 ```
-
+To open the UI for file uploading and csv template downloading, enter the following address in the browser
+```sh
+http://localhost:8083/uploadfile
+```
 Prerequisites: Install nodejs v4 or greater (>https://nodejs.org/en/download/) , npm
 
 2. FHIR-mediator
@@ -215,9 +237,17 @@ Then, the Fhir local server can be accessed on http://localhost:8084/hapi-fhir-j
 > http://hapifhir.io/doc_jpa.html
 
 #Launch the synchronization
-To run the synchronization of data, run the command
+To run the synchronization of data, perform the following action in the defined order:
+a. run the synchronization of data with the Hapi Server to ensure that all IDSR lab data are in the Fhir Server
+b. process all uploaded file and push the extracted Fhir resource in the Hapi Server as Bundle of type collection
+c. check in there is collection in pending status and process them to sync data to the IDSR. The redo again a.
+
+Here is a cron tab that you can create to perform these actions
+
 ```sh
- curl -k -u tut:tut https://localhost:5000/entitytrackers/1
+ */5 * * * * curl -k -u tut:tut https://localhost:5000/entitytrackers/1  
+*/7 * * * * curl http://localhost:8083/csv2fhir 
+*/8 * * * * curl -k -u tut:tut https://localhost:5000/pushfhir/1 
  ```
-Replace localhost by the IP of the server.
+Replace localhost by the IP of the server and the time to the estimation that may fit
 

@@ -2,7 +2,8 @@ package ca.uhn.fhir.jpa.demo;
 
 import java.util.Properties;
 import java.sql.SQLException;//
-import com.mysql.jdbc.Driver;//
+//import com.mysql.jdbc.Driver;//
+import org.postgresql.Driver;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -60,15 +61,17 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 		*/
 		try
 		{
-			retVal.setDriver(new com.mysql.jdbc.Driver());
+			//retVal.setDriver(new com.mysql.jdbc.Driver());
+			retVal.setDriver(new org.postgresql.Driver());
 		}
 		catch (Exception exc)
 		{
 			exc.printStackTrace();
 		}
-		retVal.setUrl("jdbc:mysql://localhost:3306/dhis2_fhir");
-		retVal.setUsername("root");
-		retVal.setPassword("xxxxxx");
+		//retVal.setUrl("jdbc:mysql://localhost:3306/dhis2_fhir");
+		retVal.setUrl("jdbc:postgresql://localhost:5432/dhis2_fhir");
+		retVal.setUsername("fhir");
+		retVal.setPassword("xxxxxxx");
 		
 		return retVal;
 	}
@@ -87,7 +90,8 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		//extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.MySQLDialect.class.getName());
+		//extraProperties.put("hibernate.dialect", org.hibernate.dialect.MySQLDialect.class.getName());
+		extraProperties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQL9Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

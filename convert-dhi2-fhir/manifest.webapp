@@ -22,6 +22,7 @@
   "programs_progstages_tracked":[
 	  {
 		"id":"Dy5AZEKVUqp",
+		"name":"Combined Case Registration and Notification",
 		"stages":[
 			"xLrkAXIgi9f",
 			"Kw3lcbfPPc7",
@@ -295,6 +296,7 @@
   ],
   "format_patientid_hyphen":true,
   "format_specimenid_hyphen":false,
+  "include_all_csv_column":false,
   "authentication":"admin:district",
   "temp_directory":"/home/server-hit/Documents/datalab",
   "source_directory":"/home/server-hit/Documents/datalab/source",

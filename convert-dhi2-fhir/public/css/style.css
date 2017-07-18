@@ -72,3 +72,14 @@ color:#000000;
     width: 450px;
   }
 }
+.form-group {
+  margin-bottom: 15px;
+}
+#logout_box {
+  float:right;
+  margin-right: 14px;
+  margin-top: 13px;
+}
+#logout_box a {
+	color:#000000;
+}

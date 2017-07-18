@@ -1,0 +1,52 @@
+	<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Login-Fhir Lab apps</title>
+  <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <!--<span class="glyphicon glyphicon-cloud-upload"></span>-->
+            <h2>Fhir Lab apps</h2>
+            <h4>Sign in</h4>
+            <form action="/login" method="POST">
+            <div >
+              <!--<div class="progress-bar" role="progressbar"></div>-->
+               <div class="form-group">
+					<label for="username">Username:</label>
+					<input type="text" class="form-control" id="username" name="username">
+				</div>
+				<div class="form-group">
+					<label for="pwd">Password:</label>
+					<input type="password" class="form-control" id="password" name="password">
+				</div>
+            </div>
+            <button class="btn btn-lg login-btn" type="submit">Sign in</button>
+            <div id="error">
+				<p> Wrong user name or password!</p>
+			</div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!--<h5><a href="/downloadcsv">Download the csv template for Lab here</a></h5>-->
+
+  <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="javascripts/login.js"></script>
+</body>
+</html>

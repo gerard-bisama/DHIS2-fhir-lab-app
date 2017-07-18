@@ -356,6 +356,30 @@ exports.GetAllOrganisationUnits= function GetAllOrganisationUnits(callback)
 	request.send();
 	
 }
+exports.authenticate=function authenticate(credentials,callback)
+{
+	var urlRequest=`${serverUrl}/organisationUnits?pageSize=1&page=1`;
+	var basicAuthCredential = `Basic ${btoa(credentials)}`;
+	var request = new XMLHttpRequest();
+	request.open('GET',urlRequest, true);
+	request.setRequestHeader( 'Content-Type',   'application/json' );
+	request.setRequestHeader( 'Accept', 'application/json' );
+	request.setRequestHeader("Authorization", basicAuthCredential); 
+	request.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+        var myArr = JSON.parse(this.responseText);
+        //console.log(myArr);
+        return callback(myArr);
+		}
+		else if (this.readyState == 4 && this.status == 401 )
+		{
+			//console.log(this.responseText);
+			var myArr="Bad credentials";
+			return callback(myArr);
+		}
+	};
+	request.send();
+}
 
 function getOptionsDetails(listOptionIds,dataTrace,callback)
 {
@@ -861,6 +885,7 @@ exports.getDatsElementsMetaDataInfo= function getDatsElementsMetaDataInfo(dataEl
 	request.send();
 	
 }
+//exports.loadLoginWithError=function
 /*
 export function WriteJsonFile(jsonString)
 {
@@ -965,9 +990,6 @@ exports.getAttributeWithOptionSetValue= function getAttributeWithOptionSetValue(
 	return manifest.attribute_with_optionset_value;
 }
 
-
-
-
 function ReadJSONFile(fileName)
 {
 	var arrayPath=__dirname.split('/');
@@ -985,6 +1007,7 @@ function ReadJSONFile(fileName)
 	return jsonContent;
 }
 
+
 exports.readResourceJSONFile=  function readResourceJSONFile(fileName)
 {
 	var filePath=path.resolve(path.join(manifest.resource_temp, "/", fileName));
@@ -992,6 +1015,7 @@ exports.readResourceJSONFile=  function readResourceJSONFile(fileName)
 	var jsonContent = JSON.parse(contents);
 	return jsonContent;
 }
+
 
 
 exports.writeJSONFile= function writeJSONFile(fileName,jsonContent)
@@ -1015,4 +1039,200 @@ exports.generateCSVFile = function generateCSVFile(listHeader,filename,programNa
 		writer.write(listContentCSV);
 	}
 	writer.end();
+}
+exports.generateCSVFileWithCaseData = function generateCSVFileWithCaseData(listCase,listOrganization,caseAttributeMapping,listAllMappingAttributes,filename,programName)
+{
+	var formatPatientId=manifest.format_patientid_hyphen;
+	var filePath=path.resolve(path.join(manifest.temp_directory, "/", "FileMapping.json"));
+	var contents = fs.readFileSync(filePath);
+	var jsonContent = JSON.parse(contents);
+	//return jsonContent;
+	//console.log(jsonContent)
+	var listHeader=[];
+	listHeader.push("program");
+	listHeader.push("Registering Unit");
+	var listCaseAttribute=[];
+	listCaseAttribute.push("Registering Unit");
+	for(var indexAttribute=0;indexAttribute<jsonContent.length;indexAttribute++)
+	{
+		if(jsonContent[indexAttribute].displayName!="")
+		{
+			var itemInTheList=false;
+			if(manifest.include_all_csv_column==false)
+			{
+				itemInTheList=itemIsInTheList(jsonContent[indexAttribute].displayName,listAllMappingAttributes);
+				if(itemInTheList==true)
+				{
+					listHeader.push(jsonContent[indexAttribute].displayName);
+				}
+			}
+			else
+			{
+				listHeader.push(jsonContent[indexAttribute].displayName);
+			}
+			
+			if(jsonContent[indexAttribute].type=="attribute")
+			{
+				listCaseAttribute.push(jsonContent[indexAttribute].displayName);
+			}
+		}
+	}
+	//The sort the listCase by managingOrganization Id
+	listCase.sort(function (a,b)
+	{
+		var organizationId1=(a.managingOrganization.reference.split("/"))[1];
+		var organizationId2=(b.managingOrganization.reference.split("/"))[1];
+		return organizationId1.localeCompare(organizationId2);
+		
+	})
+	//console.log(listCase)
+	//console.log(listHeader);
+	//console.log("listheader size:"+listHeader.length);
+	var writer = csvWriter({ headers: listHeader});
+	writer.pipe(fs.createWriteStream(manifest.temp_directory+"/"+filename+'.csv'));
+	
+	//listContentCSV.push(programName);
+	if(listCase.length>0)
+	//if(false)
+	{
+		var resourceCase=listCase[0];
+		if(resourceCase.resourceType =="Patient")
+		{
+			for(var indexResource=0;indexResource<listCase.length;indexResource++)
+			{
+				var oCase=listCase[indexResource];
+				var listContentCSV=[];
+				for(var indexHeader=0;indexHeader<listHeader.length;indexHeader++)
+				{
+					listContentCSV.push("");
+				}
+				listContentCSV[0]=programName;
+				//console.log(listCase[indexResource]);
+				for(var indexHeader=1;indexHeader<listHeader.length;indexHeader++)
+				{
+					var attributeName=listHeader[indexHeader];
+					if(itemIsInTheList(attributeName,listCaseAttribute)==false)
+					{
+						continue;
+					}
+					switch(attributeName)
+					{
+						
+						case caseAttributeMapping.id:
+							var caseId="";
+							if(formatPatientId==true)
+							{
+								var caseId=(oCase.id.split("-"))[0];
+							}
+							else
+							{
+								caseId=oCase.id;
+							}
+							listContentCSV[indexHeader]=caseId;
+							break;
+						case caseAttributeMapping.managingOrganization:
+							var organizationId=(oCase.managingOrganization.reference.split("/"))[1];
+							var orgName=resolveOrganizationNameById(organizationId,listOrganization);
+							listContentCSV[indexHeader]=orgName;
+							break;
+						case caseAttributeMapping.identifier:
+							for(var i=0;i<oCase.identifier.length;i++)
+							{
+								if(oCase.identifier[i].type.text==caseAttributeMapping.identifier)
+								{
+									listContentCSV[indexHeader]=oCase.identifier[i].value;
+								}
+							}
+							break;
+						case caseAttributeMapping.name_family:
+							if(oCase.name[0]!="undefined")
+							{
+								listContentCSV[indexHeader]=oCase.name[0].family;
+							}
+							break;
+						case caseAttributeMapping.name_given:
+							if(oCase.name[0]!="undefined")
+							{
+								listContentCSV[indexHeader]=oCase.name[0].given;
+							}
+							break;
+						case caseAttributeMapping.telecom_phone:
+							for(var i=0;i<oCase.telecom.length;i++)
+							{
+								if(oCase.telecom[i].system=="phone")
+								{
+									listContentCSV[indexHeader]=oCase.telecom[i].value;
+									break;
+								}
+							}
+							break;
+						case caseAttributeMapping.telecom_email:
+							for(var i=0;i<oCase.telecom.length;i++)
+							{
+								if(oCase.telecom[i].system=="email")
+								{
+									listContentCSV[indexHeader]=oCase.telecom[i].value;
+									break;
+								}
+							}
+							break;
+						case caseAttributeMapping.gender:
+							listContentCSV[indexHeader]=oCase.gender;
+							break;
+						case caseAttributeMapping.birthDate:
+							listContentCSV[indexHeader]=oCase.birthDate;
+							break;
+						case caseAttributeMapping.deceasedBoolean:
+							listContentCSV[indexHeader]=oCase.deceasedBoolean;
+							break;
+						case caseAttributeMapping.address_text:
+							if(oCase.address[0]!="undefined")
+							{
+								listContentCSV[indexHeader]=oCase.address[0].text;
+							}
+							break;
+						case caseAttributeMapping.address_city:
+							if(oCase.address[0]!="undefined")
+							{
+								listContentCSV[indexHeader]=oCase.address[0].city;
+							}
+							break;
+						case caseAttributeMapping.deceasedDateTime:
+							listContentCSV[indexHeader]=oCase.deceasedDateTime;
+							break;
+					}
+				}
+				writer.write(listContentCSV);
+			}//
+		}
+	}
+	writer.end();
+	//console.log(caseAttributeMapping);
+}
+function itemIsInTheList(item,list)
+{
+	var isIn=false;
+	for(var i=0;i<list.length;i++)
+	{
+		if(list[i]==item)
+		{
+			isIn=true;
+			break;
+		}
+	}
+	return isIn;
+}
+function resolveOrganizationNameById(idOrganization,listOrganization)
+{
+	var orgName="";
+	for(var indexOrganization=0;indexOrganization<listOrganization.length;indexOrganization++)
+	{
+		var oOrganization=listOrganization[indexOrganization];
+		if(oOrganization.id==idOrganization)
+		{
+			orgName=oOrganization.name;
+			break;
+		}
+	}
+	return orgName;
 }

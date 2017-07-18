@@ -1,8 +1,20 @@
 package org.mediator.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.resource.Basic;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.ListResource;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.Specimen;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -15,6 +27,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 //import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 
@@ -764,6 +777,12 @@ public class FhirResourceValidator  {
         }
         return copy;
     }
+    private static ca.uhn.fhir.model.api.Bundle CreateBundleCopy(ca.uhn.fhir.model.api.Bundle oBundle)
+    {
+        ca.uhn.fhir.model.api.Bundle copy=new ca.uhn.fhir.model.api.Bundle();
+        copy=oBundle;
+        return  copy;
+    }
     public List<Practitioner> extractPractitionerFromBundleString(String bundleJsonString,String sourceServerURI) throws Exception
     {
         List<Practitioner> extractedPractitioner=new ArrayList<>();
@@ -876,6 +895,44 @@ public class FhirResourceValidator  {
                     while (nextPageBundle.getLink(Bundle.LINK_NEXT)!=null)
                     {
                         Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
+                        fhirProcessor=null;
+                        fhirProcessor=new FhirResourceProcessor(subNextBundle);
+                        fhirProcessor.processResourcesBundle();
+                        extractedListResource.addAll(fhirProcessor.getListOfListResource());
+                        nextPageBundle=CreateBundleCopy(subNextBundle);
+                    }
+                }
+            }
+
+        }
+
+
+        return extractedListResource;
+    }
+    public static List<ListResource> extractListResourceFromApiBundleObject(ca.uhn.fhir.model.api.Bundle oBundle, FhirContext oContext,String sourceServerURI) throws Exception
+    {
+        List<ListResource> extractedListResource=new ArrayList<>();
+        if(oBundle!=null ) {
+            if (oBundle.getResources(ListResource.class).size() == 0) {
+                return extractedListResource;
+            }
+            else if (oBundle.getResources(ListResource.class).size()>0)
+            {
+                FhirResourceProcessor fhirProcessor=new FhirResourceProcessor(oBundle);
+                fhirProcessor.processResourcesBundle();
+                extractedListResource=fhirProcessor.getListOfListResource();
+                if(oBundle.getLinkNext().getValue()!=null)
+                {
+                    IGenericClient oClient=oContext.newRestfulGenericClient(sourceServerURI);
+                    ca.uhn.fhir.model.api.Bundle nextPageBundle=oClient.loadPage().next(oBundle).execute();
+                    //oClient.loadPage().next(oBundle).execute();
+                    fhirProcessor=null;
+                    fhirProcessor=new FhirResourceProcessor(nextPageBundle);
+                    fhirProcessor.processResourcesBundle();
+                    extractedListResource.addAll(fhirProcessor.getListOfListResource());
+                    while (nextPageBundle.getLinkNext().getValue()!=null)
+                    {
+                        ca.uhn.fhir.model.api.Bundle subNextBundle=oClient.loadPage().next(nextPageBundle).execute();
                         fhirProcessor=null;
                         fhirProcessor=new FhirResourceProcessor(subNextBundle);
                         fhirProcessor.processResourcesBundle();
@@ -1305,6 +1362,17 @@ class FhirResourceProcessor
         this._listOfResources=new ArrayList<IResource>();
         //Extract all the resources in the Bundle
         for(Bundle.Entry entry: this._oBundle.getEntry())
+        {
+            this._listOfResources.add(entry.getResource());
+
+        }
+    }
+    public FhirResourceProcessor(ca.uhn.fhir.model.api.Bundle oBundle)
+    {
+       // this._oBundle=oBundle;
+        this._listOfResources=new ArrayList<IResource>();
+        //Extract all the resources in the Bundle
+        for(BundleEntry entry: oBundle.getEntries())
         {
             this._listOfResources.add(entry.getResource());
 
@@ -2022,6 +2090,162 @@ class FhirResourceProcessor
                     "succes:"+success+"," +
                     "failed:"+failed+"}";
         return  stringTransactionResult;
+    }
+    public static void deleteDiagnosticReportBySpecimen(FhirContext oContext,List<String> listIdSpecimenToDelete, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            IBaseOperationOutcome resp=client.delete()
+                    .resourceConditionalByType("DiagnosticReport")
+                    //.where(DiagnosticReport.SPECIMEN.hasId(idSpecimenToDelete))
+                    .where(DiagnosticReport.SPECIMEN.hasAnyOfIds(listIdSpecimenToDelete))
+                    .execute();
+            if(resp!=null)
+            {
+                OperationOutcome outcome = (OperationOutcome) resp;
+                System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+            }
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
+    }
+    public static void deleteObservationBySpecimen(FhirContext oContext,List<String> listIdSpecimenToDelete, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            IBaseOperationOutcome resp=client.delete()
+                    .resourceConditionalByType("Observation")
+                    //.where(DiagnosticReport.SPECIMEN.hasId(idSpecimenToDelete))
+                    .where(Observation.SPECIMEN.hasAnyOfIds(listIdSpecimenToDelete))
+                    .execute();
+            if(resp!=null)
+            {
+                OperationOutcome outcome = (OperationOutcome) resp;
+                System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+            }
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
+    }
+    public static void deleteDiagnosticOrderBySpecimen(FhirContext oContext,List<String> listIdSpecimenToDelete, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            IBaseOperationOutcome resp=client.delete()
+                    .resourceConditionalByType("DiagnosticOrder")
+                    //.where(DiagnosticReport.SPECIMEN.hasId(idSpecimenToDelete))
+                    .where(DiagnosticOrder.SPECIMEN.hasAnyOfIds(listIdSpecimenToDelete))
+                    .execute();
+            if(resp!=null)
+            {
+                OperationOutcome outcome = (OperationOutcome) resp;
+                System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+            }
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
+    }
+    public static void deletePractitioner(FhirContext oContext,List<IdDt> listIdsPractitioner, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            for(IdDt idToDelete:listIdsPractitioner)
+            {
+
+                IBaseOperationOutcome resp=client.delete()
+                        .resourceById(idToDelete)
+                        .execute();
+                if(resp!=null)
+                {
+                    OperationOutcome outcome = (OperationOutcome) resp;
+                    System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+                }
+            }
+
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
+    }
+    public static void deleteSpecimen(FhirContext oContext,List<IdDt> listIdsSpecimen, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            for(IdDt idToDelete:listIdsSpecimen)
+            {
+
+                IBaseOperationOutcome resp=client.delete()
+                        .resourceById(idToDelete)
+                        .execute();
+                if(resp!=null)
+                {
+                    OperationOutcome outcome = (OperationOutcome) resp;
+                    System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+                }
+            }
+
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
+    }
+    public static void deleteListResourceSpecimen(FhirContext oContext,List<String> listIdsSpecimen, String serverUrl, String logFileName)
+    {
+        try
+        {
+            IGenericClient client=oContext.newRestfulGenericClient(serverUrl);
+            for(String idToDelete:listIdsSpecimen)
+            {
+                //First search for List resource that refers to the specimen
+                ca.uhn.fhir.model.api.Bundle oBundle = client.search().forResource(ListResource.class)
+                        .where(new StringClientParam("item").matches().value(idToDelete))
+                        .execute();
+
+                List<ListResource> listExtractedResource= FhirResourceValidator.extractListResourceFromApiBundleObject(oBundle,oContext,serverUrl);
+                for(ListResource oListResource:listExtractedResource)
+                {
+                    IBaseOperationOutcome resp=client.delete()
+                            .resourceById(oListResource.getId())
+                            .execute();
+                    if(resp!=null)
+                    {
+                        OperationOutcome outcome = (OperationOutcome) resp;
+                        System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
+                    }
+                }
+
+            }
+
+
+        }
+        catch (Exception exc)
+        {
+            FhirMediatorUtilities.writeInLogFile(logFileName,
+                    exc.getMessage(),"Error");
+        }
     }
 
     public static String updatePractitionerInTransaction(FhirContext oContext,List<Practitioner> listOfPractitioner, String serverUrl) throws Exception

@@ -189,6 +189,46 @@ public class FhirMediatorUtilities {
         }
         return buildRequestPath;
     }
+    public static String buildResourcesSearchRequestByType(String resourceType)
+    {
+        String buildRequestPath="";
+        switch (resourceType)
+        {
+            case "Practitioner":
+                buildRequestPath="/Practitioner";
+                break;
+            case "Patient":
+                buildRequestPath="/Patient";
+                break;
+            case "Organization":
+                buildRequestPath="/Organization";
+                break;
+            case "Specimen":
+                buildRequestPath="/Specimen";
+                break;
+            case "DiagnosticOrder":
+                buildRequestPath="/DiagnosticOrder";
+                break;
+            case "Observation":
+                buildRequestPath="/Observation";
+                break;
+            case "Condition":
+                buildRequestPath="/Condition";
+                break;
+            case "DiagnosticReport":
+                buildRequestPath="/DiagnosticReport";
+                break;
+            case "List":
+                buildRequestPath="/List";
+                break;
+            case "Basic":
+                buildRequestPath="/Basic";
+                break;
+
+        }
+        buildRequestPath+="?_pretty=true";
+        return buildRequestPath;
+    }
     public static String buildPractitionerUpdateRequest(String identifierSystem,String identifierValue)
     {
         String buildRequestPath="/Practitioner?";

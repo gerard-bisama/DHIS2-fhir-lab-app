@@ -7,6 +7,7 @@ import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.http.HttpStatus;
 //import org.hl7.fhir.dstu3.model.Identifier;
 //import org.hl7.fhir.dstu3.model.Practitioner;
@@ -66,6 +67,8 @@ public class DefaultOrchestrator extends UntypedActor {
     private List<DiagnosticOrder> listOfDiagnosticOrderToAdd;
     private List<Observation> listOfObservationToAdd;
     private List<DiagnosticReport> listOfDiagnosticReportToAdd;
+    List<String> listIdSpecimenToDelete;
+    List<Specimen> listSpecimenToDelete;
 
     int nbrOfSearchRequestToWaitFor;
     String baseServerRepoURI;
@@ -165,6 +168,8 @@ public class DefaultOrchestrator extends UntypedActor {
         listOfDiagnosticOrderToAdd=new ArrayList<>();
         listOfObservationToAdd=new ArrayList<>();
         listOfDiagnosticReportToAdd=new ArrayList<>();
+        listIdSpecimenToDelete=new ArrayList<>();
+        listSpecimenToDelete=new ArrayList<>();
         nbrOfSearchRequestToWaitFor=0;
         listIdsPractitionerUsedForSearch=new ArrayList<>();
         listIdsPatientUsedForSearch=new ArrayList<>();
@@ -228,6 +233,8 @@ public class DefaultOrchestrator extends UntypedActor {
         log.info("Received response Fhir repository Server");
         //originalRequest.getRespondTo().tell(response.toFinishRequest(), getSelf());
         //Perform the resource validation from the response
+        listIdSpecimenToDelete=new ArrayList<>();
+        listSpecimenToDelete=new ArrayList<>();
         try
         {
             if (response.getStatusCode() == HttpStatus.SC_OK) {
@@ -693,10 +700,16 @@ public class DefaultOrchestrator extends UntypedActor {
 
         }
         listIdsSpecimenUsedForSearch=listOfId;
+        /*
         specimenRequest=new SpecimenOrchestratorActor.ResolveSpecimenRequest(
                 originalRequest.getRequestHandler(),
                 getSelf(),
                 listOfId
+        );*/
+        specimenRequest=new SpecimenOrchestratorActor.ResolveSpecimenRequest(
+                originalRequest.getRequestHandler(),
+                getSelf(),
+                null
         );
         ActorRef specimenRequestOrchestrator=getContext().actorOf(
                 Props.create(SpecimenOrchestratorActor.class,config));
@@ -1376,6 +1389,7 @@ public class DefaultOrchestrator extends UntypedActor {
                 //Identify List of Patient to add and to Update
                 identifySpecimenToUpdate(listSolvedSpecimenResponse,baseServerRepoURI);//Always run update identification before the add identification
                 identifySpecimenToAdd();
+                identifySpecimenToDelete(listSolvedSpecimenResponse,baseServerRepoURI);
                 //from the original list of Practitioner found, extract the rest of Practitioner to add
 
                 String resultInsertion=null;
@@ -1866,6 +1880,7 @@ public class DefaultOrchestrator extends UntypedActor {
             finalizePractitionerRequest(responsePractitioner);
             finalizePatientRequest(responsePatient);
             finalizeSpecimenRequest(responseSpecimen);
+            deleteSpecimenReferenceResources();
             finalizeConditionRequest(responseCondition);
             finalizeDiagnosticOrderRequest(responseDiagnosticOrder);
             finalizeObservationRequest(responseObservation);
@@ -1873,7 +1888,7 @@ public class DefaultOrchestrator extends UntypedActor {
             finalizeListResourceRequest(responseListResource);
             finalizeBasicRequest(responseBasic);
             FhirMediatorUtilities.writeInLogFile(this.mediatorConfiguration.getLogFile(),
-                    "End of DHIS2 -> Hapi Fhir data sync","Notice");
+                        "End of DHIS2 -> Hapi Fhir data sync","Notice");
             FinishRequest _fr = new FinishRequest(logResult, "text/plain", HttpStatus.SC_OK);
             originalRequest.getRespondTo().tell(_fr, getSelf());
         }
@@ -1941,6 +1956,61 @@ public class DefaultOrchestrator extends UntypedActor {
             }
 
         }
+    }
+    private void deleteSpecimenReferenceResources()
+    {
+        String ServerApp="";
+        String baseServerRepoURI="";
+        ServerApp=mediatorConfiguration.getServerTargetAppName().equals("null")?null:mediatorConfiguration.getServerTargetAppName();
+        baseServerRepoURI=FhirMediatorUtilities.buidServerRepoBaseUri(
+                this.mediatorConfiguration.getServerTargetscheme(),
+                this.mediatorConfiguration.getServerTargetURI(),
+                this.mediatorConfiguration.getServerTargetPort(),
+                ServerApp,
+                this.mediatorConfiguration.getServerTargetFhirDataModel()
+        );
+        if(listIdSpecimenToDelete.size()>0) {
+            FhirResourceProcessor.deleteDiagnosticReportBySpecimen(resourceBundle.getContext(),
+                    listIdSpecimenToDelete,
+                    baseServerRepoURI, logFileName);
+            FhirResourceProcessor.deleteObservationBySpecimen(resourceBundle.getContext(),
+                    listIdSpecimenToDelete,
+                    baseServerRepoURI, logFileName);
+            FhirResourceProcessor.deleteDiagnosticOrderBySpecimen(resourceBundle.getContext(),
+                    listIdSpecimenToDelete,
+                    baseServerRepoURI, logFileName);
+            FhirResourceProcessor.deleteListResourceSpecimen(resourceBundle.getContext(),
+                    listIdSpecimenToDelete,
+                    baseServerRepoURI, logFileName);
+
+
+            List<IdDt> listIdSpecimen = new ArrayList<>();
+            for (Specimen oSpecimen : listSpecimenToDelete) {
+                listIdSpecimen.add(oSpecimen.getId());
+            }
+            FhirResourceProcessor.deleteSpecimen(resourceBundle.getContext(),
+                    listIdSpecimen,
+                    baseServerRepoURI, logFileName);
+            //Get IdPractitioner
+            List<IdDt> listIdPractitionerCollector = new ArrayList<>();
+            for (Specimen oSpecimen : listSpecimenToDelete) {
+                if (oSpecimen.getCollection() != null) {
+                    if (oSpecimen.getCollection().getCollector() != null) {
+                        listIdPractitionerCollector.add(oSpecimen.getCollection().getCollector().getReference());
+                    }
+                }
+            }
+            if (listIdPractitionerCollector.size() > 0) {
+                FhirResourceProcessor.deletePractitioner(resourceBundle.getContext(),
+                        listIdPractitionerCollector,
+                        baseServerRepoURI, logFileName);
+            }
+        }
+
+
+
+
+
     }
     private void mainFinalizeSpecimen()
     {
@@ -2710,6 +2780,47 @@ public class DefaultOrchestrator extends UntypedActor {
         {
             log.error(exc.getMessage());
         }
+    }
+    void identifySpecimenToDelete(List<String> bundleSearchResultSet,String serverRepoURI)
+    {
+
+        try
+        {
+            for (String oBundleSearchResult:bundleSearchResultSet) {
+                for (Specimen oSpecimen : resourceBundle.extractSpecimenFromBundleString(oBundleSearchResult, serverRepoURI)) {
+                    String specimenIdToSearch=oSpecimen.getId().getIdPart();
+                    boolean isInUpdateList=isSpecimenInTheList(specimenIdToSearch,this.listOfSpecimenToUpdate);
+                    boolean isInAddList=isSpecimenInTheList(specimenIdToSearch,this.listOfSpecimenToAdd);
+                    if(isInAddList || isInUpdateList)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        listIdSpecimenToDelete.add(specimenIdToSearch);
+                        listSpecimenToDelete.add(oSpecimen);
+                    }
+                }
+            }
+        }
+        catch (Exception exc)
+        {
+            log.error(exc.getMessage());
+            //return ;
+        }
+    }
+    boolean isSpecimenInTheList(String specimenId,List<Specimen> listOfSpecimen)
+    {
+        boolean isInTheList=false;
+        for(Specimen oSpecimen : listOfSpecimen)
+        {
+            if(oSpecimen.getId().getIdPart().equals(specimenId))
+            {
+                isInTheList=true;
+                break;
+            }
+        }
+        return isInTheList;
     }
     void identifyConditionToAdd()
     {

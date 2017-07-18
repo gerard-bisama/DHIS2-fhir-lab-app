@@ -52,8 +52,15 @@ public class SpecimenOrchestratorActor extends UntypedActor {
         List<String> paramsRequest=new ArrayList<>();
         paramsRequest=request.getRequestObject();
 
+        if(paramsRequest==null)
+        {
+            builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByType("Specimen");
+        }
+        else
+        {
+            builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByIds("Specimen",paramsRequest);
+        }
 
-        builtRequestPath=FhirMediatorUtilities.buildResourcesSearchRequestByIds("Specimen",paramsRequest);
         //builtRequestPath=request.getRequestObject();
         String ServerApp="";
         String baseServerRepoURI="";

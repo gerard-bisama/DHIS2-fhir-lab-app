@@ -145,7 +145,9 @@ core.api.password=xxxx #password defined during the installation of openhim
 3. Configuration of the HAPI JPA Server
 
 To make the JPA server working ones need to create a new mysql database and change the configuration files of JPA local server. 
-To install mysql go to "https://doc.ubuntu-fr.org/mysql". Create a database named "dhis2_fhir"
+To install mysql go to "https://doc.ubuntu-fr.org/mysql". Create a database named "dhis2_fhir".
+The HAPI JPA Server can also be configured with PostgresSQL database.
+Create a postgres database and a role. Then assign the database to the role.
 - Open the config file locate here: /thelocationofyoursourcecode/dhis2-fhir/hapi-fhir-jpaserver-local/src/main/java/ca/uhn/fhir/jpa/demo.
 - Open the file FhirServerConfig.java, locate the code the public DataSource dataSource(), then  replace the lines below to the corresponding values.
 
@@ -250,4 +252,8 @@ Here is a cron tab that you can create to perform these actions
 */8 * * * * curl -k -u tut:tut https://localhost:5000/pushfhir/1 
  ```
 Replace localhost by the IP of the server and the time to the estimation that may fit
+Once the apps are running, ones could monitor the operation activities with this command
+```sh
+ tail -f ~/fhirmediator/fhirmediator.log
+```
 

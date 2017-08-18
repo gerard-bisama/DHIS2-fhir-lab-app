@@ -427,6 +427,52 @@
 		}
 		return formatedDate;
 	}
+	function processDateFromCSVFile(originalDate)
+	{
+		var birthDate="";
+		if(originalDate!="" && originalDate.includes("-")==false 
+		 && originalDate.includes("/")==false)
+		{
+			var currentYear=new Date().getFullYear();
+			var ageOfPatient=parseInt(originalDate);
+			var yearOfBirth=currentYear-ageOfPatient;
+			//console.log(yearOfBirth);
+			var dateOfBirth=""+yearOfBirth+"-01-01";
+			birthDate=dateOfBirth;
+			//console.log(new Date().getFullYear()-patientAttributesMapping.birthDate);
+		}
+		else if(originalDate!="" && originalDate.includes("-")==true)
+		{
+			birthDate=originalDate;
+		}
+		else if(originalDate!="" && originalDate.includes("/")==true)
+		{
+			//oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+			var dateToProcess="";
+			var year=(originalDate.split("/"))[2];
+			var month=(originalDate.split("/"))[1];
+			var day=(originalDate.split("/"))[0];
+			dateToProcess=year+"-"+month+"-"+day;
+			birthDate=dateToProcess;
+			//PatientSet=true;
+		}
+		return birthDate;												
+	}
+	function checkIfRecordIsDate(record)
+	{
+		var isDate=false;
+		
+		if(record!="" && record.includes("/")==true)
+		{
+			//check if it contains 2 "/"
+			var res=record.split("/").length-1;
+			if(res==2)
+			{
+				isDate=true;
+			}
+		}
+		return isDate;
+	}
 	function extractDateFromDateTime(originalDate)
 	{
 		var formatedDate="";
@@ -11748,22 +11794,11 @@
 														PatientSet=true;
 													break;
 													case patientAttributesMapping.birthDate:
-														oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
-														PatientSet=true;
-														if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]!="" && dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].includes("-")==false)
+														//oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+														var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim());
+														if(processedDate!="")
 														{
-															var currentYear=new Date().getFullYear();
-															var ageOfPatient=parseInt(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]);
-															var yearOfBirth=currentYear-ageOfPatient;
-															//console.log(yearOfBirth);
-															var dateOfBirth=""+yearOfBirth+"-01-01";
-															oPatient.birthDate=dateOfBirth;
-															PatientSet=true;
-															//console.log(new Date().getFullYear()-patientAttributesMapping.birthDate);
-														}
-														else if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]]!="" && dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].includes("-")==true)
-														{
-															oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
+															oPatient.birthDate=processedDate;
 															PatientSet=true;
 														}
 														break;
@@ -11784,7 +11819,8 @@
 													case patientAttributesMapping.deceasedDateTime:
 														if(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim()!="")
 														{
-															oPatient.deceasedDateTime=formatDateInZform(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim());
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim());
+															oPatient.deceasedDateTime=formatDateInZform(processedDate);
 														}
 														break;
 														case patientAttributesMapping.address_text:
@@ -11980,8 +12016,12 @@
 															specimenIsSet=true;
 															break;
 														case specimenAttributesMapping.receivedTime:
-															oSpecimen.receivedTime=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
-															specimenIsSet=true;
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim());
+															if(processedDate!="")
+															{
+																oSpecimen.receivedTime=processedDate;
+																specimenIsSet=true;
+															}
 															break;
 														case specimenAttributesMapping.collector:
 															oCollection.collector=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
@@ -11992,9 +12032,13 @@
 															specimenIsSet=true;
 															break;
 														case specimenAttributesMapping.collectedDateTime:
-															oCollection.collectedDateTime=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim());
+															if(processedDate!="")
+															{
+																oCollection.collectedDateTime=processedDate;
+																specimenIsSet=true;
+															}
 															hasCollectionInfo=true;
-															specimenIsSet=true;
 															break;
 														case specimenAttributesMapping.collection_quantity_unit:
 															oCollection.quantity.unit=dataFile[iteratorLigne][listSpecimenAttributeIndex[iteratorValue]].trim();
@@ -12170,8 +12214,12 @@
 															//conditionIsSet=true;
 															break;
 														case conditionAttributesMapping.dateRecorded:
-															oCondition.dateRecorded=extractDateFromDateTime(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]);
-															conditionIsSet=true;
+															var processedDate=processDateFromCSVFile(extractDateFromDateTime(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]));
+															if(processedDate!="")
+															{
+																oCondition.dateRecorded=processedDate;
+																conditionIsSet=true;
+															}
 															break;
 														case conditionAttributesMapping.code:
 															var code=getCodeFromDisplayNameInListOptionSet(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]].trim(),listOptions);
@@ -12211,8 +12259,12 @@
 															conditionIsSet=true;
 															break;
 														case conditionAttributesMapping.onsetDateTime:
-															oCondition.onsetDateTime=formatDateInZform(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]);
-															conditionIsSet=true;
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listConditionAttributeIndex[iteratorValue]]);
+															if(processedDate!="")
+															{
+																oCondition.onsetDateTime=formatDateInZform(processedDate);
+																conditionIsSet=true;
+															}
 															break;
 													}//End of switch
 												}
@@ -12339,10 +12391,15 @@
 															orderIsSet=true;
 															break;
 														case orderAttributesMapping.orderEvent_dateTime:
-															oOrderEvent.dateTime=formatDateInZform(dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]);
-															orderIsSet=true;
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]]);
+															if(processedDate!="")
+															{
+																oOrderEvent.dateTime=formatDateInZform(processedDate);
+																orderIsSet=true;
+															}
 															break;
 														case orderAttributesMapping.orderEvent_status:
+															
 															oOrderEvent.status=dataFile[iteratorLigne][listDiagnosticOrderAttributeIndex[iteratorValue]];
 															orderIsSet=true;
 															break;
@@ -12543,21 +12600,37 @@
 															//observationIsSet=true;
 															break;
 														case observationAttributesMapping.effectiveDateTime:
-															oObservation.effectiveDateTime=formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
-															observationIsSet=true;
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															if(processedDate!="")
+															{
+																oObservation.effectiveDateTime=formatDateInZform(processedDate);
+																observationIsSet=true;
+															}
 															break;
 														case observationAttributesMapping.effectivePeriod_dateSup:
-															oPeriodEffective.end= formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
-															hasEffectivePeriodInfo=true;
-															observationIsSet=true;
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															if(processedDate!="")
+															{
+																oPeriodEffective.end= formatDateInZform(processedDate);
+																hasEffectivePeriodInfo=true;
+																observationIsSet=true;
+															}
 															break;
 														case observationAttributesMapping.effectivePeriod_dateInf:
-															oPeriodEffective.start=formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
-															hasEffectivePeriodInfo=true;
-															observationIsSet=true;
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															if(processedDate!="")
+															{
+																oPeriodEffective.start=formatDateInZform(processedDate);
+																hasEffectivePeriodInfo=true;
+																observationIsSet=true;
+															}
 															break;
 														case observationAttributesMapping.issued:
-															oObservation.issued=formatDateInZform(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]]);
+															if(processedDate!="")
+															{
+																oObservation.issued=formatDateInZform(processedDate);
+															}
 															break;
 														case observationAttributesMapping.valueQuantity_unit:
 															oValueQuantity.unit=dataFile[iteratorLigne][listObservationAttributeIndex[iteratorValue]];
@@ -13489,22 +13562,38 @@
 														//diagnosticReportIsSet=true;
 														break;
 													case diagnosticReportAttributesMapping.effectiveDateTime:
-														oDiagnosticReport.effectiveDateTime=formatDateInZform(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
-														diagnosticReportIsSet=true;
+														var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
+														if(processedDate!="")
+														{
+															oDiagnosticReport.effectiveDateTime=formatDateInZform(processedDate);
+															diagnosticReportIsSet=true;
+														}
 														break;
 													case diagnosticReportAttributesMapping.effectivePeriod_start:
-														oEffectivePeriod.start=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
-														effectivePeriodIsSet=true;
-														diagnosticReportIsSet=true;
+														var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
+														if(processedDate!="")
+														{
+															oEffectivePeriod.start=processedDate;
+															effectivePeriodIsSet=true;
+															diagnosticReportIsSet=true;
+														}
 														break;
 													case diagnosticReportAttributesMapping.effectivePeriod_end:
-														oEffectivePeriod.end=dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]];
-														effectivePeriodIsSet=true;
-														diagnosticReportIsSet=true;
+														var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
+														if(processedDate!="")
+														{
+															oEffectivePeriod.end=processedDate;
+															effectivePeriodIsSet=true;
+															diagnosticReportIsSet=true;
+														}
 														break;
 													case diagnosticReportAttributesMapping.issued:
-														oDiagnosticReport.issued=formatDateInZform(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
-														diagnosticReportIsSet=true;
+														var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]);
+														if(processedDate!="")
+														{
+															oDiagnosticReport.issued=formatDateInZform(processedDate);
+															diagnosticReportIsSet=true;
+														}
 														break;
 													case diagnosticReportAttributesMapping.performer:
 														//oDiagnosticReport.performer={"reference":"Organization/"+dataFile[iteratorLigne][listDiagnosticReportAttributeIndex[iteratorValue]]};
@@ -13692,8 +13781,18 @@
 													oList.mode="working";
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
 													oList.entry.push({"deleted":false,"item":{"reference":"Specimen/"+refSpecimenId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";
@@ -13764,7 +13863,18 @@
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														var note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
+													//oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.entry.push({"deleted":false,"item":{"reference":"Patient/"+refPatientId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";
@@ -13835,7 +13945,18 @@
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														var note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
+													//oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.entry.push({"deleted":false,"item":{"reference":"Practitioner/"+refPractitionerId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";
@@ -13906,7 +14027,18 @@
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														var note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
+													//oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.entry.push({"deleted":false,"item":{"reference":"DiagnosticOrder/"+refOrderId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";
@@ -13977,7 +14109,18 @@
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														var note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
+													//oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.entry.push({"deleted":false,"item":{"reference":"Observation/"+refObservationId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";
@@ -14048,7 +14191,18 @@
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														var note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
+													//oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.entry.push({"deleted":false,"item":{"reference":"DiagnosticReport/"+refDiagnosticReportId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";
@@ -14119,7 +14273,18 @@
 													
 													var oAttribute=dataFile[0][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.title=oAttribute;
-													oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													var note="";
+													var isDate=checkIfRecordIsDate( dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													if(isDate==true)
+													{
+														var note=processDateFromCSVFile(dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim());
+													}
+													else
+													{
+														note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
+													}
+													oList.note=note;
+													//oList.note=dataFile[iteratorLigne][listListResourceAttributeIndex[iteratorValue]].trim();
 													oList.entry.push({"deleted":false,"item":{"reference":"Condition/"+refConditionReportId}});
 													//console.log(oList);
 													dicResourceExtracted.type="List";

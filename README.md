@@ -99,6 +99,7 @@ mkdir config
 cp  /thelocationofyoursourcecode/fhirmediator.properties  /home/fhirmediator/config/
 sudo usermod -a -G youruser fhirmediator
 sudo chown -R fhirmediator:yourusergroup /home/fhirmediator/config/
+sudo chmod +r /home/fhirmediator/config/fhirmediator.properties
  ```
 - Change the source of data and the destination.
 ```sh 

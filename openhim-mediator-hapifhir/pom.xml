@@ -173,5 +173,11 @@
     <artifactId>thymeleaf</artifactId>
     <version>2.1.3.RELEASE</version>
   </dependency>
+  <!-- Scala feature to enhance OOP-->
+  <dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-library-all</artifactId>
+    <version>2.12.3</version>
+  </dependency>
 </dependencies>
 </project>

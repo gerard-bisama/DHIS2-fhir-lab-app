@@ -451,6 +451,7 @@ function getOptions(listOptionSetIds,dataTrace,callback)
 	};
 	request.send();
 }
+//Return value associated to the option set from entity and data elements attributes
 exports.getOptionSetFromAttribute= function getOptionSetFromAttribute(listIdAttributes,listIdDataElement,dataTrace,callback)
 {
 	var urlRequest=`${serverUrl}/trackedEntityAttributes.json?paging=false&filter=id:in:[${listIdAttributes}]&fields=id,displayName,optionSet`;
@@ -496,6 +497,7 @@ exports.getOptionSetFromAttribute= function getOptionSetFromAttribute(listIdAttr
 	request.send();
 	
 }
+//Return option value assiociated to the data element
 function getOptionSetFromDataElement(_listOptionSetIds,listIdAttributes,dataTrace,callback)
 {
 	var urlRequest=`${serverUrl}/dataElements.json?paging=false&filter=id:in:[${listIdAttributes}]&fields=id,displayName,optionSet`;
@@ -543,6 +545,11 @@ function getOptionSetFromDataElement(_listOptionSetIds,listIdAttributes,dataTrac
 	request.send();
 	
 }
+
+//Get the list of All organization Units from trackers by keeping the list of programs concerned
+//This is due to the async call that lose the variable value when they are called
+//First parm=list of orgunits
+//Second param=list of program passed as variable to the function
 exports.GetAllOrganisationUnitsCallbakListPrograms= function GetAllOrganisationUnitsCallbakListPrograms(listOfPrograms,callback)
 {
 	//var urlRequest=`${serverUrl}/organisationUnits?paging=false&fields=:all`;
@@ -615,6 +622,8 @@ exports.GetDataElementsFromProgramStages= function GetDataElementsFromProgramSta
 	request.send();
 	
 }
+//Return the list of event associated to a program 
+//others params are references for callbacks
 exports.getAllProgramEvents= function getAllProgramEvents(programId,listoProgramStages,callback)
 {
 	var urlRequest=`${serverUrl}/events.json?program=${programId}&skipPaging=true&fields=:all`;
@@ -737,6 +746,8 @@ exports.GetTrackedEntityInstancesFromOrgunitListAndProgramId=function GetTracked
 	
 	request.send();
 }
+//Get Tracked Entity from the orgunits and programs
+//Params listOfStages,listDataElementObject are used to keep reference during the callback
 exports.GetTrackedEntityInstancesFromOrgunitListAndProgramIdAndKeepDataElementsTrack=function GetTrackedEntityInstancesFromOrgunitListAndProgramIdAndKeepDataElementsTrack(listOfrgUnitId,programId,listOfStages,listDataElementObject,callback)
 {
 	var queryOrgUnits="";
@@ -832,6 +843,8 @@ exports.getProgramMetaDataInfo= function getProgramMetaDataInfo(programId,callba
 	request.send();
 	
 }
+//Return the programstages infos filter by the programStagesIds list
+//Other variable for references to the next steps due to the async calls
 exports.getProgramStageMetaDataInfo= function getProgramStageMetaDataInfo(programStageIds,listOfAttributeFields,listDisplayNameIdMapping,callback)
 {
 	var queryStageIds="";
@@ -864,7 +877,8 @@ exports.getProgramStageMetaDataInfo= function getProgramStageMetaDataInfo(progra
 	request.send();
 	
 }
-exports.getDatsElementsMetaDataInfo= function getDatsElementsMetaDataInfo(dataElemtsIds,progStage,listOfAttributeFields,listDisplayNameIdMapping,callback)
+//Get dataElement metadata information for a list of data element Ids 
+exports.getDataElementsMetaDataInfo= function getDatsElementsMetaDataInfo(dataElemtsIds,progStage,listOfAttributeFields,listDisplayNameIdMapping,callback)
 {
 	var urlRequest=`${serverUrl}/dataElements.json?paging=false&filter=id:in:[${dataElemtsIds}]`;
 	var request = new XMLHttpRequest();

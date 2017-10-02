@@ -1,6 +1,6 @@
 # FHIR Lab Integration Application
 
-National Health Managment Information Systems (HMIS) require real-time information on notifiable disease surveillance cases and events. This capability is captured in the Integrated Disease Surveillance and Response (IDSR) framework.
+National Health Management Information Systems (HMIS) require real-time information on notifiable disease surveillance cases and events. This capability is captured in the Integrated Disease Surveillance and Response (IDSR) framework.
 
 Laboratories may have different information systems and reporting data types and structures. Thus, it is necessary to make the process of reporting easy and available for users of any system but available in national HMIS. The FHIR lab app tools address the use case of district and regional laboratories that need to be able to report data on disease surveillance cases to the IDSR, which is based on the national HMIS (DHIS2), and in the FHIR format for national warehousing and data sharing in a standard manner.
 

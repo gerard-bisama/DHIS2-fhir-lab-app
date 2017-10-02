@@ -1,10 +1,10 @@
 # FHIR Lab Integration Application
 
-National Health Management Information Systems (HMIS) require real-time information on notifiable disease surveillance cases and events. This capability is captured in the Integrated Disease Surveillance and Response (IDSR) framework.
+National Health Management Information Systems (HMIS) require real-time information on notifiable disease surveillance cases and events. This capability is typically captured in an Integrated Disease Surveillance and Response (IDSR) framework, though laboratories may have different information systems and reporting data types and structures. Thus, it is necessary to make the process of reporting easy and available to users of any lab system so that it can be available in a national HMIS. 
 
-Laboratories may have different information systems and reporting data types and structures. Thus, it is necessary to make the process of reporting easy and available for users of any system but available in national HMIS. The FHIR lab app tools address the use case of district and regional laboratories that need to be able to report data on disease surveillance cases to the IDSR, which is based on the national HMIS (DHIS2), and in the FHIR format for national warehousing and data sharing in a standard manner.
+The fast healthcare interoperability resources (FHIR) lab app tools enable district and regional laboratories to report data on disease surveillance cases to an IDSR system that is based on the use of DHIS2 for a national HMIS and uses the FHIR standard for national warehousing and data sharing.
 
-Specifically, the tools support district and regional laboratories to report data to upload data using a simple CSV template. The tools then make the submitted data available in DHIS2 and in the FHIR server. The FHIR format enables sharing with other systems and the FHIR server is a national repository for all lab data.
+Specifically, the tools support district and regional laboratories to upload data using a simple CSV template. The tools then make the submitted data available in DHIS2 and in the FHIR server. The FHIR format enables sharing with other systems and the FHIR server is a national repository for all lab data.
 
 ## Workflows for Users and Admins
 
@@ -192,7 +192,7 @@ For example, for patient resource the mapping of csv column names and FHIR resou
 ```
 Do the same for others FHIR resource model.
 
-An other challenge is that more than one practitioner can be involved on the laboratory management process. There is no way for the app to categorized the role of practitioner at any stage of the program. The main role in the laboratory management is the care provider who requested the lab exam, the provider who collect the specimen and the provider who perferm the examination. The role are hard coded in like this: care_provider, specimen_collector,observation_performer
+Another challenge is that more than one practitioner can be involved on the laboratory management process. There is no way for the app to categorized the role of practitioner at any stage of the program. The main role in the laboratory management is the care provider who requested the lab exam, the provider who collects the specimen and the provider who performs the examination. The roles are hard coded in like this: care_provider, specimen_collector,observation_performer
 ```sh
 "practitioner_stage_nature":[
 {
@@ -272,7 +272,7 @@ core.api.password=xxxx #password defined during the installation of openhim
 
 ### Configuration of the HAPI JPA Server
 
-To make the JPA server working ones need to create a new mysql database and change the configuration files of JPA local server.
+To make the JPA server working, one needs to create a new mysql database and change the configuration files of JPA local server.
 To install mysql go to "https://doc.ubuntu-fr.org/mysql". Create a database named "dhis2_fhir".
 The HAPI JPA Server can also be configured with PostgresSQL database.
 Create a postgres database and a role. Then assign the database to the role.
@@ -306,10 +306,10 @@ The JPA server will run on the port 8084 but one may change this value. Open the
 </httpConnector>
 ```
 
-The FHIR Lab apps is utilizing the HL7 FHIR standard to represent IDSR data to ensure the sharing of  data between the IDSR, laboratory facilities and other systems that could need to have access to the laboratory data as well as patient demographic and disease specifics information.
+The FHIR Lab apps is utilizing the HL7 FHIR standard to represent IDSR data to ensure the sharing of  data between the IDSR, laboratory facilities and other systems that could need to have access to the laboratory data as well as patient demographic and disease specific information.
 
-The case is represented by the patient demographic information, disease to follow up and the symptoms description and is recorded in the IDSR in a specific programs. Laboratory data are  registered for the specifics case as events. The laboratory data comes from the facilities and contain information on providers (Organization and care provider), specimen handing, laboratory order, laboratory observation and test performed.
+The case is represented by the patient demographic information, disease to follow up and the symptoms description and is recorded in the IDSR in a specific programs. Laboratory data are registered for the specific case as events. The laboratory data comes from the facilities and contains information on providers (Organization and care provider), specimen handing, laboratory order, laboratory observation and test performed.
 
-Those information  are collected by facilities and submitted to a central IDSR which is a DHIS2 based system. To submit the laboratory data, the facilities should be able to have information from the IDSR in the standardized format to allow them to reference case and related laboratory data in their own system or procedure, in order to share (pull or push) data without caring of the  data structure of the client or the IDRS service providers.
+That information is collected by facilities and submitted to a central IDSR which is a DHIS2 based system. To submit the laboratory data, the facilities should be able to have information from the IDSR in the standardized format to allow them to reference case and related laboratory data in their own system or procedure, in order to share (pull or push) data without caring of the  data structure of the client or the IDRS service providers.
 
 That is why the app architure is composed of the Fhir conversion module that generates HL7 Fhir resource from the IDSR data and  csv based Lab data. Then the generated Fhir resource are stored in a Fhir repository which provides the appropriate interface for search and CRUD operation. Then, all the requests could be made to the  Fhir repository to get formalized information on Lab request, specimen handling information, status of the results, disease diagnosed, etc.

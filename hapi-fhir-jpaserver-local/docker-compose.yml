@@ -1,0 +1,21 @@
+version: '2.1'
+
+services:
+
+  hapi:
+    build: .
+    ports:
+      - 8084:8084
+      - 8080:8080
+    links:
+      - postgres:postgres
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: xxxxxxx
+      POSTGRES_USER: fhir
+      POSTGRES_DB: dhis2_fhir
+    ports:
+      - 5432:5432

@@ -1,6 +1,6 @@
 # FHIR Lab Integration Application
 
-National Health Management Information Systems (HMIS) require real-time information on notifiable disease surveillance cases and events. This capability is typically captured in an Integrated Disease Surveillance and Response (IDSR) framework, though laboratories may have different information systems and reporting data types and structures. Thus, it is necessary to make the process of reporting easy and available to users of any lab system so that it can be available in a national HMIS. 
+National Health Management Information Systems (HMIS) require real-time information on notifiable disease surveillance cases and events. This capability is typically captured in an Integrated Disease Surveillance and Response (IDSR) framework, though laboratories may have different information systems and reporting data types and structures. Thus, it is necessary to make the process of reporting easy and available to users of any lab system so that it can be available in a national HMIS.
 
 The fast healthcare interoperability resources (FHIR) lab app tools enable district and regional laboratories to report data on disease surveillance cases to an IDSR system that is based on the use of DHIS2 for a national HMIS and uses the FHIR standard for national warehousing and data sharing.
 
@@ -123,7 +123,28 @@ If the build failed, check the "hapi-fhir-base" corresponding fhir version [here
 </parent>
 ```
 
-The Fhir local server can be accessed on http://localhost:8084/hapi-fhir-jpaserver-local (localhost: can be replaced by a public IP address)
+The Fhir local server can be accessed on http://localhost:8084/hapi-fhir-jpaserver-local (localhost: can be replaced by a public IP address).
+
+
+#### Running HAPI-FHIR in Docker
+
+The server is preconfigured for use with PostgreSQL. To change the configuration, modify `` `FhirServerConfig.java` in `hapi-fhir-jpaserver-local/src/main/java/ca/uhn/fhir/jpa/demo`.
+
+> For Docker on Mac and Windows, 'localhost' will mean the thin VM layer, not the main host. Either use an internal docker network to resolve or use the alias provided by docker, for [example](https://docs.docker.com/docker-for-mac/networking/#per-container-ip-addressing-is-not-possible)
+
+The Dockerfile is meant to copy the War file into the container. First build the WAR file.
+
+```sh
+mvn package
+```
+
+The run docker-compose:
+
+```sh
+docker-compose up -d
+```
+
+The WAR file is copied to web root and the Jetty docker image fires up the server on port 8080, so access the server at http://localhost:8080/ .
 
 ### Synchronization
 

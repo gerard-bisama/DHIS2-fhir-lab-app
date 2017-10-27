@@ -6,8 +6,7 @@ WORKDIR /usr/src/app/DHIS2-fhir-lab-app/convert-dhi2-fhir
 
 # sets default
 ARG USER_PASS=admin:district
-ENV USER_PASS ${USER_PASS}
-# set argument at build time otherwise default is used
+# default above is used at build-time unless build-arg is used
 RUN sed -i "s|admin:district|${USER_PASS}|" manifest.webapp
 
 RUN mkdir -p /home/server-hit/Documents/datalab &&\

@@ -15,6 +15,7 @@ import org.openhim.mediator.engine.messages.MediatorHTTPResponse;
 import org.openhim.mediator.engine.messages.SimpleMediatorRequest;
 import org.openhim.mediator.engine.messages.SimpleMediatorResponse;
 import scala.util.parsing.combinator.*;
+//Remove the testing part do to the maven error
 
 import java.util.*;
 

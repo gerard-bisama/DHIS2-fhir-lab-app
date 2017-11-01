@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import scala.util.parsing.combinator.testing.Ident;
+import scala.util.parsing.combinator.*;
 
 import javax.tools.Diagnostic;
 import java.io.*;

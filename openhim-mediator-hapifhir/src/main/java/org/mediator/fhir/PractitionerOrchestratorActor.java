@@ -14,7 +14,7 @@ import org.openhim.mediator.engine.messages.MediatorHTTPRequest;
 import org.openhim.mediator.engine.messages.MediatorHTTPResponse;
 import org.openhim.mediator.engine.messages.SimpleMediatorRequest;
 import org.openhim.mediator.engine.messages.SimpleMediatorResponse;
-import scala.util.parsing.combinator.testing.Str;
+import scala.util.parsing.combinator.*;
 
 import java.util.*;
 

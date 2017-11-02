@@ -101,6 +101,13 @@ If you are attempting to start the Java mediator and you are experiencing a SunC
 
 Then navigate to the Mediators section on OpenHIM to see your Mediator and check in the client section if the client "tut" is created. If not create the client [manualy](http://openhim.readthedocs.io/en/latest/tutorial/2-creating-a-channel.html)
 
+To build the mediator with Docker:
+```sh
+cd openhim-mediator-hapifhir/
+mvn install
+docker build .
+docker run -p 8080:8080 <image hash>
+```
 
 
 ### HAPI-FHIR JPA server

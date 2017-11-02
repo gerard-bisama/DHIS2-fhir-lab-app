@@ -12194,7 +12194,7 @@
 									}//End for iteratorLigne
 									//console.log(listSpecimenExtracted);
 								}//End if listSpecimenAttributeIndex.length
-								//console.log(listSpecimenExtracted);
+								//console.log(listMappedResourceExtracted);
 								
 							
 								//console.log(listMappedResourceExtracted);
@@ -12347,7 +12347,7 @@
 									}//end for iteratorLigne
 								}//end if listConditionAttributeIndex
 								//console.log(listConditionExtracted[0].patient.reference.split("/")[1]);
-								//console.log(listConditionExtracted);
+								//console.log(listMappedResourceExtracted);
 								//Extract DiagnosticOrder
 								var listDiagnosticOrderExtracted=[];
 								var nbreOfHeaderAttributes=0;
@@ -13860,7 +13860,7 @@
 										}//end if dataFile[iteratorLigne].length
 									}//end for iteratorLigne
 								}//End If listPractitionerAttributeIndex
-								
+								//console.log(listMappedResourceExtracted);
 								//Extract ListResource Reference for Patient
 								var nbreOfHeaderAttributes=0;
 								var listListResourceAttributeIndex=[];

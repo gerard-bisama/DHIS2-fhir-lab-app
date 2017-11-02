@@ -732,9 +732,9 @@ public class FhirMediatorUtilities {
                             DateTimeDt oDateTime = new DateTimeDt(oSpecimen.getReceivedTime());
                             String builtDate = "";
                             builtDate = oDateTime.getYear().toString() + "-";
-                            builtDate += oDateTime.getMonth().toString().length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                            builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
                             builtDate += "-";
-                            builtDate += oDateTime.getDay().toString().length() > 1 ? oDateTime.getDay().toString() : "0" + oDateTime.getDay().toString();
+                            builtDate += (oDateTime.getDay().toString()).length() > 1 ? oDateTime.getDay().toString() : "0" + oDateTime.getDay().toString();
                             oEvent.addDataValue(oDataElement.id, builtDate);
                             continue;
 
@@ -751,9 +751,10 @@ public class FhirMediatorUtilities {
                                 DateTimeDt oDateTime = (DateTimeDt) oSpecimen.getCollection().getCollected();
                                 String builtDate = "";
                                 builtDate = oDateTime.getYear().toString() + "-";
-                                builtDate += oDateTime.getMonth().toString().length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                                builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                                //builtDate += oDateTime.getMonth().toString().length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
                                 builtDate += "-";
-                                builtDate += oDateTime.getDay().toString().length() > 1 ? oDateTime.getDay().toString() : "0" + oDateTime.getDay().toString();
+                                builtDate += (oDateTime.getDay().toString()).length() > 1 ? oDateTime.getDay().toString() : "0" + oDateTime.getDay().toString();
                                 oEvent.addDataValue(oDataElement.id, builtDate);
                             }
 
@@ -839,9 +840,10 @@ public class FhirMediatorUtilities {
                             DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
                             String builtDate="";
                             builtDate=oDateTime.getYear().toString()+"-";
-                            builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                            builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                            //builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
                             builtDate+="-";
-                            builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                            builtDate+=(oDateTime.getDay().toString()).length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
                             if(oDataElement.id.equals("eventDate"))
                             {
                                 oEvent.eventDate=builtDate;
@@ -857,9 +859,10 @@ public class FhirMediatorUtilities {
                             DateTimeDt oDateTime=new DateTimeDt(oObservation.getIssued());
                             String builtDate="";
                             builtDate=oDateTime.getYear().toString()+"-";
-                            builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                            builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                            //builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
                             builtDate+="-";
-                            builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                            builtDate+=(oDateTime.getDay().toString()).length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
                             //oEvent.eventDate=builtDate;
                             if(oDataElement.id.equals("eventDate"))
                             {
@@ -942,9 +945,10 @@ public class FhirMediatorUtilities {
                                 DateTimeDt oDateTime=new DateTimeDt(oListResource.getNote());
                                 String builtDate="";
                                 builtDate=oDateTime.getYear().toString()+"-";
-                                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                                builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                                //builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
                                 builtDate+="-";
-                                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                                builtDate+=(oDateTime.getDay().toString()).length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
 
                                 oEvent.eventDate=builtDate;
                             }
@@ -1017,9 +1021,10 @@ public class FhirMediatorUtilities {
                 DateTimeDt oDateTime=(DateTimeDt)oObservation.getEffective();
                 String builtDate="";
                 builtDate=oDateTime.getYear().toString()+"-";
-                builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
+                builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                //builtDate+=oDateTime.getMonth().toString().length()>1?oDateTime.getMonth()+1:"0"+(oDateTime.getMonth()+1);
                 builtDate+="-";
-                builtDate+=oDateTime.getDay().toString().length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
+                builtDate+=(oDateTime.getDay().toString()).length()>1?oDateTime.getDay().toString():"0"+oDateTime.getDay().toString();
 
                 oEvent.eventDate=builtDate;
 
@@ -1041,9 +1046,10 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeIssued=new DateTimeDt(oDate);
                 builtDate="";
                 builtDate=dateTimeIssued.getYear().toString()+"-";
-                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth()+1:""+dateTimeIssued.getMonth()+1;
+                builtDate += ((oDateTime.getMonth()+1)+"".toString()).length() > 1 ? oDateTime.getMonth() + 1 : "0" + (oDateTime.getMonth() + 1);
+                //builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth()+1:""+dateTimeIssued.getMonth()+1;
                 builtDate+="-";
-                builtDate+=dateTimeIssued.getDay().toString().length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
+                builtDate+=(dateTimeIssued.getDay().toString()).length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
 
                 oEventRequested.eventDate=builtDate;
                 String refTestingLab=oObservation.getPerformer().get(0).getReference().getIdPart();
@@ -1077,9 +1083,10 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeIssued=new DateTimeDt(oDate);
                 String builtDate="";
                 builtDate=dateTimeIssued.getYear().toString()+"-";
-                builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth()+1:""+dateTimeIssued.getMonth()+1;
+                builtDate += ((dateTimeIssued.getMonth()+1)+"".toString()).length() > 1 ? dateTimeIssued.getMonth() + 1 : "0" + (dateTimeIssued.getMonth() + 1);
+                //builtDate+=dateTimeIssued.getMonth().toString().length()>1?dateTimeIssued.getMonth()+1:""+dateTimeIssued.getMonth()+1;
                 builtDate+="-";
-                builtDate+=dateTimeIssued.getDay().toString().length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
+                builtDate+=(dateTimeIssued.getDay().toString()).length()>1?dateTimeIssued.getDay().toString():"0"+dateTimeIssued.getDay().toString();
 
                 oEventRequested.eventDate=builtDate;
                 String refTestingLab=oObservation.getPerformer().get(0).getReference().getIdPart();
@@ -1210,9 +1217,11 @@ public class FhirMediatorUtilities {
             DateTimeDt dateTimeBirth=new DateTimeDt(patientToProcess.getBirthDate());
             String builtDate="";
             builtDate=dateTimeBirth.getYear().toString()+"-";
-            builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
+            builtDate += ((dateTimeBirth.getMonth()+1)+"".toString()).length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+
+            //builtDate+=dateTimeBirth.getMonth().toString().length()>1?dateTimeBirth.getMonth()+1:""+dateTimeBirth.getMonth()+1;
             builtDate+="-";
-            builtDate+=dateTimeBirth.getDay().toString().length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
+            builtDate+=(dateTimeBirth.getDay().toString()).length()>1?dateTimeBirth.getDay().toString():"0"+dateTimeBirth.getDay().toString();
             Date date= new Date();
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
@@ -1340,9 +1349,11 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeBirth = new DateTimeDt(patientToProcess.getBirthDate());
                 String builtDate = "";
                 builtDate = dateTimeBirth.getYear().toString() + "-";
-                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+                builtDate += ((dateTimeBirth.getMonth()+1)+"".toString()).length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+
+                //builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
                 builtDate += "-";
-                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                builtDate += (dateTimeBirth.getDay().toString()).length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
                 /*
                 Date date= new Date();
                 Calendar cal = Calendar.getInstance();
@@ -1411,9 +1422,11 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeBirth = new DateTimeDt(trackedCondition.getDateRecorded());
                 String builtDate = "";
                 builtDate = dateTimeBirth.getYear().toString() + "-";
-                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += ((dateTimeBirth.getMonth()+1)+"".toString()).length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+
+                //builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
                 builtDate += "-";
-                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                builtDate += (dateTimeBirth.getDay().toString()).length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
                 oTrackedEntity.addAttribute(oDataElement.id, builtDate);
 
             } else if (trackedCondition.getCode() != null && oConditionMapping.code.equals(displayName)) {
@@ -1430,9 +1443,11 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeBirth = (DateTimeDt) trackedCondition.getOnset();
                 String builtDate = "";
                 builtDate = dateTimeBirth.getYear().toString() + "-";
-                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += ((dateTimeBirth.getMonth()+1)+"".toString()).length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+
+                //builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
                 builtDate += "-";
-                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                builtDate += (dateTimeBirth.getDay().toString()).length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
                 oTrackedEntity.addAttribute(oDataElement.id, builtDate);
             } else if (trackedCondition.getNotes() != null && oConditionMapping.notes.equals(displayName)) {
                 oTrackedEntity.addAttribute(oDataElement.id, trackedCondition.getNotes());
@@ -1463,9 +1478,11 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeBirth = (DateTimeDt) trackedDiagReport.getEffective();
                 String builtDate = "";
                 builtDate = dateTimeBirth.getYear().toString() + "-";
-                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += ((dateTimeBirth.getMonth()+1)+"".toString()).length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+
+                //builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
                 builtDate += "-";
-                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                builtDate += (dateTimeBirth.getDay().toString()).length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
                 oTrackedEntity.addAttribute(oDataElement.id, builtDate);
             }
             else if ((trackedDiagReport.getIssued()!=null && oDiagnosticReportMapping.issued.equals(displayName)))
@@ -1473,9 +1490,11 @@ public class FhirMediatorUtilities {
                 DateTimeDt dateTimeBirth = new DateTimeDt(trackedDiagReport.getIssued());
                 String builtDate = "";
                 builtDate = dateTimeBirth.getYear().toString() + "-";
-                builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
+                builtDate += ((dateTimeBirth.getMonth()+1)+"".toString()).length() > 1 ? dateTimeBirth.getMonth() + 1 : "0" + (dateTimeBirth.getMonth() + 1);
+
+                //builtDate += dateTimeBirth.getMonth().toString().length() > 1 ? dateTimeBirth.getMonth() + 1 : "" + dateTimeBirth.getMonth() + 1;
                 builtDate += "-";
-                builtDate += dateTimeBirth.getDay().toString().length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
+                builtDate += (dateTimeBirth.getDay().toString()).length() > 1 ? dateTimeBirth.getDay().toString() : "0" + dateTimeBirth.getDay().toString();
                 oTrackedEntity.addAttribute(oDataElement.id, builtDate);
             }
             else if ((trackedDiagReport.getConclusion()!=null && oDiagnosticReportMapping.conclusion.equals(displayName)))

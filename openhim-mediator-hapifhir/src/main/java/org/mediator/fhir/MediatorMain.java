@@ -6,7 +6,7 @@ import akka.event.LoggingAdapter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.openhim.mediator.engine.*;
-import scala.Int;
+//import scala.*;
 
 import java.io.File;
 import java.io.IOException;

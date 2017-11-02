@@ -8,6 +8,7 @@
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <!-- Dependency Versions -->
   <hapi_fhir_version>2.3-SNAPSHOT</hapi_fhir_version>
+  <scala.version>2.12.4</scala.version>
 </properties>
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -181,15 +182,39 @@
   </dependency>
   -->
   <!-- https://mvnrepository.com/artifact/org.scala-lang/scala-library -->
+  <!--
   <dependency>
     <groupId>org.scala-lang</groupId>
     <artifactId>scala-library</artifactId>
-    <version>2.12.3</version>
+    <version>${scala.version}</version>
   </dependency>
+
   <dependency>
     <groupId>org.scala-lang.modules</groupId>
     <artifactId>scala-parser-combinators_2.12</artifactId>
     <version>1.0.6</version>
   </dependency>
+  <dependency>
+    <groupId>org.scala-lang.modules</groupId>
+    <artifactId>scala-swing_2.12</artifactId>
+    <version>2.0.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.scala-lang.modules</groupId>
+    <artifactId>scala-xml_2.12</artifactId>
+    <version>1.0.6</version>
+  </dependency>
+
+  <dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-reflect</artifactId>
+    <version>${scala.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-compiler</artifactId>
+    <version>${scala.version}</version>
+  </dependency>
+  -->
 </dependencies>
 </project>

@@ -429,7 +429,7 @@
 		return formatedDate;
 	}
 	//Return date in the form of yyyy-mm-dd when the input could be number of year,dd/mm/yyyy or 
-	//even yyyy-mm-dd
+	//even yyyy-mm-dd. The Fhir standard format requires at least 2 characters for day and month
 	function processDateFromCSVFile(originalDate)
 	{
 		var birthDate="";
@@ -446,22 +446,74 @@
 		}
 		else if(originalDate!="" && originalDate.includes("-")==true)
 		{
-			birthDate=originalDate;
+			var dateToProcess="";
+			//birthDate=originalDate;
+			var indexYear= parseInt((originalDate.split("-"))[2]);
+			var year="";
+			var month="";
+			var day="";
+			if(indexYear>1900)
+			{
+				year=(originalDate.split("-"))[2];
+				month=(originalDate.split("-"))[1];
+				day=(originalDate.split("-"))[0];
+			}
+			else
+			{
+				year=(originalDate.split("-"))[0];
+				month=(originalDate.split("-"))[1];
+				day=(originalDate.split("-"))[2];
+			}
+			
+			if(month.length==1)
+			{
+				month="0"+month;
+			}
+			
+			if(day.length==1)
+			{
+				day="0"+day;
+			}
+			dateToProcess=year+"-"+month+"-"+day;
+			birthDate=dateToProcess;
+			
 		}
 		else if(originalDate!="" && originalDate.includes("/")==true)
 		{
 			//oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
 			var dateToProcess="";
-			var year=(originalDate.split("/"))[2];
-			var month=(originalDate.split("/"))[1];
-			var day=(originalDate.split("/"))[0];
+			//var year=(originalDate.split("/"))[2];
+			var indexYear= parseInt((originalDate.split("/"))[2]);
+			var year="";
+			var month="";
+			var day="";
+			if(indexYear>1900)
+			{
+				year=(originalDate.split("/"))[2];
+				month=(originalDate.split("/"))[1];
+				day=(originalDate.split("/"))[0];
+			}
+			else
+			{
+				year=(originalDate.split("/"))[0];
+				month=(originalDate.split("/"))[1];
+				day=(originalDate.split("/"))[2];
+			}
+			if(month.length==1)
+			{
+				month="0"+month;
+			}
+			if(day.length==1)
+			{
+				day="0"+day;
+			}
 			dateToProcess=year+"-"+month+"-"+day;
 			birthDate=dateToProcess;
 			//PatientSet=true;
 		}
 		return birthDate;												
 	}
-	
+	//Return True is the format is similar to the date 
 	function checkIfRecordIsDate(record)
 	{
 		var isDate=false;
@@ -470,6 +522,15 @@
 		{
 			//check if it contains 2 "/"
 			var res=record.split("/").length-1;
+			if(res==2)
+			{
+				isDate=true;
+			}
+		}
+		else if (record!="" && record.includes("-")==true)
+		{
+			//check if it contains 2 "/"
+			var res=record.split("-").length-1;
 			if(res==2)
 			{
 				isDate=true;
@@ -11850,6 +11911,7 @@
 													case patientAttributesMapping.birthDate:
 														//oPatient.birthDate=dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]];
 														var processedDate=processDateFromCSVFile(dataFile[iteratorLigne][listPatientAttributeIndex[iteratorValue]].trim());
+														//console.log(processedDate);
 														if(processedDate!="")
 														{
 															oPatient.birthDate=processedDate;
